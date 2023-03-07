@@ -72,10 +72,11 @@ There are individual folders for each study, and each folder contains files for:
 
 # Contact
 
-[e-mail](mailto:joshua.bell@oregonstate.edu)
-[Twitter](https://twitter.com/jashodb)
+- [e-mail](mailto:joshua.bell@oregonstate.edu)  
+- [Twitter](https://twitter.com/jashodb)
 
-Feel free to shoot me any questions. I am happy to help.
+Feel free to shoot me any questions. I am happy to help.  
+
 Feel free also to criticize my organization, code, or conclusions, both privately and in public. You are right, I don't know what I'm doing. I don't know how I ended up here. I just keep slipping through the cracks and now I'm in way over my head. Please send help.
 
 # License
