@@ -1,0 +1,1193 @@
+---
+title: "Cumulative Analyses"
+author: "Joshua Bell"
+date: "03/10/2021"
+output: html_document
+---
+
+# Imports
+## Present Studies
+```{r setup, include=FALSE}
+pkgs <- c("dplyr", "tidyr", "readr", "flextable", "data.table", "magrittr", "ggridges", "here", "ggplot2", "patchwork", "tidybayes", "correlation", "knitr", "datawizard", "brms", "bayestestR", "RColorBrewer")
+for(i in pkgs){
+  if(!i %in% rownames(installed.packages())){ 
+    install.packages(i) 
+    library(i, character.only = TRUE)
+  }
+  else(library(i, character.only = TRUE))
+}
+# Sets stan backend to cmdstan. You will need to install the cmdstanr package and set up the toolchain.
+options("mc.cores" = parallel::detectCores(), "brms.backend" = "cmdstan", tinytex.verbose = T)
+
+b = 4800/parallel::detectCores()
+i = 48000/parallel::detectCores()
+ch = parallel::detectCores()
+co = parallel::detectCores()
+control_list <- list(adapt_delta = .995, max_treedepth = 15)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = TRUE, fig.width = 12, fig.height = 8)
+
+ppt_m <- read_csv(here::here("data", "study_one", "ppt_manual.csv")) %>%
+        bind_rows(
+            read_csv(here::here("data", "study_two", "ppt_manual.csv")),
+            read_csv(here::here("data", "study_three", "ppt_manual.csv"))) %>%
+        as.data.table() %>%
+        mutate(
+        study = fcase(
+            ppid %like% "d1-0", "VR (Study One)",
+            ppid %like% "d2-0", "Real-world",
+            ppid %like% "d3-0", "VR (Avatar)",
+            default = NA),
+        time = factor(x = time,
+            levels = c("pre", "post"),
+            labels = c("Pre", "Post")),
+        order = fifelse(
+            ppid == "d2-018" & is.na(order), "first", order
+        ),
+        order = factor(x = order,
+            levels = c("pre", "first", "second"),
+            labels = c("Pre", "First", "Second")),
+
+        )
+
+
+
+landmark <- read_csv(here::here("data", "study_one", "landmark.csv")) %>%
+    bind_rows(
+        read_csv(here::here("data", "study_two", "landmark.csv")),
+        read_csv(here::here("data", "study_three", "landmark.csv"))) %>%
+    mutate(
+      study = fcase(
+            ppid %like% "d1-0", "VR (Study One)",
+            ppid %like% "d2-0", "Real-world",
+            ppid %like% "d3-0", "VR (Avatar)",
+        default = NA),
+      error_std = standardize(lapse_fix_error),
+         target = factor(lapse_fix_target,
+            levels = c("Elbow", "Forearm", "Wrist")),
+         error_cm = lapse_fix_error * 100,
+         forearmlength = forearmlength * 100,
+         forearmlength_std = (forearmlength - mean(forearmlength)) / sd(forearmlength),
+         time = factor(time,
+            levels = c("pre", "post"),
+            labels= c("Pre", "Post")),
+         order = factor(x = order, levels = c("pre", "first", "second"),
+            labels = c("Pre", "First", "Second"))
+            ) %>%
+            as.data.table()
+
+participant_info <- bind_rows(
+fread(
+    here::here("data", "1_tooluseinvr", "participant_info.csv"),
+),
+fread(
+    here::here("data", "2_toolusenotinvr", "participant_info.csv"),
+),
+fread(
+    here::here("data", "3_avatartooluse", "participant_info_coded.csv"),
+)[, fatigue := ifelse(fatigue_yn, 1, 0)]
+) %>%
+    mutate(
+          study = fcase(ppid %like% "d1-0", "VR (Study One)",
+                        ppid %like% "d2-0", "Real-world",
+                        ppid %like% "d3-0", "VR (Avatar)",
+                        default = NA)
+    ) %>%
+    as.data.table()
+    
+    
+
+
+
+ppt_forearmlength <- landmark[, .(forearmlength = mean(forearmlength)),
+                                by = c("ppid")] %>% merge(ppt_m, by = c("ppid")) %>%
+                                as.data.table()
+
+
+ppt_forearm_surveys <- merge(
+    ppt_forearmlength,
+participant_info[,
+        .(
+            ppid,
+            study,
+            age,
+            gender,
+            fatigue,
+            performance_hypothesis
+        )
+    ],
+    by = c("ppid", "study")
+)
+```
+
+## Prior Tool Embodiment Studies
+```{r previous-data}
+# Cardinali et al. (2009) simulated
+# Empirical values, taken (estimated) from Cardinali et al. (2009) figure 1C, corresponding to experiment 2.
+mupre <- 1245.33
+mupost <- 1202.67
+
+# Error bars were 10px (in total), each side corresponding to 26.66 based on the y axis.
+se <- 26.66
+sample <- 18
+sd <- se * sqrt(sample)
+cor <- .9055
+cov <- matrix(c(
+    sd^2, cor * (sd^2),
+    cor * (sd^2), sd^2
+), nrow = 2)
+
+simdata <- MASS::mvrnorm(sample, mu = c(mupre, mupost), cov, empirical = TRUE) %>%
+    as.data.frame() %>%
+    pivot_longer(cols = c(V1, V2), names_to = "time", values_to = "velocity") %>%
+    mutate(
+      std_vel = (velocity - mean(velocity)) / sd(velocity),
+      time = factor(time, levels = c("V1", "V2"), labels = c("Pre", "Post")),
+      ppid = as.character(rep(1:sample, each = 2))
+      ) %>%
+    pivot_wider(id_cols = ppid, names_from = time, values_from = std_vel) %>%
+    mutate(
+      std_vel_pre = Pre,
+      std_vel_post = Post,
+      std_vel_change = (Post - Pre),
+      study = "Cardinali et al. (2009, Simulated)"
+    ) 
+
+# Martel et al. (2019) empirical data
+martel_2019_wide <- read_csv(here::here("data", "priors", "Martel2019.csv"), col_types = "fddddddddddddddddddfdd")
+martel_2019_long <- fread(here::here("data", "priors", "martel_manova_long.csv"))
+    
+martel_2019_long[,
+    `:=`(
+        vel_m_filt_std = (VEL - mean(VEL, na.rm = TRUE)) / sd(VEL, na.rm = TRUE),
+        acc_m_filtfilt_std = (ACC - mean(ACC, na.rm = TRUE)) / sd(ACC, na.rm = TRUE),
+        dec_m_filtfilt_std = (DEC - mean(DEC, na.rm = TRUE)) / sd(DEC, na.rm = TRUE),
+        vel_lat_filt_std = (TPVEL - mean(TPVEL, na.rm = TRUE)) / sd(TPVEL, na.rm = TRUE),
+        acc_lat_filtfilt_std = (TPACC - mean(TPACC, na.rm = TRUE)) / sd(TPACC, na.rm = TRUE),
+        dec_lat_filtfilt_std = (TPDEC - mean(TPDEC, na.rm = TRUE)) / sd(TPDEC, na.rm = TRUE)
+    ),
+    by = c("GROUP")
+][,
+time := factor(Time, levels = c("PRE", "POST"), labels = c("Pre", "Post"))
+]
+
+martel_2019 <- martel_2019_wide %>%
+    pivot_longer(cols = c(VELPRE, VELPOST), names_to = "time", values_to = "velocity") %>%
+    mutate(
+      std_vel = (velocity - mean(velocity)) / sd(velocity),
+      time = factor(time, levels = c("VELPRE", "VELPOST"), labels = c("Pre", "Post")),
+      ppid = SUBJECTS
+    ) %>%
+    pivot_wider(id_cols = c(ppid, FOREARMLENGTH), names_from = time, values_from = std_vel, values_fn = ~mean(.x)) %>%
+    mutate(
+        std_vel_pre = Pre,
+        std_vel_post = Post,
+        std_vel_change = (Post - Pre),
+        study = "Martel et al. (2019)"
+    ) 
+
+martel_2019_forearm <- martel_2019_wide %>%
+    group_by(GROUP) %>%
+    dplyr::mutate(
+        ppid = SUBJECTS,
+        vel_m_filt = VELPRE,
+        acc_m_filtfilt = ACCPRE,
+        dec_m_filtfilt = DECPRE,
+        vel_lat_filt = TPVELPRE,
+        acc_lat_filtfilt = TPACCPRE,
+        dec_lat_filtfilt = TPDECPRE,
+        vel_m_filt_std = (vel_m_filt - mean(vel_m_filt, na.rm = TRUE))/sd(vel_m_filt, na.rm = TRUE),
+        acc_m_filtfilt_std = (acc_m_filtfilt - mean(acc_m_filtfilt, na.rm = TRUE))/sd(acc_m_filtfilt, na.rm = TRUE),
+        dec_m_filtfilt_std = (dec_m_filtfilt - mean(dec_m_filtfilt, na.rm = TRUE))/sd(dec_m_filtfilt, na.rm = TRUE),
+        vel_lat_filt_std = (vel_lat_filt - mean(vel_lat_filt, na.rm = TRUE))/sd(vel_lat_filt, na.rm = TRUE),
+        acc_lat_filtfilt_std = (acc_lat_filtfilt - mean(acc_lat_filtfilt, na.rm = TRUE))/sd(acc_lat_filtfilt, na.rm = TRUE),
+        dec_lat_filtfilt_std = (dec_lat_filtfilt - mean(dec_lat_filtfilt, na.rm = TRUE))/sd(dec_lat_filtfilt, na.rm = TRUE),
+        forearmlength = FOREARMLENGTH/10,
+        forearmlength_std = (forearmlength - mean(forearmlength, na.rm = TRUE))/sd(forearmlength, na.rm = TRUE),
+        study = fifelse(GROUP == 1, "Martel et al. (2019) Ahead", "Martel et al. (2019) Across")
+    ) %>% 
+    as.data.table()
+
+
+martel_2021_18plus <- read_csv(here::here("data", "priors", "martel2021_18up_processed.csv")) %>%
+mutate(
+  std_vel = (VEL - mean(VEL, na.rm = TRUE)) / sd(VEL, na.rm = TRUE),
+) %>% dplyr::select(
+    subjects, 
+    ForearmLength, 
+    trials_reaching, 
+    std_vel, 
+    session,
+    VEL,
+    ACC,
+    DEC,
+    TPACC,
+    TPDEC,
+    TPVEL
+    ) %>%
+    filter(session != "TOOL") %>%
+    mutate(
+        vel_m_filt_std = (VEL - mean(VEL, na.rm = TRUE)) / sd(VEL, na.rm = TRUE),
+        acc_m_filtfilt_std = (ACC - mean(ACC, na.rm = TRUE)) / sd(ACC, na.rm = TRUE),
+        dec_m_filtfilt_std = (DEC - mean(DEC, na.rm = TRUE)) / sd(DEC, na.rm = TRUE),
+        vel_lat_filt_std = (TPVEL - mean(TPVEL, na.rm = TRUE)) / sd(TPVEL, na.rm = TRUE),
+        acc_lat_filtfilt_std = (TPACC - mean(TPACC, na.rm = TRUE)) / sd(TPACC, na.rm = TRUE),
+        dec_lat_filtfilt_std = (TPDEC - mean(TPDEC, na.rm = TRUE)) / sd(TPDEC, na.rm = TRUE),
+        study = "Martel et al. (2021) 18+",
+        time = fifelse(session == "PRE", "Pre", "Post")
+    )
+
+
+martel_21 <- inner_join(
+    martel_2021_18plus %>% filter(session %in% c("PRE")),
+    martel_2021_18plus %>% filter(session %in% c("POST")),
+    by = c("subjects", "trials_reaching", "ForearmLength"), suffix = c("PRE", "POST")
+)
+
+# Join again with tool-use Velocity as a third VEL column.
+
+# Collapse across trials, computing averages.
+
+martel_21 <- martel_21 %>%
+    group_by(subjects, trials_reaching) %>%
+    dplyr::summarise(
+        trial_num_in_block = mean(trials_reaching),
+        vel_m_filt = mean(VELPRE),
+        acc_m_filtfilt = mean(ACCPRE),
+        dec_m_filtfilt = mean(DECPRE),
+        vel_lat_filt = mean(TPVELPRE),
+        acc_lat_filtfilt = mean(TPACCPRE),
+        dec_lat_filtfilt = mean(TPDECPRE),
+        std_vel_pre = mean(std_velPRE, na.rm = TRUE),
+        std_vel_post = mean(std_velPOST, na.rm = TRUE),
+        std_vel_change = std_vel_post - std_vel_pre,
+        forearmlength = mean(ForearmLength/10),
+        study = "Martel et al. (2021)"
+    ) %>%
+    ungroup() %>%
+    mutate(
+      ppid = subjects,
+        vel_m_filt_std = (vel_m_filt - mean(vel_m_filt)) / sd(vel_m_filt),
+        acc_m_filtfilt_std = (acc_m_filtfilt - mean(acc_m_filtfilt)) / sd(acc_m_filtfilt),
+        dec_m_filtfilt_std =  (dec_m_filtfilt - mean(dec_m_filtfilt)) / sd(dec_m_filtfilt),
+        vel_lat_filt_std = (vel_lat_filt - mean(vel_lat_filt)) / sd(vel_lat_filt),
+        acc_lat_filtfilt_std = (acc_lat_filtfilt - mean(acc_lat_filtfilt)) / sd(acc_lat_filtfilt),
+        dec_lat_filtfilt_std = (dec_lat_filtfilt - mean(dec_lat_filtfilt)) / sd(dec_lat_filtfilt),
+      forearmlength_std = (forearmlength - mean(forearmlength)) / sd(forearmlength)
+    ) %>% as.data.table()
+```
+
+# Exploratory Analysis
+
+## Follow-ups
+
+### How many participants displayed the expected effects?
+```{r}
+ppt_m %>% group_by(ppid, time) %>% 
+dplyr::summarise(m_vel = mean(vel_m_filt)) %>% 
+as.data.table() %>% 
+dcast(ppid~time) %>%
+mutate(direction = fifelse(Pre > Post, 1, 0),) %>% 
+dplyr::summarise(num_velocity_effect = sum(direction),
+                 num_velocity_no_effect = sum(!direction),
+                 percent_velocity_effect = num_velocity_effect / (num_velocity_effect + num_velocity_no_effect))
+
+ppt_m %>% group_by(ppid, time) %>% 
+dplyr::summarise(m_acc = mean(acc_m_filtfilt, na.rm = TRUE)) %>% 
+as.data.table() %>% 
+dcast(ppid~time) %>% 
+mutate(direction = fifelse(Pre > Post, 1, 0)) %>% 
+dplyr::summarise(num_accel_effect = sum(direction, na.rm = TRUE))
+
+ppt_m %>% group_by(ppid, time) %>% 
+dplyr::summarise(m_dec = mean(dec_m_filtfilt)) %>% 
+as.data.table() %>% 
+dcast(ppid~time) %>% 
+mutate(direction = fifelse(Pre < Post, 1, 0)) %>% 
+dplyr::summarise(num_decel_effect = sum(direction))
+
+landmark %>% group_by(ppid, time, target) %>% 
+dplyr::summarise(error = mean(error_std)) %>% 
+as.data.table() %>% 
+dcast(ppid+target~time)%>% 
+mutate(direction = fifelse(Pre < Post, "Further", "Closer")) %>%
+group_by(target) %>%
+dplyr::summarise(num_further = sum(direction == "Further"))
+```
+
+### Does order influence the number of participants who show the tool-use effect?
+
+#### Kinematics
+```{r}
+order_test_vel <- ppt_m %>%
+    group_by(ppid, order) %>%
+    dplyr::summarise(m_vel = mean(vel_m_filt)) %>%
+    as.data.table() %>%
+    dcast(ppid ~ order)
+
+order_test_acc <- ppt_m %>%
+    group_by(ppid, order) %>%
+    dplyr::summarise(m_acc = mean(acc_m_filtfilt)) %>%
+    as.data.table() %>%
+    dcast(ppid ~ order)
+
+order_test_dec <- ppt_m %>%
+    group_by(ppid, order) %>%
+    dplyr::summarise(m_dec = mean(dec_m_filtfilt)) %>%
+    as.data.table() %>%
+    dcast(ppid ~ order)
+
+bind_rows(
+order_test_vel %>%
+    dplyr::filter(!is.na(First)) %>%
+    mutate(direction = fifelse(Pre > First, 1, 0)) %>%
+    dplyr::summarise(
+        Outcome = "Velocity",
+        order = "First",
+        prop_effect = sum(direction) / n(),
+        n_effect = sum(direction)
+    ),
+order_test_vel %>%
+    dplyr::filter(!is.na(Second)) %>%
+    mutate(direction = fifelse(Pre > Second, 1, 0)) %>%
+    dplyr::summarise(
+        Outcome = "Velocity",
+        order = "Second",
+        prop_effect = sum(direction) / n(),
+        n_effect = sum(direction)
+    ),
+order_test_acc %>%
+    dplyr::filter(!is.na(First)) %>%
+    mutate(direction = fifelse(Pre > First, 1, 0)) %>%
+    dplyr::summarise(
+        Outcome = "Acceleration",
+        order = "First",
+        prop_effect = sum(direction) / n(),
+        n_effect = sum(direction)
+    ),
+order_test_acc %>%
+    dplyr::filter(!is.na(Second)) %>%
+    mutate(direction = fifelse(Pre > Second, 1, 0)) %>%
+    dplyr::summarise(
+        Outcome = "Acceleration",
+        order = "Second",
+        prop_effect = sum(direction) / n(),
+        n_effect = sum(direction)
+    ),
+order_test_dec %>%
+    dplyr::filter(!is.na(First)) %>%
+    mutate(direction = fifelse(Pre < First, 1, 0)) %>%
+    dplyr::summarise(
+        Outcome = "Deceleration",
+        order = "First",
+        prop_effect = sum(direction) / n(),
+        n_effect = sum(direction)
+    ),
+order_test_dec %>%
+    dplyr::filter(!is.na(Second)) %>%
+    mutate(direction = fifelse(Pre < Second, 1, 0)) %>%
+    dplyr::summarise(
+        Outcome = "Deceleration",
+        order = "Second",
+        prop_effect = sum(direction) / n(),
+        n_effect = sum(direction)
+    ),
+)
+```
+
+#### Landmark Biases
+```{r}
+order_test_lm <- landmark %>% group_by(ppid, order, target) %>% 
+dplyr::summarise(error = mean(error_std)) %>% 
+as.data.table() %>% 
+dcast(ppid+target~order)
+
+order_test_lm %>%
+dplyr::filter(!is.na(First)) %>%
+mutate(direction = fifelse(Pre < First, "Further", "Closer")) %>%
+group_by(target) %>%
+dplyr::summarise(prop_further = sum(direction == "Further")/n())
+
+order_test_lm %>%
+dplyr::filter(!is.na(Second)) %>%
+mutate(direction = fifelse(Pre < Second, "Further", "Closer")) %>%
+group_by(target) %>%
+dplyr::summarise(prop_further = sum(direction == "Further")/n())
+```
+
+
+
+
+## Bell & Macuga (2022) Criticism Follow-ups
+
+The following analyses were not preregistered, but were outlined in @bell2022.
+
+### Does Forearm Length influence baseline kinematic measures?
+
+
+```{r}
+t <- ppt_forearmlength[time == "Pre"][,
+  `:=`(forearmlength_std = (forearmlength - mean(forearmlength, na.rm = TRUE)) / sd(forearmlength, na.rm = TRUE),
+    vel_m_filt_std = (vel_m_filt - mean(vel_m_filt, na.rm = TRUE)) / sd(vel_m_filt, na.rm = TRUE),
+    acc_m_filtfilt_std = (acc_m_filtfilt - mean(acc_m_filtfilt, na.rm = TRUE)) / sd(acc_m_filtfilt, na.rm = TRUE),
+    dec_m_filtfilt_std = (dec_m_filtfilt - mean(dec_m_filtfilt, na.rm = TRUE)) / sd(dec_m_filtfilt, na.rm = TRUE),
+    vel_lat_filt_std = (vel_lat_filt - mean(vel_lat_filt, na.rm = TRUE)) / sd(vel_lat_filt, na.rm = TRUE),
+    acc_lat_filtfilt_std = (acc_lat_filtfilt - mean(acc_lat_filtfilt, na.rm = TRUE)) / sd(acc_lat_filtfilt, na.rm = TRUE),
+    dec_lat_filtfilt_std = (dec_lat_filtfilt - mean(dec_lat_filtfilt, na.rm = TRUE)) / sd(dec_lat_filtfilt, na.rm = TRUE),
+    ppid = factor(ppid),
+    trial_num_in_block = trial_num_in_block),
+    by = "study"] %>%
+    dplyr::filter(time == "Pre") %>%
+    dplyr::select(
+        ppid,
+        study,
+        forearmlength,
+        vel_m_filt,
+        acc_m_filtfilt,
+        dec_m_filtfilt,
+        vel_lat_filt,
+        acc_lat_filtfilt,
+        dec_lat_filtfilt,
+        forearmlength_std,
+        vel_m_filt_std,
+        acc_m_filtfilt_std,
+        dec_m_filtfilt_std,
+        vel_lat_filt_std,
+        acc_lat_filtfilt_std,
+        dec_lat_filtfilt_std
+    ) %>%
+    bind_rows(
+        martel_2019_forearm %>%
+        dplyr::select(
+            ppid,
+            study,
+            forearmlength,
+            vel_m_filt,
+            acc_m_filtfilt,
+            dec_m_filtfilt,
+            vel_lat_filt,
+            acc_lat_filtfilt,
+            dec_lat_filtfilt,
+            forearmlength_std,
+            vel_m_filt_std,
+            acc_m_filtfilt_std,
+            dec_m_filtfilt_std,
+            vel_lat_filt_std,
+            acc_lat_filtfilt_std,
+            dec_lat_filtfilt_std
+        ), 
+        martel_21 %>%
+        dplyr::select(
+            ppid,
+            study,
+            forearmlength,
+            vel_m_filt,
+            acc_m_filtfilt,
+            dec_m_filtfilt,
+            vel_lat_filt,
+            acc_lat_filtfilt,
+            dec_lat_filtfilt,
+            forearmlength_std,
+            vel_m_filt_std,
+            acc_m_filtfilt_std,
+            dec_m_filtfilt_std,
+            vel_lat_filt_std,
+            acc_lat_filtfilt_std,
+            dec_lat_filtfilt_std
+        )
+    )
+
+vel <- t %>% group_by(ppid, study) %>%
+dplyr::summarise(forearmlength_std = mean(forearmlength_std, na.rm = TRUE),
+          vel_m_filt_std = mean(vel_m_filt_std, na.rm = TRUE)) %>%  
+ggplot(aes(x = forearmlength_std, y = vel_m_filt_std)) +
+geom_point(aes(color = study)) +
+geom_smooth(method = "lm", se = FALSE, color = "black") +
+geom_smooth(method = "lm", se = FALSE, aes(color = study), linewidth = 1, linetype = "dashed") +
+labs(x = "Forearm Length (Standardized)", y = "Velocity (Standardized)")
+
+acc <- t %>% group_by(ppid, study) %>%
+dplyr::summarise(forearmlength_std =mean(forearmlength_std, na.rm = TRUE),
+          acc_m_filtfilt_std = mean(acc_m_filtfilt_std, na.rm = TRUE)) %>%  
+ggplot(aes(x = forearmlength_std, y = acc_m_filtfilt_std)) +
+geom_point(aes(color = study)) +
+geom_smooth(method = "lm", se = FALSE, color = "black") +
+geom_smooth(method = "lm", se = FALSE, aes(color = study), linewidth = 1, linetype = "dashed") +
+labs(x = "Forearm Length (Standardized)", y = "Acceleration (Standardized)")
+
+dec <- t %>% group_by(ppid, study) %>%
+dplyr::summarise(forearmlength_std =mean(forearmlength_std, na.rm = TRUE),
+          dec_m_filtfilt_std = mean(dec_m_filtfilt_std, na.rm = TRUE)) %>%  
+ggplot(aes(x = forearmlength_std, y = dec_m_filtfilt_std)) +
+geom_point(aes(color = study)) +
+geom_smooth(method = "lm", se = FALSE, color = "black") +
+geom_smooth(method = "lm", se = FALSE, aes(color = study), linewidth = 1, linetype = "dashed") +
+labs(x = "Forearm Length (Standardized)", y = "Deceleration (Standardized)")
+
+vel_lat <- t %>% group_by(ppid, study) %>%
+dplyr::summarise(forearmlength_std =mean(forearmlength_std, na.rm = TRUE),
+          vel_lat_filt_std = mean(vel_lat_filt_std, na.rm = TRUE)) %>%  
+ggplot(aes(x = forearmlength_std, y = vel_lat_filt_std)) +
+geom_point(aes(color = study)) +
+geom_smooth(method = "lm", se = FALSE, color = "black") +
+geom_smooth(method = "lm", se = FALSE, aes(color = study), linewidth = 1, linetype = "dashed") +
+labs(x = "Forearm Length (Standardized)", y = "Velocity Latency (Standardized)")
+
+acc_lat <- t %>% group_by(ppid, study) %>%
+dplyr::summarise(forearmlength_std =mean(forearmlength_std, na.rm = TRUE),
+          acc_lat_filtfilt_std = mean(acc_lat_filtfilt_std, na.rm = TRUE)) %>%  
+ggplot(aes(x = forearmlength_std, y = acc_lat_filtfilt_std)) +
+geom_point(aes(color = study)) +
+geom_smooth(method = "lm", se = FALSE, color = "black") +
+geom_smooth(method = "lm", se = FALSE, aes(color = study), linewidth = 1, linetype = "dashed") +
+labs(x = "Forearm Length (Standardized)", y = "Acceleration Latency (Standardized)")
+
+dec_lat <- t %>% group_by(ppid, study) %>%
+dplyr::summarise(forearmlength_std =mean(forearmlength_std, na.rm = TRUE),
+          dec_lat_filtfilt_std = mean(dec_lat_filtfilt_std, na.rm = TRUE)) %>%  
+ggplot(aes(x = forearmlength_std, y = dec_lat_filtfilt_std)) +
+geom_point(aes(color = study)) +
+geom_smooth(method = "lm", se = FALSE, color = "black") +
+geom_smooth(method = "lm", se = FALSE, aes(color = study), linewidth = 1, linetype = "dashed") +
+labs(x = "Forearm Length (Standardized)", y = "Deceleration Latency (Standardized)")
+
+forearmlength_plots <- (vel + acc + dec) / (vel_lat + acc_lat + dec_lat) + 
+patchwork::plot_layout(guides = "collect") & 
+labs(color = "Study") &
+theme_tidybayes() &
+theme(legend.position = "bottom",
+text = element_text(size = 12))
+
+saveRDS(forearmlength_plots, here::here("scripts", "for_osf", "cumulative_analyses", "figures", "forearm_velocity.rds"))
+
+cor <- t %>%
+mutate(ppid = factor(ppid),
+         study = factor(study)) %>%
+dplyr::select(
+    vel_m_filt_std,
+    acc_m_filtfilt_std,
+    dec_m_filtfilt_std,
+    vel_lat_filt_std,
+    acc_lat_filtfilt_std,
+    dec_lat_filtfilt_std,
+    forearmlength_std,
+    study
+) %>% correlation::correlation(
+  method = "auto",
+  bayesian = TRUE,
+  bayesian_prior = "wide",
+  multilevel = TRUE,
+  include_factors = TRUE,
+  partial = TRUE
+)
+```
+
+### How do kinematic values change by trial?
+i.e., is there a transient effect of the tool-use task?
+
+```{r}
+ppt_combined <- ppt_forearm_surveys %>% 
+  mutate(overall_trial = fcase(time == "Pre", trial_num_in_block,
+                               time == "Post", trial_num_in_block + 18),
+          study = fcase(ppid %like% "d1-0", "VR (Study One)",
+                        ppid %like% "d2-0", "Real-world",
+                        ppid %like% "d3-0", "VR (Avatar)",
+                        default = NA))
+
+ppt_combined %>%
+  dplyr::filter(vel_m_filt < 2000, !(time == "tool-use" & vel_m_filt > 1500), !vel_m_filt < 100) %>%
+  ggplot(aes(x = overall_trial, y = vel_m_filt,  color = time)) +
+  geom_point(size = 2, alpha = .5) +
+  geom_smooth(aes(color = time), size = 2, alpha = .5, method = "lm") +
+  theme_tidybayes() +
+  theme(text = element_text(size = 26)) +
+  scale_y_continuous(limits = c(0, 2000)) 
+
+by_trial_velocity <- ppt_combined %>%
+  dplyr::filter(vel_m_filt < 2000,
+              !(time == "tool-use" & vel_m_filt > 1500)) %>%
+  group_by(overall_trial, time, study) %>%
+  dplyr::summarise(m_vel = mean(vel_m_filt),
+            m_acc = mean(acc_m_filtfilt),
+            m_dec = mean(dec_m_filtfilt)) %>%
+  ggplot(aes(x = overall_trial, y = m_vel, group = interaction(study, time), color = study, linetype = study)) +
+    geom_line(linewidth = 1) +
+    geom_point(size = 3) +
+    geom_vline(xintercept = 18.5, linetype = "dashed") +
+    labs(x = "Trial", y = "Peak Velocity (mm/s)", color = "Study", linetype = "Study") +
+    theme_tidybayes()+
+    theme(text = element_text(size = 22),
+        plot.background = element_rect(fill = "transparent"),
+        panel.background = element_rect(fill = "transparent"),
+        legend.background = element_rect(fill = "transparent"),
+        legend.position = "bottom",
+        legend.key = element_rect(fill = "transparent"))
+
+saveRDS(by_trial_velocity, here::here("scripts", "for_osf", "cumulative_analyses", "figures", "by_trial_velocity.rds"))
+ggsave(
+    here::here("scripts", "for_osf", "cumulative_analyses", "figures", "by_trial_velocity.png"), 
+    by_trial_velocity + labs(title = "Peak Velocity By Trial"), 
+    width = 10, 
+    height = 8, 
+    units = "in", 
+    dpi = 300, 
+    bg = "transparent")
+```
+
+### Is this influenced by order?
+```{r}
+order_test_vel <- ppt_m %>% group_by(ppid, trial_num_in_block, order, time, study) %>% 
+dplyr::summarise(
+    m_vel = mean(vel_m_filt)
+    ) %>% 
+dplyr::mutate(
+    overall_trial = fcase(time == "Pre", trial_num_in_block,
+                          time == "Post", trial_num_in_block + 18),
+    study = fcase(ppid %like% "d1-0", "VR (Study One)",
+        ppid %like% "d2-0", "Real-world",
+        ppid %like% "d3-0", "VR (Avatar)",
+        default = NA
+    )
+) %>%
+as.data.table() %>% 
+dcast(ppid+study+trial_num_in_block~order, value.var = "m_vel", fun.aggregate = mean) 
+
+first_participants <- order_test_vel %>%
+dplyr::filter(!is.na(First), !is.nan(First)) %>%
+group_by(trial_num_in_block, study) %>%
+dplyr::summarise(
+    m_vel_pre = mean(Pre, na.rm = TRUE),
+    m_vel_post = mean(First, na.rm = TRUE)
+    )
+
+second_participants <- order_test_vel %>%
+    dplyr::filter(!is.na(Second), !is.nan(Second)) %>%
+    group_by(trial_num_in_block, study) %>%
+    dplyr::summarise(
+        m_vel_pre = mean(Pre, na.rm = TRUE),
+        m_vel_post = mean(Second, na.rm = TRUE)
+    )
+
+order_test_vel %>%
+group_by(trial_num_in_block, study) %>% 
+dplyr::summarise(m_vel_pre = mean(Pre, na.rm = TRUE), m_vel_first = mean(First, na.rm = TRUE), m_vel_second = mean(Second, na.rm = TRUE)) %>%
+
+ggplot(
+    aes(x = trial_num_in_block, color = study, group = study)
+    ) +
+  geom_line(
+    data = first_participants,
+    aes(y = m_vel_pre), 
+    linetype = "dashed",
+    size = 1
+    ) +
+  geom_line(
+    data = first_participants,
+    aes(y = m_vel_post, x = trial_num_in_block + 18), 
+    linetype = "dashed",
+    size = 1
+    ) +
+    geom_line(
+    data = second_participants,
+    aes(y = m_vel_pre),
+    size = 1
+    ) +
+    geom_line(
+    data = second_participants,
+    aes(y = m_vel_post, x = trial_num_in_block + 18),
+    size = 1
+    )+
+    labs(x = "Trial", y = "Peak Velocity (mm/s)", color = "Study", linetype = "Order", title = "Velocity Over Trials By Order And Study") +
+    theme_tidybayes()+
+    scale_linetype_manual(values = c("dashed", "solid"), labels = c("First", "Second"))+
+    theme(text = element_text(size = 22),
+        plot.background = element_rect(fill = "transparent"),
+        panel.background = element_rect(fill = "transparent"),
+        legend.background = element_rect(fill = "transparent"),
+        legend.position = "bottom",
+        legend.key = element_rect(fill = "transparent"))
+```
+Dashed lines are participants who completed the reaching task first, solid lines are participants who completed the reaching task second.
+
+All participants, regardless of order, seemed to show an initial drop in kinematics that quickly recovered.
+
+## Post-experiment Survey Exploratory Analyses
+
+```{r}
+ppt_standardized <- ppt_forearm_surveys %>%
+    group_by(study) %>%
+    dplyr::mutate(
+      std_vel = (vel_m_filt - mean(vel_m_filt, na.rm = TRUE)) / sd(vel_m_filt, na.rm = TRUE),
+        std_acc = (acc_m_filtfilt - mean(acc_m_filtfilt, na.rm = TRUE)) / sd(acc_m_filtfilt, na.rm = TRUE),
+        std_dec = (dec_m_filtfilt - mean(dec_m_filtfilt, na.rm = TRUE)) / sd(dec_m_filtfilt, na.rm = TRUE),
+        std_vel_lat = (vel_lat_filt - mean(vel_lat_filt, na.rm = TRUE)) / sd(vel_lat_filt, na.rm = TRUE),
+        std_acc_lat = (acc_lat_filtfilt - mean(acc_lat_filtfilt, na.rm = TRUE)) / sd(acc_lat_filtfilt, na.rm = TRUE),
+        std_dec_lat = (dec_lat_filtfilt - mean(dec_lat_filtfilt, na.rm = TRUE)) / sd(dec_lat_filtfilt, na.rm = TRUE)
+    ) %>% ungroup()
+
+change <- ppt_standardized %>%
+    pivot_wider(
+        id_cols = c(ppid, trial_num_in_block, study, fatigue),
+        names_from = time,
+        values_from = c(
+            std_vel,
+            std_acc,
+            std_dec,
+            std_vel_lat,
+            std_acc_lat,
+            std_dec_lat
+        ),
+        values_fn = list(
+            std_vel = ~mean(.x, na.rm = TRUE),
+            std_acc = ~mean(.x, na.rm = TRUE),
+            std_dec = ~mean(.x, na.rm = TRUE),
+            std_vel_lat = ~mean(.x, na.rm = TRUE),
+            std_acc_lat = ~mean(.x, na.rm = TRUE),
+            std_dec_lat = ~mean(.x, na.rm = TRUE)
+        )
+    ) 
+
+change_by_study <- change %>%
+    dplyr::group_by(ppid, study) %>%
+    dplyr::summarise(
+        std_vel_change = round(
+            mean(std_vel_Post) - mean(std_vel_Pre),
+            4
+        ),
+        std_acc_change = round(
+            mean(std_acc_Post) - mean(std_acc_Pre),
+            4
+        ),
+        std_dec_change = round(
+            mean(std_dec_Post) - mean(std_dec_Pre),
+            4
+        ),
+        std_vel_lat_change = round(
+            mean(std_vel_lat_Post) - mean(std_vel_lat_Pre),
+            4
+        ),
+        std_acc_lat_change = round(
+            mean(std_acc_lat_Post) - mean(std_acc_lat_Pre),
+            4
+        ),
+        std_dec_lat_change = round(
+            mean(std_dec_lat_Post) - mean(std_dec_lat_Pre),
+            4
+        )
+    ) %>%
+    as.data.table()
+
+change_by_study_and_fatigue <- ppt_standardized %>%
+    # dplyr::filter(
+    #     (time == "Pre" & trial_num_in_block > 12) |
+    #     (time == "Post" & trial_num_in_block < 7)
+    #     ) %>%
+    pivot_wider(
+        id_cols = c(ppid, study, fatigue, performance_hypothesis),
+        names_from = time,
+        values_from = c(
+            std_vel,
+            std_acc,
+            std_dec,
+            std_vel_lat,
+            std_acc_lat,
+            std_dec_lat
+        ),
+        values_fn = list(
+            std_vel = ~mean(.x, na.rm = TRUE),
+            std_acc = ~mean(.x, na.rm = TRUE),
+            std_dec = ~mean(.x, na.rm = TRUE),
+            std_vel_lat = ~mean(.x, na.rm = TRUE),
+            std_acc_lat = ~mean(.x, na.rm = TRUE),
+            std_dec_lat = ~mean(.x, na.rm = TRUE)
+        )
+    )  %>%
+    dplyr::mutate(
+        fatigue = fifelse(fatigue == 1, "Yes", "No"),
+        performance_hypothesis = fifelse(performance_hypothesis == 1, "Yes", "No"),
+        std_vel_change = std_vel_Post - std_vel_Pre,
+        std_acc_change = std_acc_Post - std_acc_Pre,
+        std_dec_change = std_dec_Post - std_dec_Pre,
+        std_vel_lat_change = std_vel_lat_Post - std_vel_lat_Pre,
+        std_acc_lat_change = std_acc_lat_Post - std_acc_lat_Pre,
+        std_dec_lat_change = std_dec_lat_Post - std_dec_lat_Pre
+    ) %>%
+    as.data.table()
+```
+
+## Did the results for fatigued participants differ?
+
+Fatigue denoted by a free response item in the post-test, "What was the most difficult part of the experiment?". If the answer noted that the participant felt fatigued, sore, etc. from tool-use, they were coded as fatigued.
+
+### Full block
+```{r plotted-change}
+change_by_study_and_fatigue %>%
+    ggplot(
+      aes
+      (x = std_vel_change,
+      fill = fatigue, 
+      color = fatigue)) +
+    stat_dotsinterval(
+        dotsize = 1,
+        alpha = .5,
+       position = position_dodge(width = .6),
+        point_interval = mean_qi
+    ) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+    scale_fill_manual(
+        breaks = c("Yes", "No"),
+        values = c("firebrick", "steelblue")
+    ) +
+    scale_color_manual(
+        breaks = c("Yes", "No"),
+        values = c("firebrick", "steelblue")
+    ) +
+    scale_y_discrete(
+        breaks = c("VR (Study One)", "VR (Avatar)", "Real-world"),
+    ) +
+    theme_tidybayes() +
+    theme(text = element_text(size = 26)) +
+    labs(
+        title = "Change in Kinematics by Self-reported Fatigue", 
+        x = "Velocity Change (Standardized)", 
+        y = "Study")
+
+```
+
+### 6 Trials before and after tool-use
+
+```{r}
+change_fatigue_six_trials <- ppt_standardized %>%
+    dplyr::filter(
+        (time == "Pre" & trial_num_in_block > 12) |
+        (time == "Post" & trial_num_in_block < 7)
+        ) %>%
+    pivot_wider(
+        id_cols = c(ppid, study, fatigue, performance_hypothesis),
+        names_from = time,
+        values_from = c(
+            std_vel,
+            std_acc,
+            std_dec,
+            std_vel_lat,
+            std_acc_lat,
+            std_dec_lat
+        ),
+        values_fn = list(
+            std_vel = ~ mean(.x, na.rm = TRUE),
+            std_acc = ~ mean(.x, na.rm = TRUE),
+            std_dec = ~ mean(.x, na.rm = TRUE),
+            std_vel_lat = ~ mean(.x, na.rm = TRUE),
+            std_acc_lat = ~ mean(.x, na.rm = TRUE),
+            std_dec_lat = ~ mean(.x, na.rm = TRUE)
+        )
+    ) %>%
+    dplyr::mutate(
+        fatigue = fifelse(fatigue == 1, "Yes", "No"),
+        performance_hypothesis = fifelse(performance_hypothesis == 1, "Yes", "No"),
+        std_vel_change = std_vel_Post - std_vel_Pre,
+        std_acc_change = std_acc_Post - std_acc_Pre,
+        std_dec_change = std_dec_Post - std_dec_Pre,
+        std_vel_lat_change = std_vel_lat_Post - std_vel_lat_Pre,
+        std_acc_lat_change = std_acc_lat_Post - std_acc_lat_Pre,
+        std_dec_lat_change = std_dec_lat_Post - std_dec_lat_Pre
+    ) %>%
+    as.data.table()
+
+change_fatigue_six_trials %>%
+    ggplot(
+        aes
+        (
+            x = std_vel_change,
+            fill = fatigue,
+            color = fatigue
+        )
+    ) +
+    stat_dotsinterval(
+        dotsize = 1,
+        alpha = .5,
+        position = position_dodge(width = .6),
+        point_interval = mean_qi
+    ) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+    scale_fill_manual(
+        breaks = c("Yes", "No"),
+        values = c("firebrick", "steelblue")
+    ) +
+    scale_color_manual(
+        breaks = c("Yes", "No"),
+        values = c("firebrick", "steelblue")
+    ) +
+    scale_y_discrete(
+        breaks = c("VR (Study One)", "VR (Avatar)", "Real-world"),
+    ) +
+    theme_tidybayes() +
+    theme(text = element_text(size = 26)) +
+    labs(
+        title = "Change in Kinematics by Self-reported Fatigue",
+        x = "Velocity Change (Standardized)",
+        y = "Study"
+    )
+
+```
+
+
+## Did the hypothesis guess matter?
+
+```{r}
+change_by_study_and_fatigue %>%
+    ggplot(
+        aes
+        (
+            x = std_vel_change,
+            fill = performance_hypothesis,
+            color = performance_hypothesis
+        )
+    ) +
+    stat_dotsinterval(
+        dotsize = 1,
+        alpha = .5,
+        position = position_dodge(width = .6),
+        point_interval = mean_qi
+    ) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+    scale_fill_manual(
+        breaks = c("Yes", "No"),
+        values = c("firebrick", "steelblue")
+    ) +
+    scale_color_manual(
+        breaks = c("Yes", "No"),
+        values = c("firebrick", "steelblue")
+    ) +
+    scale_y_discrete(
+        breaks = c("VR (Study One)", "VR (Avatar)", "Real-world"),
+    ) +
+    theme_tidybayes() +
+    theme(text = element_text(size = 26)) +
+    labs(
+        title = "Change in Kinematics by Performance Hypothesis",
+        x = "Velocity Change (Standardized)",
+        y = "Study"
+    )
+
+```
+
+Probably too few who guessed otherwise to tell.
+
+# Comparisons with Past Work
+
+```{r}
+combined_data <- bind_rows(
+    simdata %>% dplyr::select(ppid, study, std_vel_pre, std_vel_post, std_vel_change),
+    martel_2019 %>% dplyr::select(ppid, study, std_vel_pre, std_vel_post, std_vel_change),
+    martel_21 %>% dplyr::select(ppid, study, std_vel_pre, std_vel_post, std_vel_change, trial_num_in_block),
+)
+
+empirical_plot <- bind_rows(
+    combined_data %>% 
+    group_by(ppid, study) %>% 
+    summarise(std_vel_pre = mean(std_vel_pre), std_vel_post = mean(std_vel_post), std_vel_change = std_vel_post - std_vel_pre)
+, 
+    change_by_study) %>%
+    group_by(study) %>%
+    ggplot(aes(x = std_vel_change, y = study, fill = study, color = study)) +
+    stat_dotsinterval(
+        dotsize = 1,
+        alpha = .5,
+        point_interval = mean_qi
+    ) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black", size = 1) +
+    theme_tidybayes() +
+    theme(
+        text = element_text(size = 12),
+        legend.position = "none",
+        plot.background = element_rect(fill = "transparent"),
+        panel.background = element_rect(fill = "transparent")
+    ) +
+    labs(title = "Change in Kinematics", subtitle = "Present and Past Work", x = "Change in Standardized Velocity (Post - Pre)", y = "Study")
+
+
+saveRDS(empirical_plot, here::here("scripts", "for_osf", "cumulative_analyses", "figures", "empirical_plot.rds"))
+ggsave(here::here("scripts", "for_osf", "cumulative_analyses", "figures", "empirical_plot.png"), width = 10, height = 10, dpi = 300)
+empirical_plot
+```
+
+## Kinematic Meta-Analysis (Velocity)
+
+### Prior Distributions
+
+```{r}
+kinematic_meta_analysis_data <- combined_data %>%
+    pivot_longer(
+        cols = c(std_vel_pre, std_vel_post),
+        names_to = "time",
+        values_to = "std_vel"
+    ) %>%
+    dplyr::mutate(
+        time = fifelse(time == "std_vel_pre", "Pre", "Post")
+    ) %>%
+    bind_rows(
+      ppt_standardized %>%
+        dplyr::select(ppid, study, std_vel, time, trial_num_in_block)
+    ) %>%
+    dplyr::mutate(
+        time = factor(time, levels = c("Pre", "Post")))
+
+
+kinematic_meta_analysis_priors <- brm(
+    std_vel ~ 1 + time + (1 + time | study) + (1 + time | ppid),
+    data = kinematic_meta_analysis_data,
+    family = gaussian,
+    prior = c(
+        set_prior(prior = "normal(0, 2)", class = "Intercept"),
+        set_prior(prior = "normal(-.2, 1.5)", class = "b", coef = "timePost"),
+        set_prior(prior = "exponential(1)", class = "sd"),
+        set_prior(prior = "exponential(1)", class = "sigma"),
+        set_prior(prior = "lkj(1)", class = "cor", group = "ppid"),
+        set_prior(prior = "lkj(1)", class = "cor", group = "study")
+    ),
+    sample_prior = "only",
+    seed = 1337,
+    silent = TRUE, refresh = 0,
+    save_pars = save_pars(all = TRUE),
+    warmup = b, iter = i, chains = ch, cores = co,
+    control = control_list
+)
+
+plot(kinematic_meta_analysis_priors)
+summary(kinematic_meta_analysis_priors)
+```
+
+### Posterior
+
+```{r}
+kinematic_meta_analysis_posterior <- update(
+    kinematic_meta_analysis_priors,
+    sample_prior = "no",
+    refresh = 0,
+    seed = 1337,
+    file = here::here("scripts", "for_osf", "cumulative_analyses", "models", "velocity_meta_analysis")
+)
+
+summary(kinematic_meta_analysis_posterior)
+
+pp_check(kinematic_meta_analysis_posterior, ndraws = 50) +
+    theme_tidybayes() +
+    theme(
+        axis.text.y = element_blank()
+    ) +
+    labs(
+        title = "Peak Velocity",
+        subtitle = "Posterior Draws vs. Empirical Distribution",
+        x = "Velocity (mm/s)"
+    )
+
+velbf <- bayesfactor_pointnull(
+    kinematic_meta_analysis_posterior,
+    prior = kinematic_meta_analysis_priors
+) %>% as.data.table()
+
+meta_analysis_description <- bayestestR::describe_posterior(
+    kinematic_meta_analysis_posterior,
+    centrality = "map",
+    ci_method = "hdi"
+) %>% as.data.table()
+
+meta_analysis_description
+saveRDS(meta_analysis_description, here::here("scripts", "for_osf", "cumulative_analyses", "models", "meta_analysis_description.rds"))
+
+
+velocity_peak_posterior <- kinematic_meta_analysis_data %>%
+    distinct(
+        time,
+        study
+    ) %>%
+    add_epred_draws(
+        kinematic_meta_analysis_posterior,
+        re_formula = ~1 +time + (1 + time | study),
+        seed = 1337,
+        allow_new_levels = F,
+        ndraws = 5000
+    ) %>%
+    mutate(
+        Outcome = "Peak Velocity (Standardized)"
+    ) %>%
+    as.data.table() %>%
+    pivot_wider(
+      id_cols = c(study, .draw),
+        names_from = time,
+        values_from = .epred
+    ) %>%
+    mutate(
+        Change = Post - Pre
+    )
+
+velocity_posterior <- ggplot(
+      velocity_peak_posterior,
+      aes(
+          x = Change,
+          y = study,
+          fill = study,
+          color = study
+      )
+  ) +
+    geom_vline(xintercept = 0, alpha = .5, linetype = "dashed", color = "black", size = .5) +
+    geom_hline(yintercept = 3.5, alpha = .5, linetype = "dashed", color = "black", size = .5) +
+    geom_segment(
+        aes(
+            x = HDInterval::hdi(Change, .95)[1],
+            xend = HDInterval::hdi(Change, .95)[2],
+            y = 3.5,
+            yend = 3.5
+        ),
+        alpha = .5,
+        linetype = "solid",
+        color = "black",
+        size = 3,
+        lineend = "round"
+    ) +
+    geom_point(
+        # Maximum a priori estimate
+        aes(
+            x = meta_analysis_description$MAP[2],
+            y = 3.5
+        ),
+        color = "black",
+        size = 7,
+    ) +
+    geom_density_ridges(
+        alpha = .5,
+        scale = 1.3,
+        color = "black",
+        size = .5,
+        rel_min_height = .01
+    ) +
+    ggdist::stat_pointinterval(
+        point_size = 5,
+        linewidth = 3,
+        interval_color = "black",
+    )+
+    scale_x_continuous(expand = c(0, 0), limits = c(-1, 1)) +
+    scale_y_discrete(expand = c(.05, .05)) +
+    scale_color_manual(values = c(brewer.pal(n = 8, name = "Dark2"))) +
+    scale_fill_manual(values = c(brewer.pal(n = 8, name = "Dark2"))) +
+    theme_tidybayes() +
+    theme(text = element_text(size = 10)) +
+    theme(
+        axis.text.y = element_text(size = 12),
+        axis.text.x = element_text(size = 10),
+        axis.title.x = element_text(size = 12),
+        axis.title.y = element_blank(),
+        panel.background = element_rect(fill = "transparent", colour = NA),
+        legend.background = element_rect(fill = "transparent", colour = NA),
+        legend.position = "none",
+        plot.background = element_rect(fill = "transparent", colour = NA)
+    ) +
+    labs(
+        x = "Standardized Change in Peak Velocity (Pre - Post)",
+        y = "Study"
+    )
+
+velocity_posterior
+saveRDS(velocity_posterior, here::here("scripts", "for_osf", "cumulative_analyses", "figures", "velocity_posterior.rds"))
+ggsave(here::here("scripts", "for_osf", "cumulative_analyses", "figures", "velocity_posterior.png"), width = 10, height = 10, dpi = 300)
+```

@@ -1,0 +1,829 @@
+ppid,experiment,order,block,trial,time,target,lapse_fix_target,error,lapse_fix_error,forearmlength,closest_to,lapse
+d3-001,3_avatartooluse,pre,1,1,pre,Forearm,Forearm,0.0609,0.0609,0.3508,Forearm,FALSE
+d3-001,3_avatartooluse,pre,1,2,pre,Elbow,Elbow,-0.0148,-0.0148,0.35,Elbow,FALSE
+d3-001,3_avatartooluse,pre,1,3,pre,Wrist,Wrist,-0.0346,-0.0346,0.3497,Wrist,FALSE
+d3-001,3_avatartooluse,pre,1,4,pre,Elbow,Elbow,0.01,0.01,0.3492,Elbow,FALSE
+d3-001,3_avatartooluse,pre,1,5,pre,Wrist,Wrist,-0.0356,-0.0356,0.3491,Wrist,FALSE
+d3-001,3_avatartooluse,pre,1,6,pre,Forearm,Forearm,-0.0223,-0.0223,0.3494,Forearm,FALSE
+d3-001,3_avatartooluse,pre,1,7,pre,Wrist,Wrist,-0.018,-0.018,0.349,Wrist,FALSE
+d3-001,3_avatartooluse,pre,1,8,pre,Forearm,Forearm,-0.0239,-0.0239,0.3488,Forearm,FALSE
+d3-001,3_avatartooluse,pre,1,9,pre,Elbow,Elbow,0.0351,0.0351,0.3486,Elbow,FALSE
+d3-001,3_avatartooluse,pre,1,10,pre,Forearm,Forearm,-0.0607,-0.0607,0.3495,Forearm,FALSE
+d3-001,3_avatartooluse,pre,1,11,pre,Wrist,Wrist,-0.0508,-0.0508,0.3486,Wrist,FALSE
+d3-001,3_avatartooluse,pre,1,12,pre,Elbow,Elbow,-0.0191,-0.0191,0.3485,Elbow,FALSE
+d3-001,3_avatartooluse,pre,1,13,pre,Wrist,Wrist,-0.1215,-0.1215,0.3488,Forearm,FALSE
+d3-001,3_avatartooluse,pre,1,14,pre,Elbow,Elbow,-0.0252,-0.0252,0.3491,Elbow,FALSE
+d3-001,3_avatartooluse,pre,1,15,pre,Forearm,Forearm,-0.0625,-0.0625,0.349,Forearm,FALSE
+d3-001,3_avatartooluse,pre,1,16,pre,Wrist,Wrist,-0.0865,-0.0865,0.3488,Forearm,FALSE
+d3-001,3_avatartooluse,pre,1,17,pre,Elbow,Elbow,-0.0281,-0.0281,0.3489,Elbow,FALSE
+d3-001,3_avatartooluse,pre,1,18,pre,Forearm,Forearm,-0.0788,-0.0788,0.3491,Forearm,FALSE
+d3-001,3_avatartooluse,second,5,1,post,Forearm,Forearm,-0.0641,-0.0641,0.3485,Forearm,FALSE
+d3-001,3_avatartooluse,second,5,2,post,Elbow,Elbow,-0.0158,-0.0158,0.3475,Elbow,FALSE
+d3-001,3_avatartooluse,second,5,3,post,Wrist,Wrist,-0.0383,-0.0383,0.3478,Wrist,FALSE
+d3-001,3_avatartooluse,second,5,4,post,Elbow,Elbow,-0.0371,-0.0371,0.3474,Elbow,FALSE
+d3-001,3_avatartooluse,second,5,5,post,Wrist,Wrist,-0.0805,-0.0805,0.3477,Wrist,FALSE
+d3-001,3_avatartooluse,second,5,6,post,Forearm,Forearm,-0.0479,-0.0479,0.3475,Forearm,FALSE
+d3-001,3_avatartooluse,second,5,7,post,Wrist,Wrist,-0.1034,-0.1034,0.3472,Forearm,FALSE
+d3-001,3_avatartooluse,second,5,8,post,Forearm,Forearm,-0.0797,-0.0797,0.3473,Forearm,FALSE
+d3-001,3_avatartooluse,second,5,9,post,Elbow,Elbow,-0.0543,-0.0543,0.3475,Elbow,FALSE
+d3-001,3_avatartooluse,second,5,10,post,Forearm,Forearm,-0.0881,-0.0881,0.3476,Elbow,FALSE
+d3-001,3_avatartooluse,second,5,11,post,Elbow,Elbow,-0.0649,-0.0649,0.3483,Elbow,FALSE
+d3-001,3_avatartooluse,second,5,12,post,Wrist,Wrist,-0.0673,-0.0673,0.348,Wrist,FALSE
+d3-001,3_avatartooluse,second,5,13,post,Forearm,Forearm,-0.118,-0.118,0.3484,Elbow,FALSE
+d3-001,3_avatartooluse,second,5,14,post,Wrist,Wrist,-0.1248,-0.1248,0.3483,Forearm,FALSE
+d3-001,3_avatartooluse,second,5,15,post,Elbow,Elbow,-0.0818,-0.0818,0.3486,Elbow,FALSE
+d3-001,3_avatartooluse,second,5,16,post,Forearm,Forearm,-0.1228,-0.1228,0.3484,Elbow,FALSE
+d3-001,3_avatartooluse,second,5,17,post,Elbow,Elbow,-0.0695,-0.0695,0.3485,Elbow,FALSE
+d3-001,3_avatartooluse,second,5,18,post,Wrist,Wrist,-0.0842,-0.0842,0.3486,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,1,pre,Wrist,Wrist,0.0501,0.0501,0.3585,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,2,pre,Elbow,Elbow,0.0586,0.0586,0.3627,Elbow,FALSE
+d3-002,3_avatartooluse,pre,1,3,pre,Forearm,Wrist,0.1861,0.00570000000000004,0.3625,Wrist,TRUE
+d3-002,3_avatartooluse,pre,1,4,pre,Elbow,Elbow,0.0627,0.0627,0.3627,Elbow,FALSE
+d3-002,3_avatartooluse,pre,1,5,pre,Wrist,Wrist,0.1017,0.1017,0.3628,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,6,pre,Forearm,Forearm,0.1676,0.1676,0.3631,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,7,pre,Elbow,Elbow,0.0955,0.0955,0.3635,Forearm,FALSE
+d3-002,3_avatartooluse,pre,1,8,pre,Forearm,Forearm,0.1222,0.1222,0.3637,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,9,pre,Wrist,Wrist,0.0367,0.0367,0.3644,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,10,pre,Elbow,Elbow,0.0695,0.0695,0.365,Elbow,FALSE
+d3-002,3_avatartooluse,pre,1,11,pre,Forearm,Forearm,0.0993,0.0993,0.3652,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,12,pre,Wrist,Wrist,0.04,0.04,0.3651,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,13,pre,Forearm,Forearm,0.1188,0.1188,0.3651,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,14,pre,Wrist,Wrist,0.0531,0.0531,0.3655,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,15,pre,Elbow,Elbow,0.0696,0.0696,0.366,Elbow,FALSE
+d3-002,3_avatartooluse,pre,1,16,pre,Wrist,Wrist,0.0953,0.0953,0.3656,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,17,pre,Forearm,Forearm,0.1345,0.1345,0.3655,Wrist,FALSE
+d3-002,3_avatartooluse,pre,1,18,pre,Elbow,Elbow,0.0646,0.0646,0.3657,Elbow,FALSE
+d3-002,3_avatartooluse,first,4,1,post,Forearm,Forearm,0.1191,0.1191,0.3229,Wrist,FALSE
+d3-002,3_avatartooluse,first,4,2,post,Elbow,Elbow,0.0057,0.0057,0.322,Elbow,FALSE
+d3-002,3_avatartooluse,first,4,3,post,Wrist,Wrist,0.1485,0.1485,0.3213,Wrist,FALSE
+d3-002,3_avatartooluse,first,4,4,post,Elbow,Elbow,0.0422,0.0422,0.3208,Elbow,FALSE
+d3-002,3_avatartooluse,first,4,5,post,Forearm,Forearm,0.0607,0.0607,0.3204,Forearm,FALSE
+d3-002,3_avatartooluse,first,4,6,post,Wrist,Wrist,0.1274,0.1274,0.3202,Wrist,FALSE
+d3-002,3_avatartooluse,first,4,7,post,Forearm,Forearm,0.1057,0.1057,0.3202,Wrist,FALSE
+d3-002,3_avatartooluse,first,4,8,post,Wrist,Wrist,0.1634,0.1634,0.3201,Wrist,FALSE
+d3-002,3_avatartooluse,first,4,9,post,Elbow,Elbow,0.0407,0.0407,0.3202,Elbow,FALSE
+d3-002,3_avatartooluse,first,4,10,post,Forearm,Wrist,0.2224,0.0631999999999999,0.3203,Wrist,TRUE
+d3-002,3_avatartooluse,first,4,11,post,Wrist,Wrist,0.1037,0.1037,0.3204,Wrist,FALSE
+d3-002,3_avatartooluse,first,4,12,post,Elbow,Elbow,0.088,0.088,0.3208,Forearm,FALSE
+d3-002,3_avatartooluse,first,4,13,post,Forearm,Forearm,0.1506,0.1506,0.3216,Wrist,FALSE
+d3-002,3_avatartooluse,first,4,14,post,Wrist,Wrist,0.0962,0.0962,0.322,Wrist,FALSE
+d3-002,3_avatartooluse,first,4,15,post,Elbow,Elbow,0.0633,0.0633,0.3224,Elbow,FALSE
+d3-002,3_avatartooluse,first,4,16,post,Wrist,Wrist,0.1082,0.1082,0.3227,Wrist,FALSE
+d3-002,3_avatartooluse,first,4,17,post,Elbow,Elbow,0.0233,0.0233,0.3233,Elbow,FALSE
+d3-002,3_avatartooluse,first,4,18,post,Forearm,Forearm,0.0735,0.0735,0.3239,Forearm,FALSE
+d3-003,3_avatartooluse,pre,2,1,pre,Forearm,Forearm,0.0155,0.0155,0.3428,Forearm,FALSE
+d3-003,3_avatartooluse,pre,2,2,pre,Wrist,Wrist,0.0317,0.0317,0.3415,Wrist,FALSE
+d3-003,3_avatartooluse,pre,2,3,pre,Elbow,Elbow,0.0773,0.0773,0.3407,Elbow,FALSE
+d3-003,3_avatartooluse,pre,2,4,pre,Wrist,Wrist,-0.0839,-0.0839,0.3427,Wrist,FALSE
+d3-003,3_avatartooluse,pre,2,5,pre,Forearm,Forearm,-0.0244,-0.0244,0.3429,Forearm,FALSE
+d3-003,3_avatartooluse,pre,2,6,pre,Elbow,Elbow,0.0442,0.0442,0.3427,Elbow,FALSE
+d3-003,3_avatartooluse,pre,2,7,pre,Forearm,Forearm,-0.0498,-0.0498,0.3408,Forearm,FALSE
+d3-003,3_avatartooluse,pre,2,8,pre,Elbow,Elbow,0.0341,0.0341,0.3399,Elbow,FALSE
+d3-003,3_avatartooluse,pre,2,9,pre,Wrist,Wrist,-0.0121,-0.0121,0.3452,Wrist,FALSE
+d3-003,3_avatartooluse,pre,2,10,pre,Forearm,Forearm,-0.0329,-0.0329,0.3473,Forearm,FALSE
+d3-003,3_avatartooluse,pre,2,11,pre,Elbow,Elbow,0.0172,0.0172,0.3503,Elbow,FALSE
+d3-003,3_avatartooluse,pre,2,12,pre,Wrist,Wrist,-0.0842,-0.0842,0.3495,Wrist,FALSE
+d3-003,3_avatartooluse,pre,2,13,pre,Elbow,Elbow,0.0383,0.0383,0.3497,Elbow,FALSE
+d3-003,3_avatartooluse,pre,2,14,pre,Wrist,Wrist,-0.1232,-0.1232,0.3501,Forearm,FALSE
+d3-003,3_avatartooluse,pre,2,15,pre,Forearm,Forearm,-0.0488,-0.0488,0.351,Forearm,FALSE
+d3-003,3_avatartooluse,pre,2,16,pre,Elbow,Elbow,0.0339,0.0339,0.3511,Elbow,FALSE
+d3-003,3_avatartooluse,pre,2,17,pre,Forearm,Forearm,-0.0392,-0.0392,0.3512,Forearm,FALSE
+d3-003,3_avatartooluse,pre,2,18,pre,Wrist,Wrist,-0.0906,-0.0906,0.3498,Forearm,FALSE
+d3-003,3_avatartooluse,second,5,1,post,Forearm,Forearm,-0.0232,-0.0232,0.3414,Forearm,FALSE
+d3-003,3_avatartooluse,second,5,2,post,Elbow,Elbow,0.0335,0.0335,0.3394,Elbow,FALSE
+d3-003,3_avatartooluse,second,5,3,post,Wrist,Wrist,-0.0967,-0.0967,0.3416,Forearm,FALSE
+d3-003,3_avatartooluse,second,5,4,post,Forearm,Forearm,-0.0105,-0.0105,0.3411,Forearm,FALSE
+d3-003,3_avatartooluse,second,5,5,post,Wrist,Wrist,-0.0898,-0.0898,0.34,Forearm,FALSE
+d3-003,3_avatartooluse,second,5,6,post,Elbow,Elbow,0.0268,0.0268,0.3409,Elbow,FALSE
+d3-003,3_avatartooluse,second,5,7,post,Forearm,Forearm,-0.0799,-0.0799,0.3392,Forearm,FALSE
+d3-003,3_avatartooluse,second,5,8,post,Wrist,Wrist,-0.1337,-0.1337,0.3398,Forearm,FALSE
+d3-003,3_avatartooluse,second,5,9,post,Elbow,Elbow,0.0196,0.0196,0.3416,Elbow,FALSE
+d3-003,3_avatartooluse,second,5,10,post,Wrist,Wrist,-0.0801,-0.0801,0.3413,Wrist,FALSE
+d3-003,3_avatartooluse,second,5,11,post,Elbow,Elbow,0.0052,0.0052,0.3417,Elbow,FALSE
+d3-003,3_avatartooluse,second,5,12,post,Forearm,Forearm,-0.0561,-0.0561,0.3421,Forearm,FALSE
+d3-003,3_avatartooluse,second,5,13,post,Elbow,Elbow,0.0131,0.0131,0.3425,Elbow,FALSE
+d3-003,3_avatartooluse,second,5,14,post,Wrist,Wrist,-0.1248,-0.1248,0.3422,Forearm,FALSE
+d3-003,3_avatartooluse,second,5,15,post,Forearm,Forearm,-0.0513,-0.0513,0.3412,Forearm,FALSE
+d3-003,3_avatartooluse,second,5,16,post,Wrist,Wrist,-0.114,-0.114,0.3405,Forearm,FALSE
+d3-003,3_avatartooluse,second,5,17,post,Elbow,Elbow,0.0069,0.0069,0.3404,Elbow,FALSE
+d3-003,3_avatartooluse,second,5,18,post,Forearm,Forearm,-0.0788,-0.0788,0.3413,Forearm,FALSE
+d3-004,3_avatartooluse,pre,2,1,pre,Elbow,Elbow,0.0485,0.0485,0.3065,Elbow,FALSE
+d3-004,3_avatartooluse,pre,2,2,pre,Forearm,Forearm,0.033,0.033,0.3074,Forearm,FALSE
+d3-004,3_avatartooluse,pre,2,3,pre,Wrist,Wrist,-0.0384,-0.0384,0.3086,Wrist,FALSE
+d3-004,3_avatartooluse,pre,2,4,pre,Elbow,Elbow,0.0801,0.0801,0.3105,Forearm,FALSE
+d3-004,3_avatartooluse,pre,2,5,pre,Wrist,Wrist,0.016,0.016,0.3114,Wrist,FALSE
+d3-004,3_avatartooluse,pre,2,6,pre,Forearm,Forearm,-0.0183,-0.0183,0.3121,Forearm,FALSE
+d3-004,3_avatartooluse,pre,2,7,pre,Elbow,Elbow,0.0687,0.0687,0.3132,Elbow,FALSE
+d3-004,3_avatartooluse,pre,2,8,pre,Forearm,Forearm,-0.0084,-0.0084,0.3141,Forearm,FALSE
+d3-004,3_avatartooluse,pre,2,9,pre,Wrist,Wrist,-0.0344,-0.0344,0.3142,Wrist,FALSE
+d3-004,3_avatartooluse,pre,2,10,pre,Elbow,Elbow,-0.0701,-0.0701,0.3142,Elbow,FALSE
+d3-004,3_avatartooluse,pre,2,11,pre,Wrist,Wrist,-0.022,-0.022,0.3137,Wrist,FALSE
+d3-004,3_avatartooluse,pre,2,12,pre,Forearm,Forearm,-0.0454,-0.0454,0.3136,Forearm,FALSE
+d3-004,3_avatartooluse,pre,2,13,pre,Elbow,Elbow,0.0835,0.0835,0.3157,Forearm,FALSE
+d3-004,3_avatartooluse,pre,2,14,pre,Wrist,Wrist,-0.0072,-0.0072,0.3161,Wrist,FALSE
+d3-004,3_avatartooluse,pre,2,15,pre,Forearm,Forearm,-0.0043,-0.0043,0.3166,Forearm,FALSE
+d3-004,3_avatartooluse,pre,2,16,pre,Elbow,Elbow,0.0574,0.0574,0.3159,Elbow,FALSE
+d3-004,3_avatartooluse,pre,2,17,pre,Forearm,Forearm,0.0063,0.0063,0.3159,Forearm,FALSE
+d3-004,3_avatartooluse,pre,2,18,pre,Wrist,Wrist,-0.0444,-0.0444,0.3156,Wrist,FALSE
+d3-004,3_avatartooluse,second,5,1,post,Forearm,Forearm,-0.0127,-0.0127,0.2937,Forearm,FALSE
+d3-004,3_avatartooluse,second,5,2,post,Elbow,Elbow,0.0373,0.0373,0.2938,Elbow,FALSE
+d3-004,3_avatartooluse,second,5,3,post,Wrist,Wrist,-0.0503,-0.0503,0.2948,Wrist,FALSE
+d3-004,3_avatartooluse,second,5,4,post,Forearm,Forearm,-0.0238,-0.0238,0.2944,Forearm,FALSE
+d3-004,3_avatartooluse,second,5,5,post,Wrist,Wrist,-0.0532,-0.0532,0.2943,Wrist,FALSE
+d3-004,3_avatartooluse,second,5,6,post,Elbow,Elbow,0.0346,0.0346,0.295,Elbow,FALSE
+d3-004,3_avatartooluse,second,5,7,post,Wrist,Wrist,-0.0644,-0.0644,0.2954,Wrist,FALSE
+d3-004,3_avatartooluse,second,5,8,post,Forearm,Forearm,-0.0216,-0.0216,0.2963,Forearm,FALSE
+d3-004,3_avatartooluse,second,5,9,post,Elbow,Elbow,0.05,0.05,0.2972,Elbow,FALSE
+d3-004,3_avatartooluse,second,5,10,post,Wrist,Wrist,-0.0406,-0.0406,0.2975,Wrist,FALSE
+d3-004,3_avatartooluse,second,5,11,post,Forearm,Forearm,-0.01,-0.01,0.2983,Forearm,FALSE
+d3-004,3_avatartooluse,second,5,12,post,Elbow,Elbow,0.0154,0.0154,0.2984,Elbow,FALSE
+d3-004,3_avatartooluse,second,5,13,post,Wrist,Wrist,-0.0876,-0.0876,0.2988,Forearm,FALSE
+d3-004,3_avatartooluse,second,5,14,post,Elbow,Elbow,0.0261,0.0261,0.3002,Elbow,FALSE
+d3-004,3_avatartooluse,second,5,15,post,Forearm,Forearm,-0.0028,-0.0028,0.3011,Forearm,FALSE
+d3-004,3_avatartooluse,second,5,16,post,Elbow,Elbow,0.022,0.022,0.3022,Elbow,FALSE
+d3-004,3_avatartooluse,second,5,17,post,Wrist,Wrist,-0.1138,-0.1138,0.3012,Forearm,FALSE
+d3-004,3_avatartooluse,second,5,18,post,Forearm,Forearm,0.0102,0.0102,0.3023,Forearm,FALSE
+d3-005,3_avatartooluse,pre,2,1,pre,Elbow,Elbow,0.0519,0.0519,0.271,Elbow,FALSE
+d3-005,3_avatartooluse,pre,2,2,pre,Forearm,Forearm,0.0312,0.0312,0.271,Forearm,FALSE
+d3-005,3_avatartooluse,pre,2,3,pre,Wrist,Wrist,-0.0541,-0.0541,0.2722,Wrist,FALSE
+d3-005,3_avatartooluse,pre,2,4,pre,Elbow,Elbow,-0.01,-0.01,0.2728,Elbow,FALSE
+d3-005,3_avatartooluse,pre,2,5,pre,Forearm,Forearm,-0.0298,-0.0298,0.2731,Forearm,FALSE
+d3-005,3_avatartooluse,pre,2,6,pre,Wrist,Wrist,-0.0562,-0.0562,0.2733,Wrist,FALSE
+d3-005,3_avatartooluse,pre,2,7,pre,Elbow,Elbow,0.0161,0.0161,0.2732,Elbow,FALSE
+d3-005,3_avatartooluse,pre,2,8,pre,Wrist,Wrist,-0.058,-0.058,0.2735,Wrist,FALSE
+d3-005,3_avatartooluse,pre,2,9,pre,Forearm,Forearm,-0.0108,-0.0108,0.2736,Forearm,FALSE
+d3-005,3_avatartooluse,pre,2,10,pre,Wrist,Wrist,-0.0343,-0.0343,0.2735,Wrist,FALSE
+d3-005,3_avatartooluse,pre,2,11,pre,Forearm,Forearm,0.0138,0.0138,0.2739,Forearm,FALSE
+d3-005,3_avatartooluse,pre,2,12,pre,Elbow,Elbow,0.0316,0.0316,0.2743,Elbow,FALSE
+d3-005,3_avatartooluse,pre,2,13,pre,Wrist,Wrist,-0.0259,-0.0259,0.2739,Wrist,FALSE
+d3-005,3_avatartooluse,pre,2,14,pre,Forearm,Forearm,0.0499,0.0499,0.2723,Forearm,FALSE
+d3-005,3_avatartooluse,pre,2,15,pre,Elbow,Elbow,0.077,0.077,0.2715,Forearm,FALSE
+d3-005,3_avatartooluse,pre,2,16,pre,Wrist,Wrist,-0.0071,-0.0071,0.2708,Wrist,FALSE
+d3-005,3_avatartooluse,pre,2,17,pre,Elbow,Elbow,0.037,0.037,0.2706,Elbow,FALSE
+d3-005,3_avatartooluse,pre,2,18,pre,Forearm,Forearm,0.0216,0.0216,0.2704,Forearm,FALSE
+d3-005,3_avatartooluse,second,5,1,post,Forearm,Forearm,-0.0469,-0.0469,0.2777,Forearm,FALSE
+d3-005,3_avatartooluse,second,5,2,post,Wrist,Wrist,-0.0487,-0.0487,0.2766,Wrist,FALSE
+d3-005,3_avatartooluse,second,5,3,post,Elbow,Elbow,-0.0288,-0.0288,0.2759,Elbow,FALSE
+d3-005,3_avatartooluse,second,5,4,post,Wrist,Wrist,-0.0482,-0.0482,0.2761,Wrist,FALSE
+d3-005,3_avatartooluse,second,5,5,post,Elbow,Elbow,-0.0507,-0.0507,0.276,Elbow,FALSE
+d3-005,3_avatartooluse,second,5,6,post,Forearm,Forearm,-0.0846,-0.0846,0.2756,Elbow,FALSE
+d3-005,3_avatartooluse,second,5,7,post,Wrist,Wrist,-0.0954,-0.0954,0.2757,Forearm,FALSE
+d3-005,3_avatartooluse,second,5,8,post,Forearm,Forearm,-0.1093,-0.1093,0.2773,Elbow,FALSE
+d3-005,3_avatartooluse,second,5,9,post,Elbow,Elbow,-0.0615,-0.0615,0.2786,Elbow,FALSE
+d3-005,3_avatartooluse,second,5,10,post,Wrist,Wrist,-0.0719,-0.0719,0.279,Forearm,FALSE
+d3-005,3_avatartooluse,second,5,11,post,Forearm,Forearm,-0.1194,-0.1194,0.2803,Elbow,FALSE
+d3-005,3_avatartooluse,second,5,12,post,Elbow,Elbow,-0.0425,-0.0425,0.2821,Elbow,FALSE
+d3-005,3_avatartooluse,second,5,13,post,Forearm,Forearm,-0.0972,-0.0972,0.2824,Elbow,FALSE
+d3-005,3_avatartooluse,second,5,14,post,Wrist,Forearm,-0.1474,-0.00680000000000003,0.2829,Forearm,TRUE
+d3-005,3_avatartooluse,second,5,15,post,Elbow,Elbow,-0.071,-0.071,0.284,Elbow,FALSE
+d3-005,3_avatartooluse,second,5,16,post,Forearm,Forearm,-0.0829,-0.0829,0.2842,Elbow,FALSE
+d3-005,3_avatartooluse,second,5,17,post,Elbow,Elbow,-0.0731,-0.0731,0.2849,Elbow,FALSE
+d3-005,3_avatartooluse,second,5,18,post,Wrist,Wrist,-0.1148,-0.1148,0.2848,Forearm,FALSE
+d3-007,3_avatartooluse,pre,1,1,pre,Wrist,Wrist,0.0469,0.0469,0.2479,Wrist,FALSE
+d3-007,3_avatartooluse,pre,1,2,pre,Forearm,Forearm,-0.0326,-0.0326,0.2507,Forearm,FALSE
+d3-007,3_avatartooluse,pre,1,3,pre,Elbow,Elbow,-0.0257,-0.0257,0.2519,Elbow,FALSE
+d3-007,3_avatartooluse,pre,1,4,pre,Wrist,Wrist,0.1138,0.1138,0.2527,Wrist,FALSE
+d3-007,3_avatartooluse,pre,1,5,pre,Forearm,Forearm,-0.0025,-0.0025,0.253,Forearm,FALSE
+d3-007,3_avatartooluse,pre,1,6,pre,Elbow,Elbow,-0.0044,-0.0044,0.253,Elbow,FALSE
+d3-007,3_avatartooluse,pre,1,7,pre,Wrist,Wrist,0.0424,0.0424,0.2539,Wrist,FALSE
+d3-007,3_avatartooluse,pre,1,8,pre,Elbow,Elbow,-0.0878,-0.0878,0.2546,Elbow,FALSE
+d3-007,3_avatartooluse,pre,1,9,pre,Forearm,Forearm,0.0862,0.0862,0.2551,Wrist,FALSE
+d3-007,3_avatartooluse,pre,1,10,pre,Wrist,Wrist,0.1182,0.1182,0.2563,Wrist,FALSE
+d3-007,3_avatartooluse,pre,1,11,pre,Forearm,Forearm,-0.0297,-0.0297,0.2582,Forearm,FALSE
+d3-007,3_avatartooluse,pre,1,12,pre,Elbow,Elbow,-0.0742,-0.0742,0.2566,Elbow,FALSE
+d3-007,3_avatartooluse,pre,1,13,pre,Forearm,Forearm,-0.0191,-0.0191,0.2561,Forearm,FALSE
+d3-007,3_avatartooluse,pre,1,14,pre,Elbow,Elbow,-0.044,-0.044,0.2561,Elbow,FALSE
+d3-007,3_avatartooluse,pre,1,15,pre,Wrist,Wrist,0.015,0.015,0.2547,Wrist,FALSE
+d3-007,3_avatartooluse,pre,1,16,pre,Forearm,Forearm,-0.0234,-0.0234,0.2552,Forearm,FALSE
+d3-007,3_avatartooluse,pre,1,17,pre,Wrist,Wrist,0.0774,0.0774,0.2552,Wrist,FALSE
+d3-007,3_avatartooluse,pre,1,18,pre,Elbow,Elbow,-0.1177,-0.1177,0.254,Elbow,FALSE
+d3-007,3_avatartooluse,second,5,1,post,Elbow,Elbow,0.0675,0.0675,0.2653,Forearm,FALSE
+d3-007,3_avatartooluse,second,5,2,post,Forearm,Forearm,0.054,0.054,0.2651,Forearm,FALSE
+d3-007,3_avatartooluse,second,5,3,post,Wrist,Wrist,0.0412,0.0412,0.2644,Wrist,FALSE
+d3-007,3_avatartooluse,second,5,4,post,Elbow,Elbow,0.022,0.022,0.2651,Elbow,FALSE
+d3-007,3_avatartooluse,second,5,5,post,Wrist,Wrist,0.0373,0.0373,0.2675,Wrist,FALSE
+d3-007,3_avatartooluse,second,5,6,post,Forearm,Forearm,0.0491,0.0491,0.2688,Forearm,FALSE
+d3-007,3_avatartooluse,second,5,7,post,Elbow,Elbow,0.0167,0.0167,0.2695,Elbow,FALSE
+d3-007,3_avatartooluse,second,5,8,post,Forearm,Forearm,0.0598,0.0598,0.2705,Forearm,FALSE
+d3-007,3_avatartooluse,second,5,9,post,Wrist,Wrist,0.0215,0.0215,0.2704,Wrist,FALSE
+d3-007,3_avatartooluse,second,5,10,post,Elbow,Elbow,0.031,0.031,0.2706,Elbow,FALSE
+d3-007,3_avatartooluse,second,5,11,post,Forearm,Forearm,-0.0026,-0.0026,0.2706,Forearm,FALSE
+d3-007,3_avatartooluse,second,5,12,post,Wrist,Wrist,-0.0227,-0.0227,0.2697,Wrist,FALSE
+d3-007,3_avatartooluse,second,5,13,post,Forearm,Forearm,0.0256,0.0256,0.2694,Forearm,FALSE
+d3-007,3_avatartooluse,second,5,14,post,Elbow,Elbow,-0.0107,-0.0107,0.2689,Elbow,FALSE
+d3-007,3_avatartooluse,second,5,15,post,Wrist,Wrist,0.0328,0.0328,0.2684,Wrist,FALSE
+d3-007,3_avatartooluse,second,5,16,post,Elbow,Elbow,-0.0564,-0.0564,0.2682,Elbow,FALSE
+d3-007,3_avatartooluse,second,5,17,post,Forearm,Forearm,-0.0094,-0.0094,0.2668,Forearm,FALSE
+d3-007,3_avatartooluse,second,5,18,post,Wrist,Wrist,-0.0155,-0.0155,0.2661,Wrist,FALSE
+d3-008,3_avatartooluse,pre,2,1,pre,Wrist,Wrist,0.0793,0.0793,0.2619,Wrist,FALSE
+d3-008,3_avatartooluse,pre,2,2,pre,Elbow,Elbow,-0.2123,-0.2123,0.2621,Elbow,FALSE
+d3-008,3_avatartooluse,pre,2,3,pre,Forearm,Forearm,-0.086,-0.086,0.262,Forearm,FALSE
+d3-008,3_avatartooluse,pre,2,4,pre,Wrist,Wrist,0.019,0.019,0.2623,Wrist,FALSE
+d3-008,3_avatartooluse,pre,2,5,pre,Elbow,Elbow,-0.1894,-0.1894,0.2631,Elbow,FALSE
+d3-008,3_avatartooluse,pre,2,6,pre,Forearm,Forearm,-0.0229,-0.0229,0.2637,Elbow,FALSE
+d3-008,3_avatartooluse,pre,2,7,pre,Wrist,Wrist,0.0431,0.0431,0.2641,Wrist,FALSE
+d3-008,3_avatartooluse,pre,2,8,pre,Forearm,Forearm,-0.0481,-0.0481,0.2637,Elbow,FALSE
+d3-008,3_avatartooluse,pre,2,9,pre,Elbow,Elbow,-0.2119,-0.2119,0.2637,Elbow,FALSE
+d3-008,3_avatartooluse,pre,2,10,pre,Forearm,Forearm,-0.018,-0.018,0.2635,Elbow,FALSE
+d3-008,3_avatartooluse,pre,2,11,pre,Wrist,Wrist,0.0303,0.0303,0.2632,Wrist,FALSE
+d3-008,3_avatartooluse,pre,2,12,pre,Elbow,Elbow,-0.2204,-0.2204,0.2628,Elbow,FALSE
+d3-008,3_avatartooluse,pre,2,13,pre,Wrist,Wrist,0.0218,0.0218,0.2628,Wrist,FALSE
+d3-008,3_avatartooluse,pre,2,14,pre,Elbow,Elbow,-0.2235,-0.2235,0.2632,Elbow,FALSE
+d3-008,3_avatartooluse,pre,2,15,pre,Forearm,Forearm,-0.0184,-0.0184,0.2631,Elbow,FALSE
+d3-008,3_avatartooluse,pre,2,16,pre,Elbow,Elbow,-0.232,-0.232,0.263,Elbow,FALSE
+d3-008,3_avatartooluse,pre,2,17,pre,Wrist,Wrist,0.0031,0.0031,0.2624,Wrist,FALSE
+d3-008,3_avatartooluse,pre,2,18,pre,Forearm,Forearm,-0.0034,-0.0034,0.2632,Elbow,FALSE
+d3-008,3_avatartooluse,first,4,1,post,Elbow,Elbow,0.052,0.052,0.2594,Elbow,FALSE
+d3-008,3_avatartooluse,first,4,2,post,Forearm,Forearm,0.0462,0.0462,0.2594,Forearm,FALSE
+d3-008,3_avatartooluse,first,4,3,post,Wrist,Wrist,0.022,0.022,0.2589,Wrist,FALSE
+d3-008,3_avatartooluse,first,4,4,post,Elbow,Elbow,0.0202,0.0202,0.2584,Elbow,FALSE
+d3-008,3_avatartooluse,first,4,5,post,Wrist,Wrist,-0.0661,-0.0661,0.2584,Forearm,FALSE
+d3-008,3_avatartooluse,first,4,6,post,Forearm,Forearm,0.0786,0.0786,0.2582,Wrist,FALSE
+d3-008,3_avatartooluse,first,4,7,post,Wrist,Wrist,-0.006,-0.006,0.2583,Wrist,FALSE
+d3-008,3_avatartooluse,first,4,8,post,Forearm,Forearm,0.0387,0.0387,0.258,Forearm,FALSE
+d3-008,3_avatartooluse,first,4,9,post,Elbow,Elbow,0.0391,0.0391,0.2577,Elbow,FALSE
+d3-008,3_avatartooluse,first,4,10,post,Forearm,Forearm,0.062,0.062,0.2571,Forearm,FALSE
+d3-008,3_avatartooluse,first,4,11,post,Elbow,Elbow,0.008,0.008,0.2578,Elbow,FALSE
+d3-008,3_avatartooluse,first,4,12,post,Wrist,Wrist,0.0616,0.0616,0.2581,Wrist,FALSE
+d3-008,3_avatartooluse,first,4,13,post,Forearm,Forearm,0.0674,0.0674,0.2581,Wrist,FALSE
+d3-008,3_avatartooluse,first,4,14,post,Elbow,Elbow,-0.0299,-0.0299,0.2571,Elbow,FALSE
+d3-008,3_avatartooluse,first,4,15,post,Wrist,Wrist,0.0545,0.0545,0.2561,Wrist,FALSE
+d3-008,3_avatartooluse,first,4,16,post,Forearm,Forearm,0.0463,0.0463,0.2558,Forearm,FALSE
+d3-008,3_avatartooluse,first,4,17,post,Elbow,Elbow,-0.0161,-0.0161,0.2557,Elbow,FALSE
+d3-008,3_avatartooluse,first,4,18,post,Wrist,Wrist,-0.0148,-0.0148,0.2558,Wrist,FALSE
+d3-009,3_avatartooluse,pre,2,1,pre,Forearm,Forearm,0.0471,0.0471,0.2548,Forearm,FALSE
+d3-009,3_avatartooluse,pre,2,2,pre,Elbow,Elbow,0.0358,0.0358,0.2549,Elbow,FALSE
+d3-009,3_avatartooluse,pre,2,3,pre,Wrist,Wrist,-0.0217,-0.0217,0.255,Wrist,FALSE
+d3-009,3_avatartooluse,pre,2,4,pre,Elbow,Elbow,-0.0508,-0.0508,0.2556,Elbow,FALSE
+d3-009,3_avatartooluse,pre,2,5,pre,Wrist,Wrist,-0.0154,-0.0154,0.2554,Wrist,FALSE
+d3-009,3_avatartooluse,pre,2,6,pre,Forearm,Forearm,-0.1131,-0.1131,0.2555,Elbow,FALSE
+d3-009,3_avatartooluse,pre,2,7,pre,Elbow,Elbow,-0.006,-0.006,0.2556,Elbow,FALSE
+d3-009,3_avatartooluse,pre,2,8,pre,Forearm,Forearm,-0.0211,-0.0211,0.2557,Forearm,FALSE
+d3-009,3_avatartooluse,pre,2,9,pre,Wrist,Wrist,-0.0407,-0.0407,0.2556,Wrist,FALSE
+d3-009,3_avatartooluse,pre,2,10,pre,Forearm,Forearm,-0.0058,-0.0058,0.2558,Forearm,FALSE
+d3-009,3_avatartooluse,pre,2,11,pre,Wrist,Wrist,-0.0455,-0.0455,0.2558,Wrist,FALSE
+d3-009,3_avatartooluse,pre,2,12,pre,Elbow,Elbow,-0.0212,-0.0212,0.2558,Elbow,FALSE
+d3-009,3_avatartooluse,pre,2,13,pre,Forearm,Forearm,-0.0242,-0.0242,0.2561,Forearm,FALSE
+d3-009,3_avatartooluse,pre,2,14,pre,Elbow,Elbow,-0.0289,-0.0289,0.2561,Elbow,FALSE
+d3-009,3_avatartooluse,pre,2,15,pre,Wrist,Wrist,-0.0409,-0.0409,0.2564,Wrist,FALSE
+d3-009,3_avatartooluse,pre,2,16,pre,Elbow,Elbow,-0.0514,-0.0514,0.2555,Elbow,FALSE
+d3-009,3_avatartooluse,pre,2,17,pre,Forearm,Forearm,-0.0748,-0.0748,0.2556,Elbow,FALSE
+d3-009,3_avatartooluse,pre,2,18,pre,Wrist,Wrist,-0.0352,-0.0352,0.2564,Wrist,FALSE
+d3-009,3_avatartooluse,second,5,1,post,Forearm,Forearm,0.0547,0.0547,0.2578,Forearm,FALSE
+d3-009,3_avatartooluse,second,5,2,post,Elbow,Elbow,0.0213,0.0213,0.2582,Elbow,FALSE
+d3-009,3_avatartooluse,second,5,3,post,Wrist,Wrist,0.0142,0.0142,0.2581,Wrist,FALSE
+d3-009,3_avatartooluse,second,5,4,post,Elbow,Elbow,0.0259,0.0259,0.2577,Elbow,FALSE
+d3-009,3_avatartooluse,second,5,5,post,Wrist,Wrist,0.0492,0.0492,0.258,Wrist,FALSE
+d3-009,3_avatartooluse,second,5,6,post,Forearm,Forearm,0.0363,0.0363,0.2579,Forearm,FALSE
+d3-009,3_avatartooluse,second,5,7,post,Elbow,Elbow,0.0355,0.0355,0.2579,Elbow,FALSE
+d3-009,3_avatartooluse,second,5,8,post,Forearm,Forearm,0.0037,0.0037,0.2576,Forearm,FALSE
+d3-009,3_avatartooluse,second,5,9,post,Wrist,Wrist,0.0153,0.0153,0.258,Wrist,FALSE
+d3-009,3_avatartooluse,second,5,10,post,Forearm,Forearm,0.0141,0.0141,0.2576,Forearm,FALSE
+d3-009,3_avatartooluse,second,5,11,post,Wrist,Wrist,0.0223,0.0223,0.2572,Wrist,FALSE
+d3-009,3_avatartooluse,second,5,12,post,Elbow,Elbow,0.0234,0.0234,0.2577,Elbow,FALSE
+d3-009,3_avatartooluse,second,5,13,post,Forearm,Forearm,0.0366,0.0366,0.2575,Forearm,FALSE
+d3-009,3_avatartooluse,second,5,14,post,Elbow,Elbow,-0.0106,-0.0106,0.2573,Elbow,FALSE
+d3-009,3_avatartooluse,second,5,15,post,Wrist,Wrist,0.0403,0.0403,0.257,Wrist,FALSE
+d3-009,3_avatartooluse,second,5,16,post,Forearm,Forearm,0.0336,0.0336,0.2573,Forearm,FALSE
+d3-009,3_avatartooluse,second,5,17,post,Wrist,Wrist,-0.0137,-0.0137,0.2567,Wrist,FALSE
+d3-009,3_avatartooluse,second,5,18,post,Elbow,Elbow,0.0091,0.0091,0.2576,Elbow,FALSE
+d3-010,3_avatartooluse,pre,1,1,pre,Forearm,Forearm,0.0346,0.0346,0.2709,Forearm,FALSE
+d3-010,3_avatartooluse,pre,1,2,pre,Elbow,Elbow,-0.1125,-0.1125,0.2718,Elbow,FALSE
+d3-010,3_avatartooluse,pre,1,3,pre,Wrist,Wrist,-0.082,-0.082,0.2712,Forearm,FALSE
+d3-010,3_avatartooluse,pre,1,4,pre,Elbow,Elbow,-0.161,-0.161,0.2728,Elbow,FALSE
+d3-010,3_avatartooluse,pre,1,5,pre,Forearm,Elbow,-0.2107,-0.0749000000000001,0.2724,Elbow,TRUE
+d3-010,3_avatartooluse,pre,1,6,pre,Wrist,Forearm,-0.1926,-0.0566000000000001,0.2727,Forearm,TRUE
+d3-010,3_avatartooluse,pre,1,7,pre,Elbow,Elbow,-0.1401,-0.1401,0.2735,Elbow,FALSE
+d3-010,3_avatartooluse,pre,1,8,pre,Wrist,Forearm,-0.1478,-0.0115999999999999,0.2731,Forearm,TRUE
+d3-010,3_avatartooluse,pre,1,9,pre,Forearm,Forearm,-0.1349,-0.1349,0.2736,Elbow,FALSE
+d3-010,3_avatartooluse,pre,1,10,pre,Elbow,Elbow,-0.1231,-0.1231,0.2731,Elbow,FALSE
+d3-010,3_avatartooluse,pre,1,11,pre,Forearm,Elbow,-0.1377,-0.00180000000000002,0.2727,Elbow,TRUE
+d3-010,3_avatartooluse,pre,1,12,pre,Wrist,Forearm,-0.1435,-0.00739999999999996,0.2728,Forearm,TRUE
+d3-010,3_avatartooluse,pre,1,13,pre,Elbow,Elbow,-0.1385,-0.1385,0.2732,Elbow,FALSE
+d3-010,3_avatartooluse,pre,1,14,pre,Forearm,Forearm,-0.1321,-0.1321,0.2725,Elbow,FALSE
+d3-010,3_avatartooluse,pre,1,15,pre,Wrist,Wrist,-0.1286,-0.1286,0.2724,Forearm,FALSE
+d3-010,3_avatartooluse,pre,1,16,pre,Forearm,Forearm,-0.1352,-0.1352,0.2721,Elbow,FALSE
+d3-010,3_avatartooluse,pre,1,17,pre,Wrist,Wrist,-0.0867,-0.0867,0.272,Forearm,FALSE
+d3-010,3_avatartooluse,pre,1,18,pre,Elbow,Elbow,-0.1002,-0.1002,0.2717,Elbow,FALSE
+d3-010,3_avatartooluse,second,5,1,post,Elbow,Elbow,-0.0566,-0.0566,0.2673,Elbow,FALSE
+d3-010,3_avatartooluse,second,5,2,post,Forearm,Forearm,-0.0497,-0.0497,0.2677,Forearm,FALSE
+d3-010,3_avatartooluse,second,5,3,post,Wrist,Wrist,-0.0066,-0.0066,0.2679,Wrist,FALSE
+d3-010,3_avatartooluse,second,5,4,post,Forearm,Forearm,-0.1292,-0.1292,0.2682,Elbow,FALSE
+d3-010,3_avatartooluse,second,5,5,post,Elbow,Elbow,-0.0665,-0.0665,0.2689,Elbow,FALSE
+d3-010,3_avatartooluse,second,5,6,post,Wrist,Wrist,-0.0868,-0.0868,0.2689,Forearm,FALSE
+d3-010,3_avatartooluse,second,5,7,post,Elbow,Elbow,-0.0936,-0.0936,0.269,Elbow,FALSE
+d3-010,3_avatartooluse,second,5,8,post,Forearm,Forearm,-0.1015,-0.1015,0.2691,Elbow,FALSE
+d3-010,3_avatartooluse,second,5,9,post,Wrist,Wrist,-0.0974,-0.0974,0.2698,Forearm,FALSE
+d3-010,3_avatartooluse,second,5,10,post,Elbow,Elbow,-0.0933,-0.0933,0.27,Elbow,FALSE
+d3-010,3_avatartooluse,second,5,11,post,Wrist,Wrist,-0.1207,-0.1207,0.2704,Forearm,FALSE
+d3-010,3_avatartooluse,second,5,12,post,Forearm,Forearm,-0.0768,-0.0768,0.2706,Elbow,FALSE
+d3-010,3_avatartooluse,second,5,13,post,Elbow,Elbow,-0.1037,-0.1037,0.2706,Elbow,FALSE
+d3-010,3_avatartooluse,second,5,14,post,Wrist,Wrist,-0.0642,-0.0642,0.2714,Wrist,FALSE
+d3-010,3_avatartooluse,second,5,15,post,Forearm,Forearm,-0.1327,-0.1327,0.2713,Elbow,FALSE
+d3-010,3_avatartooluse,second,5,16,post,Elbow,Elbow,-0.1171,-0.1171,0.2715,Elbow,FALSE
+d3-010,3_avatartooluse,second,5,17,post,Wrist,Wrist,-0.1184,-0.1184,0.2707,Forearm,FALSE
+d3-010,3_avatartooluse,second,5,18,post,Forearm,Elbow,-0.1469,-0.0121,0.2703,Elbow,TRUE
+d3-011,3_avatartooluse,pre,2,1,pre,Forearm,Forearm,0.0447,0.0447,0.2486,Forearm,FALSE
+d3-011,3_avatartooluse,pre,2,2,pre,Wrist,Wrist,0.0511,0.0511,0.2489,Wrist,FALSE
+d3-011,3_avatartooluse,pre,2,3,pre,Elbow,Elbow,-0.049,-0.049,0.2487,Elbow,FALSE
+d3-011,3_avatartooluse,pre,2,4,pre,Forearm,Wrist,0.1485,0.0242,0.2487,Wrist,TRUE
+d3-011,3_avatartooluse,pre,2,5,pre,Wrist,Wrist,-0.066,-0.066,0.2482,Forearm,FALSE
+d3-011,3_avatartooluse,pre,2,6,pre,Elbow,Elbow,-0.0561,-0.0561,0.2487,Elbow,FALSE
+d3-011,3_avatartooluse,pre,2,7,pre,Forearm,Forearm,0.0032,0.0032,0.2486,Forearm,FALSE
+d3-011,3_avatartooluse,pre,2,8,pre,Elbow,Elbow,-0.0661,-0.0661,0.248,Elbow,FALSE
+d3-011,3_avatartooluse,pre,2,9,pre,Wrist,Wrist,-0.0274,-0.0274,0.2482,Wrist,FALSE
+d3-011,3_avatartooluse,pre,2,10,pre,Elbow,Elbow,-0.0819,-0.0819,0.248,Elbow,FALSE
+d3-011,3_avatartooluse,pre,2,11,pre,Forearm,Forearm,-0.0039,-0.0039,0.2479,Forearm,FALSE
+d3-011,3_avatartooluse,pre,2,12,pre,Wrist,Wrist,-0.0374,-0.0374,0.2479,Wrist,FALSE
+d3-011,3_avatartooluse,pre,2,13,pre,Elbow,Elbow,-0.0883,-0.0883,0.2475,Elbow,FALSE
+d3-011,3_avatartooluse,pre,2,14,pre,Wrist,Wrist,-0.0135,-0.0135,0.2482,Wrist,FALSE
+d3-011,3_avatartooluse,pre,2,15,pre,Forearm,Forearm,-0.0038,-0.0038,0.2483,Forearm,FALSE
+d3-011,3_avatartooluse,pre,2,16,pre,Elbow,Elbow,-0.0541,-0.0541,0.2486,Elbow,FALSE
+d3-011,3_avatartooluse,pre,2,17,pre,Wrist,Wrist,-0.0489,-0.0489,0.2485,Wrist,FALSE
+d3-011,3_avatartooluse,pre,2,18,pre,Forearm,Forearm,-0.0241,-0.0241,0.2485,Forearm,FALSE
+d3-011,3_avatartooluse,second,5,1,post,Wrist,Wrist,-0.0078,-0.0078,0.2554,Wrist,FALSE
+d3-011,3_avatartooluse,second,5,2,post,Elbow,Elbow,-0.0458,-0.0458,0.2549,Elbow,FALSE
+d3-011,3_avatartooluse,second,5,3,post,Forearm,Forearm,-0.0546,-0.0546,0.2549,Forearm,FALSE
+d3-011,3_avatartooluse,second,5,4,post,Wrist,Wrist,-0.0109,-0.0109,0.254,Wrist,FALSE
+d3-011,3_avatartooluse,second,5,5,post,Forearm,Forearm,0.0015,0.0015,0.2537,Forearm,FALSE
+d3-011,3_avatartooluse,second,5,6,post,Elbow,Elbow,-0.0676,-0.0676,0.2532,Elbow,FALSE
+d3-011,3_avatartooluse,second,5,7,post,Forearm,Forearm,4e-04,4e-04,0.253,Forearm,FALSE
+d3-011,3_avatartooluse,second,5,8,post,Wrist,Wrist,0.0095,0.0095,0.2528,Wrist,FALSE
+d3-011,3_avatartooluse,second,5,9,post,Elbow,Elbow,-0.0925,-0.0925,0.2529,Elbow,FALSE
+d3-011,3_avatartooluse,second,5,10,post,Forearm,Forearm,0.0301,0.0301,0.2527,Forearm,FALSE
+d3-011,3_avatartooluse,second,5,11,post,Elbow,Elbow,-0.1592,-0.1592,0.2525,Elbow,FALSE
+d3-011,3_avatartooluse,second,5,12,post,Wrist,Wrist,-0.0056,-0.0056,0.2525,Wrist,FALSE
+d3-011,3_avatartooluse,second,5,13,post,Forearm,Forearm,0.0336,0.0336,0.2526,Forearm,FALSE
+d3-011,3_avatartooluse,second,5,14,post,Wrist,Wrist,0.0058,0.0058,0.2528,Wrist,FALSE
+d3-011,3_avatartooluse,second,5,15,post,Elbow,Elbow,-0.0555,-0.0555,0.2531,Elbow,FALSE
+d3-011,3_avatartooluse,second,5,16,post,Wrist,Wrist,0.0038,0.0038,0.2527,Wrist,FALSE
+d3-011,3_avatartooluse,second,5,17,post,Elbow,Elbow,-0.0626,-0.0626,0.2529,Elbow,FALSE
+d3-011,3_avatartooluse,second,5,18,post,Forearm,Forearm,0.0186,0.0186,0.2526,Forearm,FALSE
+d3-012,3_avatartooluse,pre,2,1,pre,Elbow,Elbow,-0.0606,-0.0606,0.2562,Elbow,FALSE
+d3-012,3_avatartooluse,pre,2,2,pre,Wrist,Wrist,-0.0645,-0.0645,0.2556,Forearm,FALSE
+d3-012,3_avatartooluse,pre,2,3,pre,Forearm,Forearm,-0.0634,-0.0634,0.2557,Forearm,FALSE
+d3-012,3_avatartooluse,pre,2,4,pre,Elbow,Wrist,0.2455,-0.01,0.2559,Wrist,TRUE
+d3-012,3_avatartooluse,pre,2,5,pre,Wrist,Wrist,0.0746,0.0746,0.2555,Wrist,FALSE
+d3-012,3_avatartooluse,pre,2,6,pre,Forearm,Forearm,0.0065,0.0065,0.2556,Forearm,FALSE
+d3-012,3_avatartooluse,pre,2,7,pre,Elbow,Elbow,-0.0444,-0.0444,0.2543,Elbow,FALSE
+d3-012,3_avatartooluse,pre,2,8,pre,Wrist,Wrist,0.0348,0.0348,0.2542,Wrist,FALSE
+d3-012,3_avatartooluse,pre,2,9,pre,Forearm,Forearm,0.0086,0.0086,0.2549,Forearm,FALSE
+d3-012,3_avatartooluse,pre,2,10,pre,Wrist,Wrist,0.0764,0.0764,0.2552,Wrist,FALSE
+d3-012,3_avatartooluse,pre,2,11,pre,Forearm,Forearm,0.0142,0.0142,0.2556,Forearm,FALSE
+d3-012,3_avatartooluse,pre,2,12,pre,Elbow,Elbow,-0.0369,-0.0369,0.256,Elbow,FALSE
+d3-012,3_avatartooluse,pre,2,13,pre,Forearm,Forearm,0.0222,0.0222,0.2556,Forearm,FALSE
+d3-012,3_avatartooluse,pre,2,14,pre,Wrist,Wrist,0.0468,0.0468,0.2556,Wrist,FALSE
+d3-012,3_avatartooluse,pre,2,15,pre,Elbow,Elbow,-0.0148,-0.0148,0.2557,Elbow,FALSE
+d3-012,3_avatartooluse,pre,2,16,pre,Wrist,Wrist,0.0473,0.0473,0.2561,Wrist,FALSE
+d3-012,3_avatartooluse,pre,2,17,pre,Forearm,Forearm,0.0063,0.0063,0.2562,Forearm,FALSE
+d3-012,3_avatartooluse,pre,2,18,pre,Elbow,Wrist,0.2698,0.0139,0.2561,Wrist,TRUE
+d3-012,3_avatartooluse,first,4,1,post,Elbow,Elbow,-0.0427,-0.0427,0.256,Elbow,FALSE
+d3-012,3_avatartooluse,first,4,2,post,Forearm,Forearm,0.0057,0.0057,0.2558,Forearm,FALSE
+d3-012,3_avatartooluse,first,4,3,post,Wrist,Wrist,0.0481,0.0481,0.2555,Wrist,FALSE
+d3-012,3_avatartooluse,first,4,4,post,Elbow,Elbow,-0.0855,-0.0855,0.2565,Elbow,FALSE
+d3-012,3_avatartooluse,first,4,5,post,Forearm,Forearm,-6e-04,-6e-04,0.2565,Forearm,FALSE
+d3-012,3_avatartooluse,first,4,6,post,Wrist,Wrist,0.0514,0.0514,0.2566,Wrist,FALSE
+d3-012,3_avatartooluse,first,4,7,post,Elbow,Elbow,-0.0836,-0.0836,0.2572,Elbow,FALSE
+d3-012,3_avatartooluse,first,4,8,post,Forearm,Forearm,0.0062,0.0062,0.2571,Forearm,FALSE
+d3-012,3_avatartooluse,first,4,9,post,Wrist,Wrist,0.0358,0.0358,0.2572,Wrist,FALSE
+d3-012,3_avatartooluse,first,4,10,post,Elbow,Elbow,-0.1055,-0.1055,0.2573,Elbow,FALSE
+d3-012,3_avatartooluse,first,4,11,post,Forearm,Forearm,0.0339,0.0339,0.2571,Forearm,FALSE
+d3-012,3_avatartooluse,first,4,12,post,Wrist,Wrist,0.0458,0.0458,0.2569,Wrist,FALSE
+d3-012,3_avatartooluse,first,4,13,post,Forearm,Forearm,0.0251,0.0251,0.2575,Forearm,FALSE
+d3-012,3_avatartooluse,first,4,14,post,Elbow,Wrist,0.2417,-0.0143,0.257,Wrist,TRUE
+d3-012,3_avatartooluse,first,4,15,post,Wrist,Wrist,-0.0105,-0.0105,0.2578,Wrist,FALSE
+d3-012,3_avatartooluse,first,4,16,post,Elbow,Elbow,-0.1036,-0.1036,0.2586,Elbow,FALSE
+d3-012,3_avatartooluse,first,4,17,post,Forearm,Forearm,0.0187,0.0187,0.2587,Forearm,FALSE
+d3-012,3_avatartooluse,first,4,18,post,Wrist,Wrist,0.0583,0.0583,0.2581,Wrist,FALSE
+d3-013,3_avatartooluse,pre,2,1,pre,Elbow,Elbow,-0.1479,-0.1479,0.2429,Elbow,FALSE
+d3-013,3_avatartooluse,pre,2,2,pre,Forearm,Forearm,-0.0558,-0.0558,0.2423,Forearm,FALSE
+d3-013,3_avatartooluse,pre,2,3,pre,Wrist,Wrist,-0.0464,-0.0464,0.242,Wrist,FALSE
+d3-013,3_avatartooluse,pre,2,4,pre,Elbow,Elbow,-0.1871,-0.1871,0.2417,Elbow,FALSE
+d3-013,3_avatartooluse,pre,2,5,pre,Wrist,Wrist,-0.059,-0.059,0.2431,Wrist,FALSE
+d3-013,3_avatartooluse,pre,2,6,pre,Forearm,Forearm,-0.0914,-0.0914,0.2438,Elbow,FALSE
+d3-013,3_avatartooluse,pre,2,7,pre,Elbow,Elbow,-0.0886,-0.0886,0.243,Elbow,FALSE
+d3-013,3_avatartooluse,pre,2,8,pre,Wrist,Wrist,-0.0822,-0.0822,0.2449,Forearm,FALSE
+d3-013,3_avatartooluse,pre,2,9,pre,Forearm,Forearm,-0.1033,-0.1033,0.2441,Elbow,FALSE
+d3-013,3_avatartooluse,pre,2,10,pre,Wrist,Wrist,-0.0888,-0.0888,0.2436,Forearm,FALSE
+d3-013,3_avatartooluse,pre,2,11,pre,Forearm,Forearm,-0.0826,-0.0826,0.245,Elbow,FALSE
+d3-013,3_avatartooluse,pre,2,12,pre,Elbow,Elbow,-0.0914,-0.0914,0.2428,Elbow,FALSE
+d3-013,3_avatartooluse,pre,2,13,pre,Forearm,Forearm,-0.113,-0.113,0.2424,Elbow,FALSE
+d3-013,3_avatartooluse,pre,2,14,pre,Wrist,Wrist,-0.0596,-0.0596,0.2427,Forearm,FALSE
+d3-013,3_avatartooluse,pre,2,15,pre,Elbow,Elbow,-0.1135,-0.1135,0.2425,Elbow,FALSE
+d3-013,3_avatartooluse,pre,2,16,pre,Forearm,Forearm,-0.1043,-0.1043,0.2429,Elbow,FALSE
+d3-013,3_avatartooluse,pre,2,17,pre,Elbow,Elbow,-0.106,-0.106,0.2421,Elbow,FALSE
+d3-013,3_avatartooluse,pre,2,18,pre,Wrist,Wrist,-0.0909,-0.0909,0.2427,Forearm,FALSE
+d3-013,3_avatartooluse,first,4,1,post,Wrist,Wrist,-0.0454,-0.0454,0.2391,Wrist,FALSE
+d3-013,3_avatartooluse,first,4,2,post,Elbow,Elbow,-0.0962,-0.0962,0.2402,Elbow,FALSE
+d3-013,3_avatartooluse,first,4,3,post,Forearm,Forearm,-0.1021,-0.1021,0.2403,Elbow,FALSE
+d3-013,3_avatartooluse,first,4,4,post,Elbow,Elbow,-0.1096,-0.1096,0.2391,Elbow,FALSE
+d3-013,3_avatartooluse,first,4,5,post,Forearm,Elbow,-0.139,-0.0213,0.2405,Elbow,TRUE
+d3-013,3_avatartooluse,first,4,6,post,Wrist,Wrist,-0.0755,-0.0755,0.2398,Forearm,FALSE
+d3-013,3_avatartooluse,first,4,7,post,Elbow,Elbow,-0.1395,-0.1395,0.239,Elbow,FALSE
+d3-013,3_avatartooluse,first,4,8,post,Forearm,Elbow,-0.1337,-0.0173,0.2372,Elbow,TRUE
+d3-013,3_avatartooluse,first,4,9,post,Wrist,Wrist,-0.0753,-0.0753,0.2365,Forearm,FALSE
+d3-013,3_avatartooluse,first,4,10,post,Elbow,Elbow,-0.1302,-0.1302,0.236,Elbow,FALSE
+d3-013,3_avatartooluse,first,4,11,post,Wrist,Wrist,-0.064,-0.064,0.2368,Forearm,FALSE
+d3-013,3_avatartooluse,first,4,12,post,Forearm,Elbow,-0.1303,-0.0139,0.2369,Elbow,TRUE
+d3-013,3_avatartooluse,first,4,13,post,Elbow,Elbow,-0.1278,-0.1278,0.2354,Elbow,FALSE
+d3-013,3_avatartooluse,first,4,14,post,Wrist,Wrist,-0.0783,-0.0783,0.2352,Forearm,FALSE
+d3-013,3_avatartooluse,first,4,15,post,Forearm,Elbow,-0.1297,-0.0134,0.2371,Elbow,TRUE
+d3-013,3_avatartooluse,first,4,16,post,Elbow,Elbow,-0.1324,-0.1324,0.2355,Elbow,FALSE
+d3-013,3_avatartooluse,first,4,17,post,Forearm,Elbow,-0.1198,-0.00480000000000003,0.2343,Elbow,TRUE
+d3-013,3_avatartooluse,first,4,18,post,Wrist,Wrist,-0.0867,-0.0867,0.2347,Forearm,FALSE
+d3-014,3_avatartooluse,pre,2,1,pre,Forearm,Forearm,0.0049,0.0049,0.2273,Forearm,FALSE
+d3-014,3_avatartooluse,pre,2,2,pre,Elbow,Elbow,-0.0806,-0.0806,0.2269,Elbow,FALSE
+d3-014,3_avatartooluse,pre,2,3,pre,Wrist,Wrist,-0.041,-0.041,0.2258,Wrist,FALSE
+d3-014,3_avatartooluse,pre,2,4,pre,Elbow,Elbow,-0.1124,-0.1124,0.2249,Elbow,FALSE
+d3-014,3_avatartooluse,pre,2,5,pre,Wrist,Wrist,-0.0234,-0.0234,0.224,Wrist,FALSE
+d3-014,3_avatartooluse,pre,2,6,pre,Forearm,Forearm,-0.05,-0.05,0.2234,Forearm,FALSE
+d3-014,3_avatartooluse,pre,2,7,pre,Elbow,Elbow,-0.1353,-0.1353,0.224,Elbow,FALSE
+d3-014,3_avatartooluse,pre,2,8,pre,Wrist,Wrist,-0.0805,-0.0805,0.224,Forearm,FALSE
+d3-014,3_avatartooluse,pre,2,9,pre,Forearm,Forearm,-0.0631,-0.0631,0.2237,Elbow,FALSE
+d3-014,3_avatartooluse,pre,2,10,pre,Wrist,Wrist,-0.068,-0.068,0.2235,Forearm,FALSE
+d3-014,3_avatartooluse,pre,2,11,pre,Forearm,Forearm,-0.0859,-0.0859,0.2234,Elbow,FALSE
+d3-014,3_avatartooluse,pre,2,12,pre,Elbow,Elbow,-0.1612,-0.1612,0.2234,Elbow,FALSE
+d3-014,3_avatartooluse,pre,2,13,pre,Wrist,Wrist,-0.0526,-0.0526,0.223,Wrist,FALSE
+d3-014,3_avatartooluse,pre,2,14,pre,Forearm,Forearm,-0.0845,-0.0845,0.2227,Elbow,FALSE
+d3-014,3_avatartooluse,pre,2,15,pre,Elbow,Elbow,-0.159,-0.159,0.223,Elbow,FALSE
+d3-014,3_avatartooluse,pre,2,16,pre,Wrist,Wrist,-0.0443,-0.0443,0.2232,Wrist,FALSE
+d3-014,3_avatartooluse,pre,2,17,pre,Elbow,Elbow,-0.1499,-0.1499,0.2231,Elbow,FALSE
+d3-014,3_avatartooluse,pre,2,18,pre,Forearm,Forearm,-0.1103,-0.1103,0.2232,Elbow,FALSE
+d3-014,3_avatartooluse,first,4,1,post,Forearm,Forearm,-0.0319,-0.0319,0.2185,Forearm,FALSE
+d3-014,3_avatartooluse,first,4,2,post,Wrist,Wrist,-0.0312,-0.0312,0.219,Wrist,FALSE
+d3-014,3_avatartooluse,first,4,3,post,Elbow,Elbow,-0.0888,-0.0888,0.2198,Elbow,FALSE
+d3-014,3_avatartooluse,first,4,4,post,Forearm,Forearm,-0.094,-0.094,0.2195,Elbow,FALSE
+d3-014,3_avatartooluse,first,4,5,post,Elbow,Elbow,-0.1249,-0.1249,0.2195,Elbow,FALSE
+d3-014,3_avatartooluse,first,4,6,post,Wrist,Wrist,-0.0736,-0.0736,0.2191,Forearm,FALSE
+d3-014,3_avatartooluse,first,4,7,post,Elbow,Elbow,-0.134,-0.134,0.2189,Elbow,FALSE
+d3-014,3_avatartooluse,first,4,8,post,Wrist,Wrist,-0.0791,-0.0791,0.2188,Forearm,FALSE
+d3-014,3_avatartooluse,first,4,9,post,Forearm,Forearm,-0.0963,-0.0963,0.2185,Elbow,FALSE
+d3-014,3_avatartooluse,first,4,10,post,Wrist,Wrist,-0.0517,-0.0517,0.2181,Wrist,FALSE
+d3-014,3_avatartooluse,first,4,11,post,Elbow,Elbow,-0.1178,-0.1178,0.2192,Elbow,FALSE
+d3-014,3_avatartooluse,first,4,12,post,Forearm,Forearm,-0.098,-0.098,0.2191,Elbow,FALSE
+d3-014,3_avatartooluse,first,4,13,post,Wrist,Wrist,-0.0953,-0.0953,0.2192,Forearm,FALSE
+d3-014,3_avatartooluse,first,4,14,post,Forearm,Elbow,-0.1132,-0.0038999999999999,0.2192,Elbow,TRUE
+d3-014,3_avatartooluse,first,4,15,post,Elbow,Elbow,-0.1357,-0.1357,0.2194,Elbow,FALSE
+d3-014,3_avatartooluse,first,4,16,post,Wrist,Wrist,-0.1068,-0.1068,0.2195,Forearm,FALSE
+d3-014,3_avatartooluse,first,4,17,post,Elbow,Elbow,-0.154,-0.154,0.2192,Elbow,FALSE
+d3-014,3_avatartooluse,first,4,18,post,Forearm,Forearm,-0.1039,-0.1039,0.2194,Elbow,FALSE
+d3-015,3_avatartooluse 1,pre,1,1,pre,Forearm,Elbow,-0.1739,-0.0665,0.2154,Elbow,TRUE
+d3-015,3_avatartooluse 1,pre,1,2,pre,Elbow,Elbow,-0.1352,-0.1352,0.2185,Elbow,FALSE
+d3-015,3_avatartooluse 1,pre,1,3,pre,Wrist,Wrist,-0.1035,-0.1035,0.2187,Forearm,FALSE
+d3-015,3_avatartooluse 1,pre,1,4,pre,Forearm,Elbow,-0.1488,-0.0396,0.2188,Elbow,TRUE
+d3-015,3_avatartooluse 1,pre,1,5,pre,Elbow,Elbow,-0.1447,-0.1447,0.2197,Elbow,FALSE
+d3-015,3_avatartooluse 1,pre,1,6,pre,Wrist,Wrist,-0.006,-0.006,0.2202,Wrist,FALSE
+d3-015,3_avatartooluse 1,pre,1,7,pre,Forearm,Elbow,-0.1391,-0.0294,0.2198,Elbow,TRUE
+d3-015,3_avatartooluse 1,pre,1,8,pre,Wrist,Forearm,-0.1174,-0.00749999999999995,0.22,Forearm,TRUE
+d3-015,3_avatartooluse 1,pre,1,9,pre,Elbow,Elbow,-0.1375,-0.1375,0.2202,Elbow,FALSE
+d3-015,3_avatartooluse 1,pre,1,10,pre,Forearm,Elbow,-0.1447,-0.0344,0.2212,Elbow,TRUE
+d3-015,3_avatartooluse 1,pre,1,11,pre,Elbow,Elbow,-0.1477,-0.1477,0.2217,Elbow,FALSE
+d3-015,3_avatartooluse 1,pre,1,12,pre,Wrist,Wrist,-0.0253,-0.0253,0.222,Wrist,FALSE
+d3-015,3_avatartooluse 1,pre,1,13,pre,Forearm,Elbow,-0.1781,-0.0675,0.2219,Elbow,TRUE
+d3-015,3_avatartooluse 1,pre,1,14,pre,Elbow,Elbow,-0.1566,-0.1566,0.2225,Elbow,FALSE
+d3-015,3_avatartooluse 1,pre,1,15,pre,Wrist,Wrist,-0.0312,-0.0312,0.2225,Wrist,FALSE
+d3-015,3_avatartooluse 1,pre,1,16,pre,Elbow,Elbow,-0.1236,-0.1236,0.2226,Elbow,FALSE
+d3-015,3_avatartooluse 1,pre,1,17,pre,Wrist,Wrist,-0.0596,-0.0596,0.2222,Forearm,FALSE
+d3-015,3_avatartooluse 1,pre,1,18,pre,Forearm,Elbow,-0.1291,-0.0199,0.2191,Elbow,TRUE
+d3-015,3_avatartooluse 1,second,5,1,post,Forearm,Elbow,-0.1359,-0.0138,0.2446,Elbow,TRUE
+d3-015,3_avatartooluse 1,second,5,2,post,Elbow,Elbow,-0.12,-0.12,0.2443,Elbow,FALSE
+d3-015,3_avatartooluse 1,second,5,3,post,Wrist,Wrist,-0.0563,-0.0563,0.2444,Wrist,FALSE
+d3-015,3_avatartooluse 1,second,5,4,post,Elbow,Elbow,-0.1271,-0.1271,0.2447,Elbow,FALSE
+d3-015,3_avatartooluse 1,second,5,5,post,Forearm,Forearm,-0.116,-0.116,0.2441,Elbow,FALSE
+d3-015,3_avatartooluse 1,second,5,6,post,Wrist,Wrist,-0.0932,-0.0932,0.2444,Forearm,FALSE
+d3-015,3_avatartooluse 1,second,5,7,post,Forearm,Elbow,-0.1223,-0.000600000000000045,0.2436,Elbow,TRUE
+d3-015,3_avatartooluse 1,second,5,8,post,Elbow,Elbow,-0.1395,-0.1395,0.2432,Elbow,FALSE
+d3-015,3_avatartooluse 1,second,5,9,post,Wrist,Wrist,-0.1165,-0.1165,0.243,Forearm,FALSE
+d3-015,3_avatartooluse 1,second,5,10,post,Elbow,Elbow,-0.1356,-0.1356,0.2428,Elbow,FALSE
+d3-015,3_avatartooluse 1,second,5,11,post,Forearm,Forearm,-0.1204,-0.1204,0.2425,Elbow,FALSE
+d3-015,3_avatartooluse 1,second,5,12,post,Wrist,Wrist,-0.0471,-0.0471,0.2424,Wrist,FALSE
+d3-015,3_avatartooluse 1,second,5,13,post,Elbow,Elbow,-0.1291,-0.1291,0.2416,Elbow,FALSE
+d3-015,3_avatartooluse 1,second,5,14,post,Forearm,Elbow,-0.1268,-0.00589999999999991,0.242,Elbow,TRUE
+d3-015,3_avatartooluse 1,second,5,15,post,Wrist,Wrist,-0.0491,-0.0491,0.2414,Wrist,FALSE
+d3-015,3_avatartooluse 1,second,5,16,post,Forearm,Forearm,-0.0988,-0.0988,0.2413,Elbow,FALSE
+d3-015,3_avatartooluse 1,second,5,17,post,Wrist,Wrist,-0.0717,-0.0717,0.241,Forearm,FALSE
+d3-015,3_avatartooluse 1,second,5,18,post,Elbow,Elbow,-0.1966,-0.1966,0.2409,Elbow,FALSE
+d3-016,3_avatartooluse 1,pre,1,1,pre,Wrist,Elbow,-0.2567,0.000499999999999945,0.2574,Elbow,TRUE
+d3-016,3_avatartooluse 1,pre,1,2,pre,Forearm,Forearm,-0.0785,-0.0785,0.2583,Elbow,FALSE
+d3-016,3_avatartooluse 1,pre,1,3,pre,Elbow,Wrist,0.2323,-0.0261,0.2588,Wrist,TRUE
+d3-016,3_avatartooluse 1,pre,1,4,pre,Forearm,Forearm,0.0131,0.0131,0.2585,Forearm,FALSE
+d3-016,3_avatartooluse 1,pre,1,5,pre,Wrist,Wrist,-0.0241,-0.0241,0.2584,Wrist,FALSE
+d3-016,3_avatartooluse 1,pre,1,6,pre,Elbow,Elbow,-0.0581,-0.0581,0.2574,Elbow,FALSE
+d3-016,3_avatartooluse 1,pre,1,7,pre,Wrist,Wrist,-0.0132,-0.0132,0.2567,Wrist,FALSE
+d3-016,3_avatartooluse 1,pre,1,8,pre,Elbow,Elbow,-0.0539,-0.0539,0.2567,Elbow,FALSE
+d3-016,3_avatartooluse 1,pre,1,9,pre,Forearm,Forearm,-0.0559,-0.0559,0.2563,Forearm,FALSE
+d3-016,3_avatartooluse 1,pre,1,10,pre,Wrist,Wrist,-0.0991,-0.0991,0.256,Forearm,FALSE
+d3-016,3_avatartooluse 1,pre,1,11,pre,Elbow,Elbow,-0.0808,-0.0808,0.256,Elbow,FALSE
+d3-016,3_avatartooluse 1,pre,1,12,pre,Forearm,Forearm,-0.0602,-0.0602,0.2542,Forearm,FALSE
+d3-016,3_avatartooluse 1,pre,1,13,pre,Wrist,Wrist,0.068,0.068,0.2547,Wrist,FALSE
+d3-016,3_avatartooluse 1,pre,1,14,pre,Forearm,Forearm,-0.0855,-0.0855,0.2553,Elbow,FALSE
+d3-016,3_avatartooluse 1,pre,1,15,pre,Elbow,Elbow,-0.0633,-0.0633,0.2541,Elbow,FALSE
+d3-016,3_avatartooluse 1,pre,1,16,pre,Forearm,Forearm,-0.084,-0.084,0.2539,Elbow,FALSE
+d3-016,3_avatartooluse 1,pre,1,17,pre,Elbow,Elbow,-0.1052,-0.1052,0.2548,Elbow,FALSE
+d3-016,3_avatartooluse 1,pre,1,18,pre,Wrist,Wrist,-0.0716,-0.0716,0.2545,Forearm,FALSE
+d3-016,3_avatartooluse 1,second,5,1,post,Wrist,Wrist,-0.0226,-0.0226,0.2496,Wrist,FALSE
+d3-016,3_avatartooluse 1,second,5,2,post,Forearm,Forearm,-0.0053,-0.0053,0.2496,Forearm,FALSE
+d3-016,3_avatartooluse 1,second,5,3,post,Elbow,Elbow,-0.056,-0.056,0.2504,Elbow,FALSE
+d3-016,3_avatartooluse 1,second,5,4,post,Forearm,Forearm,-0.0588,-0.0588,0.2507,Forearm,FALSE
+d3-016,3_avatartooluse 1,second,5,5,post,Elbow,Elbow,-0.1145,-0.1145,0.2509,Elbow,FALSE
+d3-016,3_avatartooluse 1,second,5,6,post,Wrist,Wrist,-0.0098,-0.0098,0.2516,Wrist,FALSE
+d3-016,3_avatartooluse 1,second,5,7,post,Elbow,Elbow,-0.0842,-0.0842,0.2515,Elbow,FALSE
+d3-016,3_avatartooluse 1,second,5,8,post,Forearm,Forearm,-0.057,-0.057,0.2511,Forearm,FALSE
+d3-016,3_avatartooluse 1,second,5,9,post,Wrist,Wrist,0.0272,0.0272,0.2519,Wrist,FALSE
+d3-016,3_avatartooluse 1,second,5,10,post,Elbow,Elbow,-0.0811,-0.0811,0.2526,Elbow,FALSE
+d3-016,3_avatartooluse 1,second,5,11,post,Wrist,Wrist,0.0247,0.0247,0.2526,Wrist,FALSE
+d3-016,3_avatartooluse 1,second,5,12,post,Forearm,Forearm,-0.0659,-0.0659,0.2537,Elbow,FALSE
+d3-016,3_avatartooluse 1,second,5,13,post,Wrist,Wrist,0.0361,0.0361,0.256,Wrist,FALSE
+d3-016,3_avatartooluse 1,second,5,14,post,Forearm,Forearm,-0.0426,-0.0426,0.2517,Forearm,FALSE
+d3-016,3_avatartooluse 1,second,5,15,post,Elbow,Elbow,-0.0825,-0.0825,0.2515,Elbow,FALSE
+d3-016,3_avatartooluse 1,second,5,16,post,Forearm,Forearm,-0.0839,-0.0839,0.2523,Elbow,FALSE
+d3-016,3_avatartooluse 1,second,5,17,post,Wrist,Wrist,-0.0263,-0.0263,0.2529,Wrist,FALSE
+d3-016,3_avatartooluse 1,second,5,18,post,Elbow,Elbow,-0.1157,-0.1157,0.2521,Elbow,FALSE
+d3-017,3_avatartooluse 1,pre,1,1,pre,Wrist,Wrist,0.0325,0.0325,0.245,Wrist,FALSE
+d3-017,3_avatartooluse 1,pre,1,2,pre,Forearm,Forearm,0.052,0.052,0.2451,Forearm,FALSE
+d3-017,3_avatartooluse 1,pre,1,3,pre,Elbow,Elbow,0.0275,0.0275,0.2451,Elbow,FALSE
+d3-017,3_avatartooluse 1,pre,1,4,pre,Wrist,Wrist,-0.0518,-0.0518,0.2455,Wrist,FALSE
+d3-017,3_avatartooluse 1,pre,1,5,pre,Elbow,Elbow,-0.0363,-0.0363,0.2459,Elbow,FALSE
+d3-017,3_avatartooluse 1,pre,1,6,pre,Forearm,Forearm,-0.021,-0.021,0.2461,Forearm,FALSE
+d3-017,3_avatartooluse 1,pre,1,7,pre,Wrist,Wrist,-0.0636,-0.0636,0.2464,Forearm,FALSE
+d3-017,3_avatartooluse 1,pre,1,8,pre,Forearm,Forearm,-0.0606,-0.0606,0.2462,Forearm,FALSE
+d3-017,3_avatartooluse 1,pre,1,9,pre,Elbow,Elbow,-0.0517,-0.0517,0.2462,Elbow,FALSE
+d3-017,3_avatartooluse 1,pre,1,10,pre,Wrist,Wrist,-0.0533,-0.0533,0.2461,Wrist,FALSE
+d3-017,3_avatartooluse 1,pre,1,11,pre,Elbow,Elbow,-0.0952,-0.0952,0.2463,Elbow,FALSE
+d3-017,3_avatartooluse 1,pre,1,12,pre,Forearm,Forearm,-0.0955,-0.0955,0.2463,Elbow,FALSE
+d3-017,3_avatartooluse 1,pre,1,13,pre,Wrist,Wrist,-0.1001,-0.1001,0.2459,Forearm,FALSE
+d3-017,3_avatartooluse 1,pre,1,14,pre,Forearm,Forearm,-0.0959,-0.0959,0.2461,Elbow,FALSE
+d3-017,3_avatartooluse 1,pre,1,15,pre,Elbow,Elbow,-0.1,-0.1,0.246,Elbow,FALSE
+d3-017,3_avatartooluse 1,pre,1,16,pre,Wrist,Wrist,-0.0995,-0.0995,0.2466,Forearm,FALSE
+d3-017,3_avatartooluse 1,pre,1,17,pre,Elbow,Elbow,-0.1212,-0.1212,0.2475,Elbow,FALSE
+d3-017,3_avatartooluse 1,pre,1,18,pre,Forearm,Elbow,-0.1397,-0.0161,0.2473,Elbow,TRUE
+d3-017,3_avatartooluse 1,first,4,1,post,Forearm,Forearm,-0.0353,-0.0353,0.2436,Forearm,FALSE
+d3-017,3_avatartooluse 1,first,4,2,post,Elbow,Elbow,-0.0885,-0.0885,0.2446,Elbow,FALSE
+d3-017,3_avatartooluse 1,first,4,3,post,Wrist,Wrist,-0.0857,-0.0857,0.2447,Forearm,FALSE
+d3-017,3_avatartooluse 1,first,4,4,post,Elbow,Elbow,-0.1287,-0.1287,0.2449,Elbow,FALSE
+d3-017,3_avatartooluse 1,first,4,5,post,Wrist,Wrist,-0.0685,-0.0685,0.2449,Forearm,FALSE
+d3-017,3_avatartooluse 1,first,4,6,post,Forearm,Elbow,-0.1301,-0.00770000000000004,0.245,Elbow,TRUE
+d3-017,3_avatartooluse 1,first,4,7,post,Wrist,Wrist,-0.0986,-0.0986,0.2447,Forearm,FALSE
+d3-017,3_avatartooluse 1,first,4,8,post,Elbow,Elbow,-0.1193,-0.1193,0.2449,Elbow,FALSE
+d3-017,3_avatartooluse 1,first,4,9,post,Forearm,Elbow,-0.1563,-0.0339,0.2448,Elbow,TRUE
+d3-017,3_avatartooluse 1,first,4,10,post,Wrist,Wrist,-0.1167,-0.1167,0.2442,Forearm,FALSE
+d3-017,3_avatartooluse 1,first,4,11,post,Forearm,Elbow,-0.151,-0.029,0.2442,Elbow,TRUE
+d3-017,3_avatartooluse 1,first,4,12,post,Elbow,Elbow,-0.1161,-0.1161,0.2443,Elbow,FALSE
+d3-017,3_avatartooluse 1,first,4,13,post,Forearm,Elbow,-0.1428,-0.0206999999999999,0.2441,Elbow,TRUE
+d3-017,3_avatartooluse 1,first,4,14,post,Wrist,Wrist,-0.1034,-0.1034,0.2439,Forearm,FALSE
+d3-017,3_avatartooluse 1,first,4,15,post,Elbow,Elbow,-0.0042,-0.0042,0.2434,Elbow,FALSE
+d3-017,3_avatartooluse 1,first,4,16,post,Wrist,Wrist,-0.1044,-0.1044,0.2439,Forearm,FALSE
+d3-017,3_avatartooluse 1,first,4,17,post,Forearm,Elbow,-0.1335,-0.0115,0.2441,Elbow,TRUE
+d3-017,3_avatartooluse 1,first,4,18,post,Elbow,Elbow,-0.1389,-0.1389,0.2439,Elbow,FALSE
+d3-018,3_avatartooluse,pre,2,1,pre,Elbow,Elbow,-0.0456,-0.0456,0.2248,Elbow,FALSE
+d3-018,3_avatartooluse,pre,2,2,pre,Forearm,Elbow,-0.1343,-0.0223,0.2242,Elbow,TRUE
+d3-018,3_avatartooluse,pre,2,3,pre,Wrist,Wrist,-0.0581,-0.0581,0.2226,Forearm,FALSE
+d3-018,3_avatartooluse,pre,2,4,pre,Forearm,Forearm,-0.0624,-0.0624,0.2224,Elbow,FALSE
+d3-018,3_avatartooluse,pre,2,5,pre,Wrist,Wrist,-0.0519,-0.0519,0.2225,Wrist,FALSE
+d3-018,3_avatartooluse,pre,2,6,pre,Elbow,Elbow,-0.122,-0.122,0.2223,Elbow,FALSE
+d3-018,3_avatartooluse,pre,2,7,pre,Forearm,Forearm,-0.0662,-0.0662,0.2225,Elbow,FALSE
+d3-018,3_avatartooluse,pre,2,8,pre,Wrist,Wrist,-0.0154,-0.0154,0.2226,Wrist,FALSE
+d3-018,3_avatartooluse,pre,2,9,pre,Elbow,Elbow,-0.043,-0.043,0.2225,Elbow,FALSE
+d3-018,3_avatartooluse,pre,2,10,pre,Forearm,Forearm,-0.0383,-0.0383,0.2239,Forearm,FALSE
+d3-018,3_avatartooluse,pre,2,11,pre,Wrist,Wrist,-0.0524,-0.0524,0.2252,Wrist,FALSE
+d3-018,3_avatartooluse,pre,2,12,pre,Elbow,Elbow,-0.0537,-0.0537,0.2259,Elbow,FALSE
+d3-018,3_avatartooluse,pre,2,13,pre,Forearm,Elbow,-0.1154,-0.00229999999999997,0.2265,Elbow,TRUE
+d3-018,3_avatartooluse,pre,2,14,pre,Wrist,Wrist,-0.0597,-0.0597,0.2275,Forearm,FALSE
+d3-018,3_avatartooluse,pre,2,15,pre,Elbow,Elbow,-0.0752,-0.0752,0.2279,Elbow,FALSE
+d3-018,3_avatartooluse,pre,2,16,pre,Forearm,Forearm,-0.059,-0.059,0.2284,Elbow,FALSE
+d3-018,3_avatartooluse,pre,2,17,pre,Wrist,Wrist,-0.0562,-0.0562,0.229,Wrist,FALSE
+d3-018,3_avatartooluse,pre,2,18,pre,Elbow,Elbow,-0.0298,-0.0298,0.2286,Elbow,FALSE
+d3-018,3_avatartooluse,first,4,1,post,Forearm,Forearm,-0.0452,-0.0452,0.2217,Forearm,FALSE
+d3-018,3_avatartooluse,first,4,2,post,Wrist,Wrist,-0.0187,-0.0187,0.2216,Wrist,FALSE
+d3-018,3_avatartooluse,first,4,3,post,Elbow,Elbow,-0.0054,-0.0054,0.2216,Elbow,FALSE
+d3-018,3_avatartooluse,first,4,4,post,Forearm,Forearm,-0.0384,-0.0384,0.22,Forearm,FALSE
+d3-018,3_avatartooluse,first,4,5,post,Elbow,Elbow,-0.0196,-0.0196,0.219,Elbow,FALSE
+d3-018,3_avatartooluse,first,4,6,post,Wrist,Wrist,-0.0232,-0.0232,0.2179,Wrist,FALSE
+d3-018,3_avatartooluse,first,4,7,post,Forearm,Elbow,-0.1141,-0.00470000000000004,0.2191,Elbow,TRUE
+d3-018,3_avatartooluse,first,4,8,post,Wrist,Wrist,-0.0068,-0.0068,0.218,Wrist,FALSE
+d3-018,3_avatartooluse,first,4,9,post,Elbow,Elbow,-0.023,-0.023,0.2181,Elbow,FALSE
+d3-018,3_avatartooluse,first,4,10,post,Wrist,Wrist,-0.018,-0.018,0.2179,Wrist,FALSE
+d3-018,3_avatartooluse,first,4,11,post,Elbow,Elbow,-0.0356,-0.0356,0.2182,Elbow,FALSE
+d3-018,3_avatartooluse,first,4,12,post,Forearm,Forearm,-0.0525,-0.0525,0.2181,Forearm,FALSE
+d3-018,3_avatartooluse,first,4,13,post,Wrist,Wrist,-0.0684,-0.0684,0.2179,Forearm,FALSE
+d3-018,3_avatartooluse,first,4,14,post,Forearm,Forearm,-0.074,-0.074,0.2178,Elbow,FALSE
+d3-018,3_avatartooluse,first,4,15,post,Elbow,Elbow,-0.0461,-0.0461,0.2183,Elbow,FALSE
+d3-018,3_avatartooluse,first,4,16,post,Wrist,Wrist,-0.0452,-0.0452,0.2186,Wrist,FALSE
+d3-018,3_avatartooluse,first,4,17,post,Elbow,Elbow,-0.0624,-0.0624,0.2191,Elbow,FALSE
+d3-018,3_avatartooluse,first,4,18,post,Forearm,Forearm,-0.0594,-0.0594,0.2192,Elbow,FALSE
+d3-019,3_avatartooluse,pre,1,1,pre,Forearm,Forearm,-0.0024,-0.0024,0.2257,Forearm,FALSE
+d3-019,3_avatartooluse,pre,1,2,pre,Wrist,Wrist,0.0476,0.0476,0.2287,Wrist,FALSE
+d3-019,3_avatartooluse,pre,1,3,pre,Elbow,Elbow,-0.1231,-0.1231,0.2283,Elbow,FALSE
+d3-019,3_avatartooluse,pre,1,4,pre,Wrist,Wrist,0.0886,0.0886,0.2275,Wrist,FALSE
+d3-019,3_avatartooluse,pre,1,5,pre,Forearm,Forearm,-0.0261,-0.0261,0.2268,Forearm,FALSE
+d3-019,3_avatartooluse,pre,1,6,pre,Elbow,Elbow,0.0305,0.0305,0.2269,Elbow,FALSE
+d3-019,3_avatartooluse,pre,1,7,pre,Forearm,Forearm,0.0273,0.0273,0.2265,Forearm,FALSE
+d3-019,3_avatartooluse,pre,1,8,pre,Elbow,Elbow,-0.0533,-0.0533,0.226,Elbow,FALSE
+d3-019,3_avatartooluse,pre,1,9,pre,Wrist,Wrist,0.1247,0.1247,0.2258,Wrist,FALSE
+d3-019,3_avatartooluse,pre,1,10,pre,Elbow,Elbow,-0.0424,-0.0424,0.2268,Elbow,FALSE
+d3-019,3_avatartooluse,pre,1,11,pre,Forearm,Forearm,0.0025,0.0025,0.2262,Forearm,FALSE
+d3-019,3_avatartooluse,pre,1,12,pre,Wrist,Wrist,0.1202,0.1202,0.2259,Wrist,FALSE
+d3-019,3_avatartooluse,pre,1,13,pre,Elbow,Elbow,-0.0029,-0.0029,0.2255,Elbow,FALSE
+d3-019,3_avatartooluse,pre,1,14,pre,Forearm,Forearm,0.0074,0.0074,0.2253,Forearm,FALSE
+d3-019,3_avatartooluse,pre,1,15,pre,Wrist,Wrist,0.1066,0.1066,0.2255,Wrist,FALSE
+d3-019,3_avatartooluse,pre,1,16,pre,Forearm,Forearm,0.026,0.026,0.2255,Forearm,FALSE
+d3-019,3_avatartooluse,pre,1,17,pre,Wrist,Wrist,0.0782,0.0782,0.2254,Wrist,FALSE
+d3-019,3_avatartooluse,pre,1,18,pre,Elbow,Elbow,-0.0705,-0.0705,0.2261,Elbow,FALSE
+d3-019,3_avatartooluse,first,4,1,post,Forearm,Forearm,0.0578,0.0578,0.224,Wrist,FALSE
+d3-019,3_avatartooluse,first,4,2,post,Wrist,Wrist,0.079,0.079,0.2238,Wrist,FALSE
+d3-019,3_avatartooluse,first,4,3,post,Elbow,Elbow,0.0047,0.0047,0.2247,Elbow,FALSE
+d3-019,3_avatartooluse,first,4,4,post,Forearm,Forearm,0.0804,0.0804,0.2255,Wrist,FALSE
+d3-019,3_avatartooluse,first,4,5,post,Wrist,Wrist,0.1218,0.1218,0.2254,Wrist,FALSE
+d3-019,3_avatartooluse,first,4,6,post,Elbow,Elbow,0.0646,0.0646,0.2258,Forearm,FALSE
+d3-019,3_avatartooluse,first,4,7,post,Forearm,Forearm,0.1113,0.1113,0.2251,Wrist,FALSE
+d3-019,3_avatartooluse,first,4,8,post,Elbow,Elbow,-0.0292,-0.0292,0.2251,Elbow,FALSE
+d3-019,3_avatartooluse,first,4,9,post,Wrist,Wrist,0.1264,0.1264,0.2252,Wrist,FALSE
+d3-019,3_avatartooluse,first,4,10,post,Forearm,Forearm,0.0571,0.0571,0.2251,Wrist,FALSE
+d3-019,3_avatartooluse,first,4,11,post,Wrist,Wrist,0.0961,0.0961,0.2254,Wrist,FALSE
+d3-019,3_avatartooluse,first,4,12,post,Elbow,Elbow,-0.0304,-0.0304,0.2255,Elbow,FALSE
+d3-019,3_avatartooluse,first,4,13,post,Wrist,Wrist,0.078,0.078,0.2253,Wrist,FALSE
+d3-019,3_avatartooluse,first,4,14,post,Forearm,Forearm,0.1119,0.1119,0.2255,Wrist,FALSE
+d3-019,3_avatartooluse,first,4,15,post,Elbow,Elbow,-0.0434,-0.0434,0.2252,Elbow,FALSE
+d3-019,3_avatartooluse,first,4,16,post,Forearm,Forearm,0.0468,0.0468,0.2257,Forearm,FALSE
+d3-019,3_avatartooluse,first,4,17,post,Elbow,Elbow,-0.022,-0.022,0.2266,Elbow,FALSE
+d3-019,3_avatartooluse,first,4,18,post,Wrist,Wrist,0.0899,0.0899,0.2251,Wrist,FALSE
+d3-020,3_avatartooluse,pre,1,1,pre,Forearm,Forearm,-0.0352,-0.0352,0.2612,Forearm,FALSE
+d3-020,3_avatartooluse,pre,1,2,pre,Wrist,Wrist,-0.0687,-0.0687,0.2604,Forearm,FALSE
+d3-020,3_avatartooluse,pre,1,3,pre,Elbow,Elbow,-0.1455,-0.1455,0.2601,Elbow,FALSE
+d3-020,3_avatartooluse,pre,1,4,pre,Wrist,Wrist,-0.0598,-0.0598,0.2594,Wrist,FALSE
+d3-020,3_avatartooluse,pre,1,5,pre,Forearm,Forearm,-0.0539,-0.0539,0.2591,Forearm,FALSE
+d3-020,3_avatartooluse,pre,1,6,pre,Elbow,Elbow,-0.1222,-0.1222,0.2588,Elbow,FALSE
+d3-020,3_avatartooluse,pre,1,7,pre,Wrist,Wrist,-0.1214,-0.1214,0.2586,Forearm,FALSE
+d3-020,3_avatartooluse,pre,1,8,pre,Forearm,Forearm,-0.0828,-0.0828,0.2586,Elbow,FALSE
+d3-020,3_avatartooluse,pre,1,9,pre,Elbow,Elbow,-0.1397,-0.1397,0.2579,Elbow,FALSE
+d3-020,3_avatartooluse,pre,1,10,pre,Forearm,Forearm,-0.1223,-0.1223,0.2578,Elbow,FALSE
+d3-020,3_avatartooluse,pre,1,11,pre,Wrist,Forearm,-0.1665,-0.0377999999999999,0.258,Forearm,TRUE
+d3-020,3_avatartooluse,pre,1,12,pre,Elbow,Elbow,-0.1629,-0.1629,0.2578,Elbow,FALSE
+d3-020,3_avatartooluse,pre,1,13,pre,Wrist,Forearm,-0.1339,-0.00520000000000004,0.2581,Forearm,TRUE
+d3-020,3_avatartooluse,pre,1,14,pre,Forearm,Elbow,-0.1442,-0.0158,0.2579,Elbow,TRUE
+d3-020,3_avatartooluse,pre,1,15,pre,Elbow,Elbow,-0.1365,-0.1365,0.2563,Elbow,FALSE
+d3-020,3_avatartooluse,pre,1,16,pre,Wrist,Wrist,-0.1059,-0.1059,0.2573,Forearm,FALSE
+d3-020,3_avatartooluse,pre,1,17,pre,Elbow,Elbow,-0.1312,-0.1312,0.2589,Elbow,FALSE
+d3-020,3_avatartooluse,pre,1,18,pre,Forearm,Forearm,-0.0926,-0.0926,0.2601,Elbow,FALSE
+d3-020,3_avatartooluse,first,4,1,post,Elbow,Elbow,-0.1458,-0.1458,0.2637,Elbow,FALSE
+d3-020,3_avatartooluse,first,4,2,post,Wrist,Wrist,-0.1158,-0.1158,0.2636,Forearm,FALSE
+d3-020,3_avatartooluse,first,4,3,post,Forearm,Forearm,-0.1102,-0.1102,0.2639,Elbow,FALSE
+d3-020,3_avatartooluse,first,4,4,post,Wrist,Wrist,-0.1143,-0.1143,0.2636,Forearm,FALSE
+d3-020,3_avatartooluse,first,4,5,post,Elbow,Elbow,-0.122,-0.122,0.263,Elbow,FALSE
+d3-020,3_avatartooluse,first,4,6,post,Forearm,Elbow,-0.1391,-0.00839999999999996,0.2621,Elbow,TRUE
+d3-020,3_avatartooluse,first,4,7,post,Elbow,Elbow,-0.1208,-0.1208,0.2618,Elbow,FALSE
+d3-020,3_avatartooluse,first,4,8,post,Wrist,Forearm,-0.1443,-0.0137,0.2619,Forearm,TRUE
+d3-020,3_avatartooluse,first,4,9,post,Forearm,Forearm,-0.1139,-0.1139,0.2617,Elbow,FALSE
+d3-020,3_avatartooluse,first,4,10,post,Elbow,Elbow,-0.1339,-0.1339,0.2621,Elbow,FALSE
+d3-020,3_avatartooluse,first,4,11,post,Forearm,Forearm,-0.1288,-0.1288,0.2631,Elbow,FALSE
+d3-020,3_avatartooluse,first,4,12,post,Wrist,Wrist,-0.1225,-0.1225,0.2635,Forearm,FALSE
+d3-020,3_avatartooluse,first,4,13,post,Forearm,Elbow,-0.1587,-0.027,0.2639,Elbow,TRUE
+d3-020,3_avatartooluse,first,4,14,post,Elbow,Elbow,-0.1435,-0.1435,0.2641,Elbow,FALSE
+d3-020,3_avatartooluse,first,4,15,post,Wrist,Wrist,-0.1254,-0.1254,0.2647,Forearm,FALSE
+d3-020,3_avatartooluse,first,4,16,post,Forearm,Elbow,-0.1325,-0.000399999999999956,0.2649,Elbow,TRUE
+d3-020,3_avatartooluse,first,4,17,post,Elbow,Elbow,-0.0964,-0.0964,0.2653,Elbow,FALSE
+d3-020,3_avatartooluse,first,4,18,post,Wrist,Wrist,-0.1314,-0.1314,0.2653,Forearm,FALSE
+d3-021,3_avatartooluse,pre,1,1,pre,Forearm,Forearm,0.0427,0.0427,0.2242,Forearm,FALSE
+d3-021,3_avatartooluse,pre,1,2,pre,Wrist,Wrist,0.0071,0.0071,0.2245,Wrist,FALSE
+d3-021,3_avatartooluse,pre,1,3,pre,Elbow,Elbow,0.0066,0.0066,0.225,Elbow,FALSE
+d3-021,3_avatartooluse,pre,1,4,pre,Forearm,Forearm,0.0326,0.0326,0.225,Forearm,FALSE
+d3-021,3_avatartooluse,pre,1,5,pre,Wrist,Wrist,0.0741,0.0741,0.2258,Wrist,FALSE
+d3-021,3_avatartooluse,pre,1,6,pre,Elbow,Elbow,0.0199,0.0199,0.2256,Elbow,FALSE
+d3-021,3_avatartooluse,pre,1,7,pre,Forearm,Forearm,0.0242,0.0242,0.2256,Forearm,FALSE
+d3-021,3_avatartooluse,pre,1,8,pre,Wrist,Wrist,0.0116,0.0116,0.2258,Wrist,FALSE
+d3-021,3_avatartooluse,pre,1,9,pre,Elbow,Elbow,0.0566,0.0566,0.2255,Elbow,FALSE
+d3-021,3_avatartooluse,pre,1,10,pre,Wrist,Wrist,0.0061,0.0061,0.226,Wrist,FALSE
+d3-021,3_avatartooluse,pre,1,11,pre,Elbow,Elbow,0.0451,0.0451,0.2261,Elbow,FALSE
+d3-021,3_avatartooluse,pre,1,12,pre,Forearm,Forearm,0.0307,0.0307,0.226,Forearm,FALSE
+d3-021,3_avatartooluse,pre,1,13,pre,Wrist,Wrist,0.038,0.038,0.2261,Wrist,FALSE
+d3-021,3_avatartooluse,pre,1,14,pre,Elbow,Elbow,0.0512,0.0512,0.2259,Elbow,FALSE
+d3-021,3_avatartooluse,pre,1,15,pre,Forearm,Forearm,0.0591,0.0591,0.2261,Wrist,FALSE
+d3-021,3_avatartooluse,pre,1,16,pre,Elbow,Elbow,0.0294,0.0294,0.2261,Elbow,FALSE
+d3-021,3_avatartooluse,pre,1,17,pre,Forearm,Forearm,0.0018,0.0018,0.2258,Forearm,FALSE
+d3-021,3_avatartooluse,pre,1,18,pre,Wrist,Wrist,0.0582,0.0582,0.2259,Wrist,FALSE
+d3-021,3_avatartooluse,first,4,1,post,Forearm,Forearm,-0.0597,-0.0597,0.2273,Elbow,FALSE
+d3-021,3_avatartooluse,first,4,2,post,Wrist,Wrist,0.0186,0.0186,0.228,Wrist,FALSE
+d3-021,3_avatartooluse,first,4,3,post,Elbow,Elbow,-0.0078,-0.0078,0.228,Elbow,FALSE
+d3-021,3_avatartooluse,first,4,4,post,Wrist,Wrist,0.0096,0.0096,0.2275,Wrist,FALSE
+d3-021,3_avatartooluse,first,4,5,post,Forearm,Forearm,-0.0065,-0.0065,0.2273,Forearm,FALSE
+d3-021,3_avatartooluse,first,4,6,post,Elbow,Elbow,-0.0334,-0.0334,0.2272,Elbow,FALSE
+d3-021,3_avatartooluse,first,4,7,post,Forearm,Forearm,0.0323,0.0323,0.2274,Forearm,FALSE
+d3-021,3_avatartooluse,first,4,8,post,Wrist,Wrist,0.0251,0.0251,0.2269,Wrist,FALSE
+d3-021,3_avatartooluse,first,4,9,post,Elbow,Elbow,-0.0228,-0.0228,0.2268,Elbow,FALSE
+d3-021,3_avatartooluse,first,4,10,post,Wrist,Wrist,0.0242,0.0242,0.2266,Wrist,FALSE
+d3-021,3_avatartooluse,first,4,11,post,Elbow,Elbow,-0.0519,-0.0519,0.2265,Elbow,FALSE
+d3-021,3_avatartooluse,first,4,12,post,Forearm,Forearm,-0.03,-0.03,0.2261,Forearm,FALSE
+d3-021,3_avatartooluse,first,4,13,post,Wrist,Wrist,0.0086,0.0086,0.226,Wrist,FALSE
+d3-021,3_avatartooluse,first,4,14,post,Elbow,Elbow,-0.0402,-0.0402,0.2266,Elbow,FALSE
+d3-021,3_avatartooluse,first,4,15,post,Forearm,Forearm,-0.0185,-0.0185,0.2263,Forearm,FALSE
+d3-021,3_avatartooluse,first,4,16,post,Wrist,Wrist,-0.015,-0.015,0.2263,Wrist,FALSE
+d3-021,3_avatartooluse,first,4,17,post,Elbow,Elbow,-0.06,-0.06,0.2264,Elbow,FALSE
+d3-021,3_avatartooluse,first,4,18,post,Forearm,Forearm,-0.0097,-0.0097,0.2266,Forearm,FALSE
+d3-022,3_avatartooluse,pre,1,1,pre,Forearm,Forearm,-0.0384,-0.0384,0.284,Forearm,FALSE
+d3-022,3_avatartooluse,pre,1,2,pre,Elbow,Elbow,-0.0971,-0.0971,0.2847,Elbow,FALSE
+d3-022,3_avatartooluse,pre,1,3,pre,Wrist,Wrist,-0.0385,-0.0385,0.2841,Wrist,FALSE
+d3-022,3_avatartooluse,pre,1,4,pre,Elbow,Elbow,-0.1126,-0.1126,0.2848,Elbow,FALSE
+d3-022,3_avatartooluse,pre,1,5,pre,Forearm,Forearm,-0.1424,-0.1424,0.2848,Elbow,FALSE
+d3-022,3_avatartooluse,pre,1,6,pre,Wrist,Wrist,-0.025,-0.025,0.2832,Wrist,FALSE
+d3-022,3_avatartooluse,pre,1,7,pre,Forearm,Forearm,-0.0888,-0.0888,0.284,Elbow,FALSE
+d3-022,3_avatartooluse,pre,1,8,pre,Wrist,Wrist,-0.0544,-0.0544,0.2835,Wrist,FALSE
+d3-022,3_avatartooluse,pre,1,9,pre,Elbow,Elbow,-0.086,-0.086,0.2835,Elbow,FALSE
+d3-022,3_avatartooluse,pre,1,10,pre,Wrist,Wrist,-0.0775,-0.0775,0.2833,Forearm,FALSE
+d3-022,3_avatartooluse,pre,1,11,pre,Forearm,Forearm,-0.1143,-0.1143,0.2839,Elbow,FALSE
+d3-022,3_avatartooluse,pre,1,12,pre,Elbow,Elbow,-0.1261,-0.1261,0.2829,Elbow,FALSE
+d3-022,3_avatartooluse,pre,1,13,pre,Forearm,Elbow,-0.1487,-0.00740000000000007,0.284,Elbow,TRUE
+d3-022,3_avatartooluse,pre,1,14,pre,Wrist,Wrist,-0.1384,-0.1384,0.2833,Forearm,FALSE
+d3-022,3_avatartooluse,pre,1,15,pre,Elbow,Elbow,-0.0937,-0.0937,0.2836,Elbow,FALSE
+d3-022,3_avatartooluse,pre,1,16,pre,Wrist,Wrist,-0.0954,-0.0954,0.283,Forearm,FALSE
+d3-022,3_avatartooluse,pre,1,17,pre,Elbow,Elbow,-0.1169,-0.1169,0.2836,Elbow,FALSE
+d3-022,3_avatartooluse,pre,1,18,pre,Forearm,Elbow,-0.1666,-0.0254000000000001,0.2838,Elbow,TRUE
+d3-022,3_avatartooluse,second,5,1,post,Wrist,Wrist,-0.0308,-0.0308,0.288,Wrist,FALSE
+d3-022,3_avatartooluse,second,5,2,post,Elbow,Elbow,-0.0765,-0.0765,0.2893,Elbow,FALSE
+d3-022,3_avatartooluse,second,5,3,post,Forearm,Forearm,-0.0595,-0.0595,0.289,Forearm,FALSE
+d3-022,3_avatartooluse,second,5,4,post,Wrist,Wrist,-0.1329,-0.1329,0.2884,Forearm,FALSE
+d3-022,3_avatartooluse,second,5,5,post,Elbow,Elbow,-0.0826,-0.0826,0.2877,Elbow,FALSE
+d3-022,3_avatartooluse,second,5,6,post,Forearm,Forearm,-0.0723,-0.0723,0.2879,Elbow,FALSE
+d3-022,3_avatartooluse,second,5,7,post,Elbow,Elbow,-0.0631,-0.0631,0.2878,Elbow,FALSE
+d3-022,3_avatartooluse,second,5,8,post,Wrist,Wrist,-0.0816,-0.0816,0.2881,Forearm,FALSE
+d3-022,3_avatartooluse,second,5,9,post,Forearm,Forearm,-0.1298,-0.1298,0.2877,Elbow,FALSE
+d3-022,3_avatartooluse,second,5,10,post,Elbow,Elbow,-0.0885,-0.0885,0.2877,Elbow,FALSE
+d3-022,3_avatartooluse,second,5,11,post,Forearm,Forearm,-0.1325,-0.1325,0.2877,Elbow,FALSE
+d3-022,3_avatartooluse,second,5,12,post,Wrist,Wrist,-0.0548,-0.0548,0.2889,Wrist,FALSE
+d3-022,3_avatartooluse,second,5,13,post,Elbow,Elbow,-0.1018,-0.1018,0.2882,Elbow,FALSE
+d3-022,3_avatartooluse,second,5,14,post,Wrist,Wrist,-0.0866,-0.0866,0.2871,Forearm,FALSE
+d3-022,3_avatartooluse,second,5,15,post,Forearm,Forearm,-0.1064,-0.1064,0.2871,Elbow,FALSE
+d3-022,3_avatartooluse,second,5,16,post,Wrist,Wrist,-0.0736,-0.0736,0.287,Forearm,FALSE
+d3-022,3_avatartooluse,second,5,17,post,Elbow,Elbow,-0.1025,-0.1025,0.2869,Elbow,FALSE
+d3-022,3_avatartooluse,second,5,18,post,Forearm,Forearm,-0.1251,-0.1251,0.2865,Elbow,FALSE
+d3-023,3_avatartooluse,pre,1,1,pre,Wrist,Wrist,-0.0092,-0.0092,0.2363,Wrist,FALSE
+d3-023,3_avatartooluse,pre,1,2,pre,Forearm,Forearm,-0.0643,-0.0643,0.2368,Elbow,FALSE
+d3-023,3_avatartooluse,pre,1,3,pre,Elbow,Elbow,-0.171,-0.171,0.237,Elbow,FALSE
+d3-023,3_avatartooluse,pre,1,4,pre,Forearm,Forearm,-0.0499,-0.0499,0.2362,Forearm,FALSE
+d3-023,3_avatartooluse,pre,1,5,pre,Elbow,Elbow,-0.1098,-0.1098,0.2356,Elbow,FALSE
+d3-023,3_avatartooluse,pre,1,6,pre,Wrist,Wrist,0.0156,0.0156,0.2356,Wrist,FALSE
+d3-023,3_avatartooluse,pre,1,7,pre,Elbow,Elbow,-0.1442,-0.1442,0.2362,Elbow,FALSE
+d3-023,3_avatartooluse,pre,1,8,pre,Forearm,Forearm,-0.0532,-0.0532,0.2359,Forearm,FALSE
+d3-023,3_avatartooluse,pre,1,9,pre,Wrist,Wrist,0.0508,0.0508,0.2357,Wrist,FALSE
+d3-023,3_avatartooluse,pre,1,10,pre,Forearm,Forearm,-0.0857,-0.0857,0.2359,Elbow,FALSE
+d3-023,3_avatartooluse,pre,1,11,pre,Elbow,Elbow,-0.1406,-0.1406,0.2359,Elbow,FALSE
+d3-023,3_avatartooluse,pre,1,12,pre,Wrist,Wrist,-0.0324,-0.0324,0.2359,Wrist,FALSE
+d3-023,3_avatartooluse,pre,1,13,pre,Elbow,Elbow,-0.1509,-0.1509,0.2356,Elbow,FALSE
+d3-023,3_avatartooluse,pre,1,14,pre,Forearm,Elbow,-0.1547,-0.0373,0.2359,Elbow,TRUE
+d3-023,3_avatartooluse,pre,1,15,pre,Wrist,Wrist,-0.0097,-0.0097,0.2362,Wrist,FALSE
+d3-023,3_avatartooluse,pre,1,16,pre,Elbow,Elbow,-0.1287,-0.1287,0.2353,Elbow,FALSE
+d3-023,3_avatartooluse,pre,1,17,pre,Wrist,Wrist,-0.0469,-0.0469,0.2338,Wrist,FALSE
+d3-023,3_avatartooluse,pre,1,18,pre,Forearm,Forearm,-0.0751,-0.0751,0.233,Elbow,FALSE
+d3-023,3_avatartooluse,second,5,1,post,Wrist,Wrist,0.0237,0.0237,0.2331,Wrist,FALSE
+d3-023,3_avatartooluse,second,5,2,post,Elbow,Elbow,-0.145,-0.145,0.2329,Elbow,FALSE
+d3-023,3_avatartooluse,second,5,3,post,Forearm,Forearm,-0.0676,-0.0676,0.233,Elbow,FALSE
+d3-023,3_avatartooluse,second,5,4,post,Wrist,Wrist,0.0198,0.0198,0.233,Wrist,FALSE
+d3-023,3_avatartooluse,second,5,5,post,Elbow,Elbow,-0.149,-0.149,0.2328,Elbow,FALSE
+d3-023,3_avatartooluse,second,5,6,post,Forearm,Forearm,-0.0279,-0.0279,0.2321,Forearm,FALSE
+d3-023,3_avatartooluse,second,5,7,post,Wrist,Wrist,0.0265,0.0265,0.232,Wrist,FALSE
+d3-023,3_avatartooluse,second,5,8,post,Forearm,Forearm,-0.0026,-0.0026,0.2329,Forearm,FALSE
+d3-023,3_avatartooluse,second,5,9,post,Elbow,Elbow,-0.1718,-0.1718,0.2337,Elbow,FALSE
+d3-023,3_avatartooluse,second,5,10,post,Wrist,Wrist,0.0212,0.0212,0.2341,Wrist,FALSE
+d3-023,3_avatartooluse,second,5,11,post,Forearm,Forearm,-0.0022,-0.0022,0.2345,Forearm,FALSE
+d3-023,3_avatartooluse,second,5,12,post,Elbow,Elbow,-0.1148,-0.1148,0.2348,Elbow,FALSE
+d3-023,3_avatartooluse,second,5,13,post,Forearm,Forearm,0.0093,0.0093,0.2342,Forearm,FALSE
+d3-023,3_avatartooluse,second,5,14,post,Wrist,Wrist,-0.0235,-0.0235,0.2341,Wrist,FALSE
+d3-023,3_avatartooluse,second,5,15,post,Elbow,Elbow,-0.1553,-0.1553,0.2336,Elbow,FALSE
+d3-023,3_avatartooluse,second,5,16,post,Forearm,Forearm,-0.0508,-0.0508,0.2328,Forearm,FALSE
+d3-023,3_avatartooluse,second,5,17,post,Wrist,Wrist,0.0083,0.0083,0.2293,Wrist,FALSE
+d3-023,3_avatartooluse,second,5,18,post,Elbow,Elbow,-0.1895,-0.1895,0.2269,Elbow,FALSE
+d3-024,3_avatartooluse,pre,2,1,pre,Elbow,Elbow,-0.0988,-0.0988,0.2501,Elbow,FALSE
+d3-024,3_avatartooluse,pre,2,2,pre,Wrist,Wrist,-0.0325,-0.0325,0.2501,Wrist,FALSE
+d3-024,3_avatartooluse,pre,2,3,pre,Forearm,Forearm,-0.0802,-0.0802,0.2495,Elbow,FALSE
+d3-024,3_avatartooluse,pre,2,4,pre,Wrist,Wrist,-0.0365,-0.0365,0.2495,Wrist,FALSE
+d3-024,3_avatartooluse,pre,2,5,pre,Forearm,Forearm,-0.036,-0.036,0.2494,Forearm,FALSE
+d3-024,3_avatartooluse,pre,2,6,pre,Elbow,Elbow,-0.0698,-0.0698,0.2493,Elbow,FALSE
+d3-024,3_avatartooluse,pre,2,7,pre,Wrist,Wrist,-0.0706,-0.0706,0.2498,Forearm,FALSE
+d3-024,3_avatartooluse,pre,2,8,pre,Elbow,Elbow,-0.093,-0.093,0.2503,Elbow,FALSE
+d3-024,3_avatartooluse,pre,2,9,pre,Forearm,Forearm,-0.1084,-0.1084,0.2501,Elbow,FALSE
+d3-024,3_avatartooluse,pre,2,10,pre,Elbow,Elbow,-0.1067,-0.1067,0.2503,Elbow,FALSE
+d3-024,3_avatartooluse,pre,2,11,pre,Wrist,Wrist,-0.0771,-0.0771,0.2503,Forearm,FALSE
+d3-024,3_avatartooluse,pre,2,12,pre,Forearm,Forearm,-0.0842,-0.0842,0.2504,Elbow,FALSE
+d3-024,3_avatartooluse,pre,2,13,pre,Elbow,Elbow,-0.1574,-0.1574,0.2505,Elbow,FALSE
+d3-024,3_avatartooluse,pre,2,14,pre,Wrist,Wrist,-0.0966,-0.0966,0.2499,Forearm,FALSE
+d3-024,3_avatartooluse,pre,2,15,pre,Forearm,Forearm,-0.0657,-0.0657,0.2517,Elbow,FALSE
+d3-024,3_avatartooluse,pre,2,16,pre,Elbow,Elbow,-0.1447,-0.1447,0.2516,Elbow,FALSE
+d3-024,3_avatartooluse,pre,2,17,pre,Wrist,Forearm,-0.1677,-0.0422,0.2516,Forearm,TRUE
+d3-024,3_avatartooluse,pre,2,18,pre,Forearm,Elbow,-0.1446,-0.0188,0.2522,Elbow,TRUE
+d3-024,3_avatartooluse,second,5,1,post,Elbow,Elbow,-0.1416,-0.1416,0.2542,Elbow,FALSE
+d3-024,3_avatartooluse,second,5,2,post,Wrist,Wrist,-0.1177,-0.1177,0.254,Forearm,FALSE
+d3-024,3_avatartooluse,second,5,3,post,Forearm,Elbow,-0.1404,-0.0135999999999999,0.2542,Elbow,TRUE
+d3-024,3_avatartooluse,second,5,4,post,Elbow,Elbow,-0.1414,-0.1414,0.2546,Elbow,FALSE
+d3-024,3_avatartooluse,second,5,5,post,Wrist,Wrist,-0.0821,-0.0821,0.2542,Forearm,FALSE
+d3-024,3_avatartooluse,second,5,6,post,Forearm,Elbow,-0.1411,-0.0144,0.2542,Elbow,TRUE
+d3-024,3_avatartooluse,second,5,7,post,Wrist,Forearm,-0.1348,-0.00829999999999997,0.2537,Forearm,TRUE
+d3-024,3_avatartooluse,second,5,8,post,Forearm,Forearm,-0.1242,-0.1242,0.2533,Elbow,FALSE
+d3-024,3_avatartooluse,second,5,9,post,Elbow,Elbow,-0.0825,-0.0825,0.2531,Elbow,FALSE
+d3-024,3_avatartooluse,second,5,10,post,Forearm,Forearm,-0.1142,-0.1142,0.2537,Elbow,FALSE
+d3-024,3_avatartooluse,second,5,11,post,Elbow,Elbow,-0.1174,-0.1174,0.2539,Elbow,FALSE
+d3-024,3_avatartooluse,second,5,12,post,Wrist,Forearm,-0.1714,-0.0448999999999999,0.2538,Forearm,TRUE
+d3-024,3_avatartooluse,second,5,13,post,Elbow,Elbow,-0.1316,-0.1316,0.2538,Elbow,FALSE
+d3-024,3_avatartooluse,second,5,14,post,Wrist,Forearm,-0.1801,-0.0540999999999999,0.2527,Forearm,TRUE
+d3-024,3_avatartooluse,second,5,15,post,Forearm,Elbow,-0.1434,-0.0173,0.2532,Elbow,TRUE
+d3-024,3_avatartooluse,second,5,16,post,Elbow,Elbow,-0.1283,-0.1283,0.253,Elbow,FALSE
+d3-024,3_avatartooluse,second,5,17,post,Wrist,Wrist,-0.1177,-0.1177,0.2532,Forearm,FALSE
+d3-024,3_avatartooluse,second,5,18,post,Forearm,Elbow,-0.1444,-0.0186000000000001,0.2527,Elbow,TRUE

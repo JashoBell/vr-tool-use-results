@@ -1,0 +1,804 @@
+---
+title: "Avatar VR - Trial-level Data - Reaching"
+author: "Joshua Bell"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-float: true
+    toc-placement: left
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = TRUE, cache = TRUE, echo = FALSE, fig.height = 6, fig.width = 12)
+
+pkgs <- c("raster", "plyr", "data.table", "dplyr", "Rmisc", "magrittr", "tidyr", "readr", "ggplot2", "here", "tidybayes", "datawizard", "patchwork")
+for(i in pkgs){
+  if(!i %in% rownames(installed.packages())){ 
+    install.packages(i) 
+    library(i, character.only = TRUE)
+  }
+  else(library(i, character.only = TRUE))
+}
+# Set max memory to 1gb
+rasterOptions(maxmemory = 10e+09)
+setDTthreads(percent = 90)
+
+ppt_m_fulltrials <- fread(here::here("data", "study_three", "ppt_m_fulltrials.csv")) %>%
+  dplyr::mutate(
+    tracking = "ppt"
+  )
+
+steamvr_participants = c("d3-006", "d3-007", "d3-012", "d3-024")
+
+steamvr_m_fulltrials <- fread(here::here("data", "study_three", "steamvr_m_fulltrials.csv")) %>% 
+dplyr::filter(ppid %in% steamvr_participants) %>%
+dplyr::mutate(
+  tracking = "steamvr",
+  ovr_velocity_10hz = ovr_vel,
+  accel_filtvel_filt = ovr_acc_10hz
+)
+
+ppt_m_fulltrials <- bind_rows(
+  ppt_m_fulltrials[,
+         `:=`(
+          phase = factor(phase, levels = c("start", "begin", "out", "lift", "replace", "return", "returned")),
+         time = factor(time, levels = c("pre", "post")),
+         ppid = factor(ppid))
+  ], 
+  steamvr_m_fulltrials[,
+  .(
+    tracking,
+    velocity_10hz,
+    ovr_velocity_10hz,
+    velocity_combined,
+    time_ms_fix,
+    combined_time_ms_fix,
+    combined_start_time,
+    combined_acc_filt,
+    ppid,
+    order,
+    time,
+    trial_num_in_block,
+    phase
+  )])
+
+
+
+ppt_m_fulltrials <- ppt_m_fulltrials[order(ppid, block_num, trial_num_in_block, time_ms)
+  ]
+
+ppt_m <- fread(here::here("data", "study_three", "ppt_manual_pre_cleaning.csv"))
+ppt_m[,
+  `:=`(
+    time = factor(time, levels = c("pre", "post")),
+    tracking = "ppt"
+  )
+  ]
+
+steamvr_m <- fread(here::here("data", "study_three", "steamvr_manual.csv")) %>%
+  dplyr::filter(ppid %in% steamvr_participants) %>%
+mutate(
+    tracking = "steamvr",
+    vel_m_filt = combined_vel,
+    vel_lat_filt = combined_vel_lat,
+    acc_m_filtfilt = combined_acc,
+    acc_lat_filtfilt = combined_acc_lat,
+    dec_m_filtfilt = combined_dec,
+    dec_lat_filtfilt = combined_dec_lat
+  ) %>%
+  dplyr::select(
+    ppid,
+    time,
+    tracking,
+    order,
+    trial_num_in_block,
+    vel_m_filt,
+    combined_vel,
+    vel_lat_filt,
+    combined_vel_lat,
+    acc_m_filtfilt,
+    combined_acc,
+    acc_lat_filtfilt,
+    combined_acc_lat,
+    dec_m_filtfilt,
+    combined_dec,
+    dec_lat_filtfilt,
+    combined_dec_lat,
+    ovr_vel_m_filt,
+    ovr_vel_lat_filt,
+    ovr_acc_m_filtfilt,
+    ovr_acc_lat_filtfilt,
+    ovr_dec_m_filtfilt,
+    ovr_dec_lat_filtfilt
+  )
+
+ppt_m <- bind_rows(ppt_m, steamvr_m)
+ppt_m[order(ppid, tracking, time, trial_num_in_block)]
+
+```
+
+# SteamVR - PPT correlation
+```{r steamvr_ppt_correlation}
+
+# For steamvr_participants, correlate the kinematic data from the two trackers in the ppt_m data
+
+
+
+```
+
+# Overlaid Trials per Participant
+
+## PPT
+```{r plotsbyparticipant}
+plots_participant <- list()
+
+ppt_m_combined <- merge(ppt_m_fulltrials, ppt_m, by = c("ppid", "time", "tracking", "order", "trial_num_in_block"), all.x = TRUE, allow.cartesian = TRUE)
+
+for(p in unique(ppt_m$ppid))
+{
+  bytrial_velocity <- ppt_m_combined[
+      (!phase %in% c("start", "lift",
+      "replace", "return",
+      "returned") & !is.na(phase))
+      & (time_ms_fix > acc_lat_filtfilt - 350 & time_ms_fix > 0)
+      & (
+        is.na(dec_lat_filtfilt) 
+      | (!is.na(dec_lat_filtfilt) & time_ms_fix < dec_lat_filtfilt + 50)
+      )
+      & ppid == p,
+      by = c("ppid", "time", "tracking", "order", "trial_num_in_block")
+    ][
+      order(time, trial_num_in_block, time_ms_fix)
+    ][,
+      time_ms_fix := (0:(.N - 1)) * 5,
+      by = c("time", "trial_num_in_block", "tracking")
+    ][,
+      time_ms_norm := datawizard::normalize(time_ms_fix),
+      by = c("time", "trial_num_in_block", "tracking")
+    ]
+  time_normed <- seq(0,1, by = 0.001)
+  # Interpolate velocity to the common time scale using spline
+  average_velocity <-bytrial_velocity[,
+  .(
+    #//velocity_interpolated = spline(time_ms_norm, velocity, xout = time_normed)$y,
+    velocity_10hz_interpolated = spline(time_ms_norm, velocity_10hz, xout = time_normed)$y
+    ),
+    by = c("time", "trial_num_in_block", "tracking")
+  ][,
+    time_ms_norm := time_normed,
+    by = c("time", "trial_num_in_block", "tracking")
+  ][,
+    .(#velocity = mean(velocity_interpolated, na.rm = TRUE),
+      velocity_10hz = mean(velocity_10hz_interpolated, na.rm = TRUE)),
+    by = c("time_ms_norm", "time", "tracking")
+  ][
+    order(time, time_ms_norm)
+    ]
+  
+  if(p %in% steamvr_participants)
+  {
+    average_ovr_velocity <- bytrial_velocity[tracking == "steamvr"][,
+        .(
+            # //velocity_interpolated = spline(time_ms_norm, velocity, xout = time_normed)$y,
+            velocity_combined_interpolated = spline(time_ms_norm, velocity_combined, xout = time_normed)$y
+        ),
+        by = c("time", "trial_num_in_block", "tracking")
+    ][,
+        time_ms_norm := time_normed,
+        by = c("time", "trial_num_in_block", "tracking")
+    ][,
+        .( # velocity = mean(velocity_interpolated, na.rm = TRUE),
+            velocity_combined = mean(velocity_combined_interpolated, na.rm = TRUE)
+        ),
+        by = c("time_ms_norm", "time", "tracking")
+    ][
+        order(time, time_ms_norm)
+    ]
+  }
+
+  
+  plot <- bytrial_velocity %>%
+  ggplot(aes(x = time_ms_norm, 
+              y = velocity_10hz,
+              linetype = tracking,
+              group = interaction(trial_num_in_block, time, tracking))) +
+        geom_line(data = bytrial_velocity[time == "pre"],
+                  aes(color = "#001015"),
+          alpha = .5) +
+        geom_line(data = bytrial_velocity[time == "post"],
+                  aes(color = "#09A1D7"),
+          alpha = .5) +
+        geom_line(data = average_velocity[time == "pre"],
+                  aes(x = time_ms_norm,
+                  y = velocity_10hz,
+                  group = interaction(time, tracking),
+                  color = "#001015"),
+                  linewidth = 1) +
+        geom_line(data = average_velocity[time == "post"],
+                  aes(x = time_ms_norm,
+                  y = velocity_10hz,
+                  group = interaction(time, tracking),
+                  color = "#09A1D7"),
+                  linewidth = 1) +
+        scale_color_manual(
+          labels = c("Pre", "Post"),
+          values = c("#001015", "#09A1D7")
+          ) +
+        scale_linetype_manual(
+          labels = c("PPT", "SteamVR"),
+          values = c("solid", "dashed")
+          ) +
+        theme_tidybayes() +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+              text = element_text(size = 22)) +
+        labs(
+          x = "Time (normalized)", 
+          y = "Velocity (mm/s)",
+          title = p,
+          color = "Time",
+          linetype = "Tracking System") 
+if(p %in% steamvr_participants)
+{        
+  plot <- plot + geom_line(data = average_ovr_velocity[time == "pre"],
+                  aes(x = time_ms_norm,
+                  y = velocity_combined,
+                  group = interaction(time, tracking)),
+                  color = "firebrick",
+                  linewidth = 1) +
+        geom_line(data = average_ovr_velocity[time == "post"],
+                  aes(x = time_ms_norm,
+                  y = velocity_combined,
+                  group = interaction(time, tracking)),
+                  color = "forestgreen",
+                  linewidth = 1) 
+  }
+    plots_participant[[p]] <- plot
+}
+
+plots_participant
+```
+
+## Velocity by Participant x Trial
+
+
+```{r plotcreationloop, include=FALSE, cache = FALSE}
+
+# This code creates a list of plots for each participant, for each block, for each trial. It uses data from the data tables ppt_m
+# and ppt_m_fulltrials to create a ggplot object which is then stored in the plots list. The plot contains four vertical lines
+# representing velocity, acceleration, and deceleration latencies as well as different areas and lines representing different
+# phases of the trial. It also includes an annotation with the start time if one exists.
+
+plots <- list()
+lats <- data.table()
+for (p in unique(ppt_m_fulltrials$ppid))
+{
+    for (b in unique(ppt_m_fulltrials$time))
+    {
+        if (
+            p %in% steamvr_participants & b == "pre"
+        ) {
+            next
+        }
+        for (t in unique(ppt_m_fulltrials$trial_num_in_block))
+        {
+            m <- copy(ppt_m[!is.na(vel_m_filt) &
+                ppid == p &
+                time == b &
+                trial_num_in_block == t &
+                tracking == "ppt"])
+            d <- copy(
+                ppt_m_fulltrials[
+                    ppid == p &
+                        time == b &
+                        trial_num_in_block == t &
+                        tracking == "ppt" &
+                        !phase %in% c("start", "replace", "return", "returned") &
+                        between(
+                            time_ms_fix,
+                            0,
+                            m$dec_lat_filtfilt + 500
+                        ) &
+                        !is.na(time_ms_fix) &
+                        !is.na(velocity_10hz)
+                ]
+            )
+
+            plot <- d %>%
+                ggplot(aes(
+                    x = time_ms_fix,
+                    y = velocity_10hz,
+                    color = phase,
+                    fill = phase
+                )) +
+                geom_vline(xintercept = 0, linewidth = .75, color = "blue") +
+                geom_vline(xintercept = m[, vel_lat_filt], linewidth = .75, color = "forestgreen") +
+                geom_vline(xintercept = m[, acc_lat_filtfilt], linewidth = .75, color = "steelblue") +
+                geom_vline(xintercept = m[, dec_lat_filtfilt], linewidth = .75, color = "gold") +
+                geom_line(alpha = .5, linetype = "solid") +
+                geom_area(alpha = .5) +
+                scale_color_manual(
+                    breaks = c("begin", "out", "lift", "replace", "return"),
+                    values = c("steelblue", "forestgreen", "gold", "orange", "firebrick")
+                ) +
+                scale_fill_manual(
+                    breaks = c("begin", "out", "lift", "replace", "return"),
+                    values = c("steelblue", "forestgreen", "gold", "orange", "firebrick")
+                ) +
+                scale_x_continuous(
+                    limits = c(
+                        min(d[, time_ms_fix]),
+                        max(d[, time_ms_fix])
+                    ),
+                    breaks = scales::extended_breaks(as.integer(
+                        (max(d[, time_ms_fix]) - min(d[, time_ms_fix])) / 100
+                    ))
+                ) +
+                scale_y_continuous(limits = c(0, max(d[, velocity_10hz]) + sd(d[, velocity_10hz]))) +
+                theme_tidybayes() +
+                theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1), plot.background = element_rect(fill = "transparent"), panel.background = element_rect(fill = "transparent")) +
+                labs(title = paste("Participant: ", unique(d$ppid), ", Time:", b, ", Trial: ", as.character(t)))
+
+            if (length(copy(d[!is.na(start_time), start_time])) > 0) {
+                plot <- plot +
+                    annotate(
+                        geom = "text",
+                        x = 50,
+                        y = m[, vel_m_filt],
+                        label = copy(d[!is.na(start_time), start_time][[1]]),
+                        color = "black",
+                        size = 8
+                    )
+            }
+            plots[[p]][["ppt"]][[b]][[t]] <- plot
+        }
+    }
+}
+
+for (ps in steamvr_participants)
+{
+    for (bs in unique(ppt_m_fulltrials$time))
+    {
+        for (ts in unique(ppt_m_fulltrials$trial_num_in_block))
+        {
+            m <- copy(ppt_m[!is.na(vel_m_filt) &
+                ppid == ps &
+                time == bs &
+                trial_num_in_block == ts &
+                tracking == "steamvr"])
+            d <- copy(
+                ppt_m_fulltrials[
+                    ppid == ps &
+                        time == bs &
+                        trial_num_in_block == ts &
+                        tracking == "steamvr" &
+                        !phase %in% c("start", "replace", "return", "returned") &
+                        between(
+                            combined_time_ms_fix,
+                            0,
+                            m$combined_dec_lat + 500
+                        ) &
+                        !is.na(combined_time_ms_fix) &
+                        !is.na(velocity_combined)
+                ]
+            )
+
+            plot <- d %>%
+                ggplot(aes(
+                    x = combined_time_ms_fix,
+                    y = velocity_combined,
+                    color = phase,
+                    fill = phase
+                )) +
+                geom_vline(xintercept = 0, linewidth = .75, color = "blue") +
+                geom_vline(xintercept = m[, combined_vel_lat], linewidth = .75, color = "forestgreen") +
+                geom_vline(xintercept = m[, combined_acc_lat], linewidth = .75, color = "steelblue") +
+                geom_vline(xintercept = m[, combined_dec_lat], linewidth = .75, color = "gold") +
+                geom_line(alpha = .5, linetype = "dashed", linewidth = 2) +
+                scale_color_manual(
+                    breaks = c("begin", "out", "lift", "replace", "return"),
+                    values = c("steelblue", "forestgreen", "gold", "orange", "firebrick")
+                ) +
+                scale_fill_manual(
+                    breaks = c("begin", "out", "lift", "replace", "return"),
+                    values = c("steelblue", "forestgreen", "gold", "orange", "firebrick")
+                ) +
+                scale_x_continuous(
+                    limits = c(
+                        min(d[, combined_time_ms_fix]),
+                        max(d[, combined_time_ms_fix])
+                    ),
+                    breaks = scales::extended_breaks(as.integer(
+                        (max(d[, combined_time_ms_fix]) - min(d[, combined_time_ms_fix])) / 100
+                    ))
+                ) +
+                scale_y_continuous(limits = c(0, max(d[, velocity_combined]) + sd(d[, velocity_combined]))) +
+                theme_tidybayes() +
+                theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1), plot.background = element_rect(fill = "transparent"), panel.background = element_rect(fill = "transparent")) +
+                labs(title = paste("Participant: ", unique(d$ppid), ", Time:", bs, ", Trial: ", as.character(ts)))
+
+            if (length(copy(d[!is.na(combined_start_time), combined_start_time])) > 0) {
+                plot <- plot +
+                    annotate(
+                        geom = "text",
+                        x = 50,
+                        y = m[, vel_m_filt],
+                        label = copy(d[!is.na(combined_start_time), combined_start_time][[1]]),
+                        color = "black",
+                        size = 8
+                    )
+            }
+            plots[[ps]][["steamvr"]][[bs]][[ts]] <- plot
+        }
+    }
+}
+
+```
+
+
+# Manual Reaching Trials - PPT
+## General Information
+
+- Movement onset calculated as the thick blue vertical line that appears in the timeline
+- Acceleration, velocity and deceleration are pale blue, green and gold respectively
+- The black text is the time of the movement onset from the start of recording.
+- time_ms_fix is the original time_ms with the start time of the trial subtracted from it, making 0 the start of the movement
+
+### Participant 1
+#### Pre
+```{r participant-1}
+print(plots[["d3-001"]][["ppt"]]["pre"])
+```
+#### Post
+```{r participant-1-post}
+print(plots[["d3-001"]][["ppt"]]["post"])
+```
+
+### Participant 2
+#### Pre
+```{r participant-2}
+print(plots[["d3-002"]][["ppt"]]["pre"])
+```
+#### Post
+```{r participant-2-post}
+print(plots[["d3-002"]][["ppt"]]["post"])
+```
+
+
+### Participant 3
+#### Pre
+```{r participant-3}
+print(plots[["d3-003"]][["ppt"]]["pre"])
+```
+#### Post
+```{r participant-3-post}
+print(plots[["d3-003"]][["ppt"]]["post"])
+```
+
+### Participant 4
+#### Pre
+```{r participant-4}
+print(plots[["d3-004"]][["ppt"]]["pre"])
+```
+#### Post
+```{r participant-4-post}
+print(plots[["d3-004"]][["ppt"]]["post"])
+```
+
+### Participant 5
+#### Pre
+Trials 13, 15 and 17 seem to contain tracking anomalies
+```{r participant-5}
+print(plots[["d3-005"]][["ppt"]]["pre"])
+```
+#### Post
+Trials 9 and 11 seem to contain tracking anomalies
+```{r participant-5-post}
+print(plots[["d3-005"]][["ppt"]]["post"])
+```
+
+### Participant 6
+VRPN did not record for this participant in the pre-test, curves are from Vive Tracker 3.0 affixed to hand
+
+#### Pre (steamvr)
+```{r participant-6}
+plots[["d3-006"]][["steamvr"]]["pre"]
+```
+#### Post (steamvr)
+```{r participant-6-post-steamvr}
+plots[["d3-006"]][["steamvr"]]["post"]
+```
+
+#### Post (ppt)
+```{r participant-6-post}
+plots[["d3-006"]][["ppt"]]["post"]
+```
+
+### Participant 7
+VRPN did not record for this participant in the pre-test, curves are from Vive Tracker 3.0 affixed to hand
+
+#### Pre (steamvr)
+```{r participant-7}
+plots[["d3-007"]][["steamvr"]]["pre"]
+```
+#### Post (steamvr)
+```{r participant-7-post-steamvr}
+plots[["d3-007"]][["steamvr"]]["post"]
+```
+
+#### Post (ppt)
+```{r participant-7-post}
+plots[["d3-007"]][["ppt"]]["post"]
+```
+
+
+### Participant 8
+#### Pre
+```{r participant-8}
+plots[["d3-008"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-8-post}
+plots[["d3-008"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 9
+#### Pre
+```{r participant-9}
+plots[["d3-009"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-9-post}
+plots[["d3-009"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 10
+#### Pre
+```{r participant-10}
+plots[["d3-010"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-10-post}
+plots[["d3-010"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 11
+#### Pre
+Colliders did not intersect correctly on trial 8. True out movement ends at ~800ms.
+```{r participant-11}
+plots[["d3-011"]][["ppt"]]["pre"]
+```
+
+#### Post
+```{r participant-11-post}
+plots[["d3-011"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 12
+VRPN did not record for this participant in the pre-test, curves are from Vive Tracker 3.0 affixed to hand
+
+#### Pre (steamvr)
+```{r participant-12}
+plots[["d3-012"]][["steamvr"]]["pre"]
+```
+#### Post (steamvr)
+```{r participant-12-post-steamvr}
+plots[["d3-012"]][["steamvr"]]["post"]
+```
+#### Post (ppt)
+```{r participant-12-post}
+plots[["d3-012"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 13
+#### Pre
+Cube tracker placed it too high to trigger the colliders on the first trial, thus start time is very high.
+Trial 3 appears to have a tracking anomaly.
+```{r participant-13}
+plots[["d3-013"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-13-post}
+plots[["d3-013"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 14
+#### Pre
+```{r participant-14}
+plots[["d3-014"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-14-post}
+plots[["d3-014"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 15
+#### Pre
+```{r participant-15}
+plots[["d3-015"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-15-post}
+plots[["d3-015"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 16
+#### Pre
+```{r participant-16}
+plots[["d3-016"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-16-post}
+plots[["d3-016"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 17
+#### Pre
+```{r participant-17}
+plots[["d3-017"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-17-post}
+plots[["d3-017"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 18
+#### Pre
+```{r participant-18}
+plots[["d3-018"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-18-post}
+plots[["d3-018"]][["ppt"]]["post"]
+```
+
+
+### Participant 19
+#### Pre
+```{r participant-19}
+plots[["d3-019"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-19-post}
+plots[["d3-019"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 20
+#### Pre
+```{r participant-20}
+plots[["d3-020"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-20-post}
+plots[["d3-020"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 21
+#### Pre
+```{r participant-21}
+plots[["d3-021"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-21-post}
+plots[["d3-021"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 22
+#### Pre
+```{r participant-22}
+plots[["d3-022"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-22-post}
+plots[["d3-022"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 23
+#### Pre
+```{r participant-23}
+plots[["d3-023"]][["ppt"]]["pre"]
+```
+#### Post
+```{r participant-23-post}
+plots[["d3-023"]][["ppt"]]["post"]
+```
+
+
+
+### Participant 24
+#### Pre
+```{r participant-24}
+plots[["d3-024"]][["steamvr"]]["pre"]
+```
+#### Post (steamvr)
+```{r participant-24-post-steamvr}
+plots[["d3-024"]][["steamvr"]]["post"]
+```
+
+#### Post
+```{r participant-24-post}
+plots[["d3-024"]][["ppt"]]["post"]
+```
+
+# Removals, Imputation and Export
+
+```{r imputation-and-export, include = TRUE}
+ppt_m[
+    (ppid == "d3-005" & trial_num_in_block %in% c(13, 15, 17) & time == "pre") |
+        (ppid == "d3-005" & trial_num_in_block %in% c(9, 11) & time == "post") |
+        (ppid == "d3-013" & trial_num_in_block %in% c(3) & time == "pre"),
+    `:=`(
+        vel_m_filt = NA_real_,
+        vel_lat_filt = NA_real_,
+        acc_m_filtfilt = NA_real_,
+        dec_m_filtfilt = NA_real_,
+        acc_lat_filtfilt = NA_real_,
+        dec_lat_filtfilt = NA_real_
+    )
+]
+
+ppt_m[
+    is.na(vel_m_filt) | is.na(vel_lat_filt) | is.na(acc_m_filtfilt) | is.na(dec_m_filtfilt) | is.na(acc_lat_filtfilt) | is.na(dec_lat_filtfilt)
+]
+
+
+d <- complete(ppt_m, ppid, trial_num_in_block, time) %>% as.data.table()
+d <- d[
+    ,
+    `:=`(
+        ppid = factor(ppid),
+        time = factor(time),
+        trial_num_in_block = factor(trial_num_in_block)
+    )
+]
+
+skimr::skim(d)
+
+# Use multivariate random forest imputation to impute any missing values
+set.seed(1337)
+d_imputed <- d %>%
+    simputation::impute_mf(
+        formula = vel_m_filt + vel_lat_filt
+            + acc_m_filtfilt + dec_m_filtfilt
+            + acc_lat_filtfilt + dec_lat_filtfilt
+        ~ trial_num_in_block
+            + ppid
+            + time
+    )
+
+fwrite(
+    d_imputed %>%
+    # Remove the PPT tracking data for the participants who it did not record the pre-test for.
+    dplyr::filter(!(ppid %in% c("d3-006", "d3-007", "d3-012", "d3-024") & tracking == "ppt")), 
+    here::here("data", "study_three", "ppt_manual.csv")
+)
+
+```

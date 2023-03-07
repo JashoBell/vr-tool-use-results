@@ -1,0 +1,1781 @@
+---
+title: "Real-world - Supplementary Analyses - Reaching"
+author: "Joshua Bell"
+date: "10/14/2022"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-float: true
+    toc-placement: left
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning = FALSE, 
+                      message = FALSE, 
+                      cache = TRUE, 
+                      fig.width = 12, 
+                      fig.height = 8)
+pkgs <- c("dplyr", "readr", "magrittr", "data.table", "here", "brms", "cmdstanr", "datawizard", "bayestestR", "flextable", "ggplot2", "tidybayes")
+for(i in pkgs){
+  if(!i %in% rownames(installed.packages())){ 
+    install.packages(i) 
+    library(i, character.only = TRUE)
+  }
+  else(library(i, character.only = TRUE))
+}
+
+options("mc.cores" = parallel::detectCores(), "brms.backend" = "cmdstan")
+control_list = list(adapt_delta = .99, max_treedepth = 15)
+
+b = 4000/parallel::detectCores()
+i = 48000/parallel::detectCores()
+ch = parallel::detectCores()
+co = parallel::detectCores()
+```
+
+```{r import-standardize, include=FALSE}
+
+ppt_m <- fread(
+  here::here("data", "study_two", "ppt_manual.csv")
+) %>% dplyr::filter(
+    !ppid %in% c(
+      "d2-016", 
+      "d2-012",
+      "d2-019",
+      "d2-008"
+      )
+    ) %>%
+  mutate(
+    time = factor(
+    x = time,
+    levels = c("pre", "post"), labels = c("Pre", "Post"),
+    )
+  )
+
+
+ppt_m_std <- ppt_m %>% 
+  mutate(vel_m_filt_std = standardize(vel_m_filt),
+          dec_m_filtfilt_std = standardize(dec_m_filtfilt),
+          acc_m_filtfilt_std = standardize(acc_m_filtfilt),
+          vel_lat_filt_std = standardize(vel_lat_filt),
+          acc_lat_filtfilt_std = standardize(acc_lat_filtfilt),
+          dec_lat_filtfilt_std = standardize(dec_lat_filtfilt)) %>%
+  as.data.table()
+
+ppt_tool <- fread(here::here("data", "study_two", "ppt_tool.csv"))
+
+landmark <- read_csv(here::here("data", "study_two", "landmark.csv")) %>%
+    mutate(error_std = standardize(lapse_fix_error),
+         target = factor(lapse_fix_target,
+            levels = c("Elbow", "Forearm", "Wrist")),
+         error_cm = lapse_fix_error * 100,
+         forearmlength = forearmlength * 100,
+         forearmlength_std = standardize(forearmlength),
+         time = factor(time,
+            levels = c("pre", "post"),
+            labels= c("Pre", "Post")),
+         order = factor(x = order, levels = c("pre", "first", "second"),
+            labels = c("Pre", "First", "Second"))) %>%
+            as.data.table()
+```
+
+# Supplemental Analyses
+
+## Reaching Task
+
+### Bongers (2010) Replication
+In Bongers's (2010) study, no effect of tool-use on kinematics was observed when considering the full block of trials in the post-test. He did, however, observe an effect when comparing a subset of trials: Those immediately after the tool-use block.
+
+```{r by-trial-plots}
+ppt_combined <- ppt_m %>% bind_rows(ppt_tool[, time := "Tool-use"]) %>% as.data.table()
+
+ppt_combined <- ppt_combined %>% 
+  mutate(overall_trial = fcase(time == "Pre", trial_num_in_block,
+                               time == "Tool-use", as.integer(trial_num_in_block + 18),
+                               time == "Post", as.integer(trial_num_in_block + 66))
+                               )
+
+ppt_combined_by_trial <- ppt_combined %>%
+  dplyr::filter(vel_m_filt < 2000,
+              !(time == "Tool-use" & vel_m_filt > 1500)) %>%
+  group_by(overall_trial, time) %>%
+  dplyr::summarise(
+    m_vel = mean(vel_m_filt, na.rm = TRUE),
+    m_acc = mean(acc_m_filtfilt, na.rm = TRUE),
+    m_dec = mean(dec_m_filtfilt, na.rm = TRUE),
+    lat_vel = mean(vel_lat_filt, na.rm = TRUE),
+    lat_acc = mean(acc_lat_filtfilt, na.rm = TRUE),
+    lat_dec = mean(dec_lat_filtfilt, na.rm = TRUE)
+  )
+
+ppt_combined_by_trial %>%
+  ggplot(aes(x = overall_trial, y = m_vel, color = time)) +
+    geom_line(size = 2) +
+    labs(title = "Peak Velocity By Trial", subtitle = "Tool-use in Real Environment", x = "Trial", y = "Peak Velocity (mm/s)") +
+    theme_tidybayes()+
+    scale_color_manual(breaks = c("Pre", "Tool-use", "Post"),
+    values = c("#001015", "firebrick", "#09A1D7"),
+    labels = c("Pre", "Tool-use", "Post")) +
+    theme(text = element_text(size = 34))
+
+ppt_combined_by_trial %>%
+  ggplot(aes(x = overall_trial, y = m_acc, color = time)) +
+    geom_line(size = 2) +
+    labs(title = "Peak Acceleration By Trial", subtitle = "Tool-use in Real Environment", x = "Trial", y = "Peak Acceleration (mm/s^2)") +
+    theme_tidybayes()+
+    scale_color_manual(breaks = c("Pre", "Tool-use", "Post"),
+    values = c("#001015", "firebrick", "#09A1D7"),
+    labels = c("Pre", "Tool-use", "Post")) +
+    theme(text = element_text(size = 34))
+  
+ppt_combined_by_trial %>%
+  ggplot(aes(x = overall_trial, y = m_dec, color = time)) +
+    geom_line(size = 2) +
+    labs(title = "Peak Deceleration By Trial", subtitle = "Tool-use in Real Environment", x = "Trial", y = "Peak Deceleration (mm/s^2)") +
+    theme_tidybayes()+
+    scale_color_manual(breaks = c("Pre", "Tool-use", "Post"),
+    values = c("#001015", "firebrick", "#09A1D7"),
+    labels = c("Pre", "Tool-use", "Post")) +
+    theme(text = element_text(size = 34))
+
+ppt_combined_by_trial %>%
+  ggplot(aes(x = overall_trial, y = lat_vel, color = time)) +
+    geom_line(size = 2) +
+    labs(title = "Peak Velocity Latency By Trial", subtitle = "Tool-use in Real Environment", x = "Trial", y = "Latency (ms)") +
+    theme_tidybayes()+
+    scale_color_manual(breaks = c("Pre", "Tool-use", "Post"),
+    values = c("#001015", "firebrick", "#09A1D7"),
+    labels = c("Pre", "Tool-use", "Post")) +
+    theme(text = element_text(size = 34))
+
+ppt_combined_by_trial %>%
+  ggplot(aes(x = overall_trial, y = lat_acc, color = time)) +
+    geom_line(size = 2) +
+    labs(title = "Peak Acceleration Latency By Trial", subtitle = "Tool-use in Real Environment", x = "Trial", y = "Latency (ms)") +
+    theme_tidybayes()+
+    scale_color_manual(breaks = c("Pre", "Tool-use", "Post"),
+    values = c("#001015", "firebrick", "#09A1D7"),
+    labels = c("Pre", "Tool-use", "Post")) +
+    theme(text = element_text(size = 34))
+
+ppt_combined_by_trial %>%
+  ggplot(aes(x = overall_trial, y = lat_dec, color = time)) +
+    geom_line(size = 2) +
+    labs(title = "Peak Deceleration Latency By Trial", subtitle = "Tool-use in Real Environment", x = "Trial", y = "Latency (ms)") +
+    theme_tidybayes()+
+    scale_color_manual(breaks = c("Pre", "Tool-use", "Post"),
+    values = c("#001015", "firebrick", "#09A1D7"),
+    labels = c("Pre", "Tool-use", "Post")) +
+    theme(text = element_text(size = 34))
+```
+
+
+#### Is this influenced by order?
+
+```{r}
+order_plot_data <- ppt_combined %>%
+dplyr::filter(
+  overall_trial > 66,
+  order != "Pre") %>%
+mutate(order = factor(
+  order,
+  levels = c("first", "second"),
+  labels = c("First", "Second"))) %>%
+group_by(
+  overall_trial,
+  order) %>% 
+dplyr::summarise(
+  m_vel = mean(vel_m_filt, na.rm = TRUE), 
+  m_acc = mean(acc_m_filtfilt, na.rm = TRUE), 
+  m_dec = mean(dec_m_filtfilt, na.rm = TRUE),
+  lat_vel = mean(vel_lat_filt, na.rm = TRUE),
+  lat_acc = mean(acc_lat_filtfilt, na.rm = TRUE),
+  lat_dec = mean(dec_lat_filtfilt, na.rm = TRUE)
+  ) 
+
+order_plot_data %>%
+ggplot(
+  aes(x = overall_trial,
+  y = m_vel,
+  color = order)) +
+  geom_line(size = 2) +
+  theme_tidybayes() +
+  labs(x = "Trial", y = "Peak Velocity") +
+  scale_color_manual(
+    breaks = c("First", "Second"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("First", "Second")
+  )
+
+order_plot_data %>%
+ggplot(
+  aes(x = overall_trial,
+  y = m_acc,
+  color = order)) +
+  geom_line(size = 2) +
+  theme_tidybayes() +
+  labs(x = "Trial", y = "Peak Acceleration") +
+  scale_color_manual(
+    breaks = c("First", "Second"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("First", "Second")
+  )
+
+order_plot_data %>%
+ggplot(
+  aes(x = overall_trial,
+  y = m_dec,
+  color = order)) +
+  geom_line(size = 2) +
+  theme_tidybayes() +
+  labs(x = "Trial", y = "Peak Deceleration") +
+  scale_color_manual(
+    breaks = c("First", "Second"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("First", "Second")
+  )
+
+order_plot_data %>%
+ggplot(
+  aes(x = overall_trial,
+  y = lat_vel,
+  color = order)) +
+  geom_line(size = 2) +
+  theme_tidybayes() +
+  labs(x = "Trial", y = "Velocity Latency") +
+  scale_color_manual(
+    breaks = c("First", "Second"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("First", "Second")
+  )
+
+order_plot_data %>%
+ggplot(
+  aes(x = overall_trial,
+  y = lat_acc,
+  color = order)) +
+  geom_line(size = 2) +
+  theme_tidybayes() +
+  labs(x = "Trial", y = "Acceleration Latency") +
+  scale_color_manual(
+    breaks = c("First", "Second"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("First", "Second")
+  )
+
+order_plot_data %>%
+ggplot(
+  aes(x = overall_trial,
+  y = lat_dec,
+  color = order)) +
+  geom_line(size = 2) +
+  theme_tidybayes() +
+  labs(x = "Trial", y = "Deceleration Latency") +
+  scale_color_manual(
+    breaks = c("First", "Second"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("First", "Second")
+  )
+```
+
+# Six-trial Models (Bongers 2010)
+
+```{r bongers-replication, include=FALSE}
+ppt_peaks_bongers <- ppt_m_std %>%
+    dplyr::filter(
+        (time == "Post" & 
+        trial_num_in_block %in% c(1:3)) 
+        | 
+        (time == "Pre" & 
+        trial_num_in_block %in% c(16:18))
+        )
+
+ppt_acceleration_and_latencies_bongers <- ppt_m %>%
+  mutate(acc_m_filtfilt_std = standardize(acc_m_filtfilt)) %>%
+  dplyr::filter(
+      (time == "Post" & 
+      trial_num_in_block %in% c(1:6)) 
+      | 
+      (time == "Pre" & 
+      trial_num_in_block %in% c(13:18))
+      )
+
+```
+
+As in Bongers, data is filtered such that the analysis only considers the last 6 trials of the first block (Pre) and the first 6 trials of the second block (Post) of manual reaching. 
+
+## Peaks
+### Velocity
+#### Prior
+```{r velocity-peak-prior}
+velocity_peak_priors <- brm(
+  vel_m_filt_std ~ 1 + time + (1 + time | ppid), 
+  data = ppt_peaks_bongers, 
+  family = gaussian,
+  prior = c(
+    set_prior(prior = "normal(-.2, 2)", class = "b", coef = "timePost"),
+    set_prior(prior = "normal(0, 2)", class = "Intercept"),
+    set_prior(prior = "exponential(1)", class = "sd"), 
+    set_prior(prior = "exponential(1)", class = "sigma"),
+    set_prior(prior = "lkj(1)", class = "cor", group = "ppid")
+  ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = TRUE, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(velocity_peak_priors)
+summary(velocity_peak_priors)
+```
+
+#### Posterior
+
+```{r velocity-peak-posterior}
+velocity_peaks <- update(
+  velocity_peak_priors,
+  sample_prior = "no",
+  refresh = 0,
+  seed = 1337,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakvelocity_ppt_bongers")
+  )
+
+plot(velocity_peaks)
+summary(velocity_peaks)
+
+pp_check(velocity_peaks, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Peak Velocity",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Velocity (mm/s)"
+  )
+
+velbf <- bayesfactor_pointnull(
+  velocity_peaks,
+  prior = velocity_peak_priors
+  ) %>% as.data.table()
+
+vel_describe <- bayestestR::describe_posterior(
+  velocity_peaks,
+  centrality = "map",
+  ci_method="hdi"
+  ) %>% 
+  dplyr::filter(Parameter == "b_timePost") %>% 
+  mutate("Outcome" = "Peak Velocity")
+
+(
+  vel_describe <- bind_cols(
+    vel_describe,
+    "BF" = exp(
+        velbf[Parameter == "b_timePost",
+        log_BF]
+        )
+        )
+)
+```
+
+### Acceleration
+#### Prior
+```{r acceleration-peak-prior}
+acceleration_peak_priors <- brm(
+  acc_m_filtfilt_std ~ 1 + time + (1 + time | ppid), 
+  data = ppt_acceleration_and_latencies_bongers, 
+  family = gaussian,
+  prior = c(
+    set_prior(prior = "normal(-.2, 2)", class = "b", coef = "timePost"),
+    set_prior(prior = "normal(0, 2)", class = "Intercept"),
+    set_prior(prior = "exponential(1)", class = "sd"), 
+    set_prior(prior = "exponential(1)", class = "sigma"),
+    set_prior(prior = "lkj(1)", class = "cor", group = "ppid")
+    ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = TRUE, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(acceleration_peak_priors)
+summary(acceleration_peak_priors)
+```
+
+#### Posterior
+
+```{r acceleration-peak-posterior}
+acceleration_peaks <- update(
+  acceleration_peak_priors,
+  sample_prior = "no",
+  refresh = 0,
+  seed = 1337,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakacceleration_ppt_bongers")
+  )
+
+plot(acceleration_peaks)
+summary(acceleration_peaks)
+
+pp_check(acceleration_peaks, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Acceleration Peak",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Acceleration (mm/s^2)"
+  )
+
+accbf <- bayesfactor_pointnull(acceleration_peaks) %>% as.data.table()
+
+acc_describe <- bayestestR::describe_posterior(
+  acceleration_peaks,
+  centrality = "map",
+  ci_method="hdi"
+  ) %>% dplyr::filter(
+    Parameter == "b_timePost"
+  ) %>% 
+  mutate("Outcome" = "Peak Acceleration")
+
+(
+  acc_describe <- bind_cols(
+    acc_describe,
+    "BF" = exp(
+        accbf[Parameter == "b_timePost",
+        log_BF]
+        )
+    )
+  )
+
+```
+
+### Deceleration
+#### Prior
+```{r deceleration-peak-prior}
+deceleration_peak_priors <- brm(
+  dec_m_filtfilt_std ~ 1 + time + (1 + time | ppid), 
+  data = ppt_peaks_bongers, 
+  family = gaussian,
+  prior = c(
+    set_prior(prior = "normal(.2, 2)", class = "b", coef = "timePost"),
+    set_prior(prior = "normal(0, 2)", class = "Intercept"),
+    set_prior(prior = "exponential(1)", class = "sd"), 
+    set_prior(prior = "exponential(1)", class = "sigma"),
+    set_prior(prior = "lkj(1)", class = "cor", group = "ppid")
+            ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = TRUE, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(deceleration_peak_priors)
+summary(deceleration_peak_priors)
+```
+
+#### Posterior
+```{r deceleration-peak-posterior}
+
+deceleration_peaks <- update(
+  deceleration_peak_priors,
+  sample_prior = "no",
+  seed = 1337,
+  refresh = 0,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakdeceleration_ppt_bongers")
+  )
+
+plot(deceleration_peaks)
+summary(deceleration_peaks)
+
+pp_check(deceleration_peaks, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Deceleration Peak",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Deceleration (mm/s^2)"
+  )
+
+dec_describe <- bayestestR::describe_posterior(
+  deceleration_peaks,
+  centrality = "map",
+  ci_method="hdi"
+  ) %>% dplyr::filter(
+    Parameter == "b_timePost"
+  ) %>% 
+  mutate("Outcome" = "Peak Deceleration")
+
+decbf <- bayesfactor_pointnull(deceleration_peaks) %>% as.data.table()
+
+(
+  dec_describe <- bind_cols(
+    dec_describe,
+    "BF" = exp(
+        decbf[Parameter == "b_timePost",
+        log_BF]
+        )
+    )
+    )
+
+```
+
+## Peak Latencies
+### Preregistration changes
+Changes from preregistration:  
+- Lognormal distribution over gaussian due to better posterior fit  
+- Unstandardized due to lognormal, and negative parameter estimates from standardization  
+- Intercepts centered at empirical mean, with an SD equal to empirical SD * 2.5  
+- Time effect centered at empirical SD / 5, with spread of empirical SD * 2.5  
+- These changes do not change the interpretable results of the models, but do improve the fit of the models  
+
+### Velocity
+
+#### Prior
+
+```{r velocity-latency-prior}
+
+velocity_latency_priors <- brm(
+  vel_lat_filt ~ 1 + time + (1 + time | ppid), 
+  data = ppt_acceleration_and_latencies_bongers, 
+  family = lognormal,
+  prior = c(
+     prior_string(
+       prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,sd(vel_lat_filt)] / 5
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,sd(vel_lat_filt)] * 2.5
+         ), 2), ")"
+       ),
+       class = "b"),
+    # Use rstanarm approach to set Intercept prior
+    # Use normal with mean of response, and sd of response * 2.5
+    prior_string(
+      prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,mean(vel_lat_filt)]
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,sd(vel_lat_filt)] * 2.5
+         ), 2), ")"
+       ),
+      class = "Intercept"),
+    prior(prior = "exponential(1)", class = "sd"),
+    prior(prior = "exponential(1)", class = "sigma"),
+    prior(prior = "lkj(1)", class = "cor", group = "ppid")
+            ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = 2, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(velocity_latency_priors)
+summary(velocity_latency_priors)
+```
+
+#### Posterior
+```{r velocity-latency-posterior}
+
+velocity_latencies <- update(
+  velocity_latency_priors,
+  sample_prior = "no",
+  refresh = 0,
+  seed = 1337,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "velocity_latency_ppt_bongers")
+  )
+
+plot(velocity_latencies)
+summary(velocity_latencies)
+
+pp_check(velocity_latencies, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Velocity Latency",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Time (ms)"
+  )
+
+velocity_latencies_describe <- bayestestR::describe_posterior(
+  velocity_latencies,
+  centrality = "map",
+  ci_method="hdi"
+  ) %>% 
+  dplyr::filter(
+  Parameter == "b_timePost"
+  ) %>% 
+  mutate("Outcome" = "Velocity Latency")
+
+vellatbf <- bayesfactor_pointnull(velocity_latencies) %>% as.data.table()
+
+vel_lat_describe <- bind_cols(
+    velocity_latencies_describe,
+    "BF" = exp(
+        vellatbf[Parameter == "b_timePost",
+        log_BF]
+        )
+    )
+```
+
+### Acceleration
+#### Prior
+```{r acceleration-latency-prior}
+
+# Acceleration Latency -------------
+
+acceleration_latency_priors <- brm(
+  acc_lat_filtfilt ~ 1 + time + (1 + time | ppid), 
+  data = ppt_acceleration_and_latencies_bongers, 
+  family = lognormal(link = "identity"),
+  prior = c(
+     prior_string(
+       prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,sd(acc_lat_filtfilt)] / 5
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,sd(acc_lat_filtfilt)] * 2.5
+         ), 2), ")"
+       ),
+       class = "b"),
+    # Use rstanarm approach to set Intercept prior
+    # Use normal with mean of response, and sd of response * 2.5
+    prior_string(
+      prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,mean(acc_lat_filtfilt)]
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,sd(acc_lat_filtfilt)] * 2.5
+         ), 2), ")"
+       ),
+      class = "Intercept"),
+    prior(prior = "exponential(1)", class = "sd"),
+    prior(prior = "exponential(1)", class = "sigma"),
+    prior(prior = "lkj(1)", class = "cor", group = "ppid")
+            ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = 2, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(acceleration_latency_priors) 
+
+```
+
+#### Posterior
+```{r acceleration-latency-posterior}
+
+acceleration_latencies <- update(
+  acceleration_latency_priors,
+  sample_prior = "no",
+  refresh = 0,
+  seed = 1337,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "acceleration_latency_ppt_bongers")
+  )
+
+plot(acceleration_latencies)
+summary(acceleration_latencies)
+
+pp_check(acceleration_latencies, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Acceleration Latency",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Time (ms)"
+  )
+
+acc_lat_describe <- bayestestR::describe_posterior(
+  acceleration_latencies, centrality = "map",
+  ci_method="hdi"
+  ) %>% 
+  dplyr::filter(
+    Parameter == "b_timePost"
+  ) %>% 
+  mutate("Outcome" = "Acceleration Latency")
+
+acclatbf <- bayesfactor_pointnull(acceleration_latencies) %>% as.data.table()
+
+(
+  acc_lat_describe <- bind_cols(
+    acc_lat_describe,
+    "BF" = exp(
+        acclatbf[
+          Parameter == "b_timePost",
+          log_BF
+          ]
+        )
+    )
+    )
+```
+
+### Deceleration
+#### Prior
+```{r deceleration-latency-prior}
+
+deceleration_latency_priors <- brm(dec_lat_filtfilt ~ 1 + time + (1 + time | ppid), 
+  data = ppt_acceleration_and_latencies_bongers, 
+  family = lognormal(link = "identity"),
+  prior = c(
+     prior_string(
+       prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,sd(dec_lat_filtfilt)] / 5
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,sd(dec_lat_filtfilt)] * 2.5
+         ), 2), ")"
+       ),
+       class = "b"),
+    # Use rstanarm approach to set Intercept prior
+    # Use normal with mean of response, and sd of response * 2.5
+    prior_string(
+      prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,mean(dec_lat_filtfilt)]
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_bongers[,sd(dec_lat_filtfilt)] * 2.5
+         ), 2), ")"
+       ),
+      class = "Intercept"),
+    prior(prior = "exponential(1)", class = "sd"),
+    prior(prior = "exponential(1)", class = "sigma"),
+    prior(prior = "lkj(1)", class = "cor", group = "ppid")
+            ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = 2, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(deceleration_latency_priors)
+summary(deceleration_latency_priors)
+```
+
+#### Posterior
+
+```{r deceleration-latency-posterior}
+
+deceleration_latencies <- update(
+  deceleration_latency_priors,
+  sample_prior = "no",
+  seed = 1337,
+  refresh = 0,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "deceleration_latency_ppt_bongers")
+  )
+
+plot(deceleration_latencies)
+summary(deceleration_latencies)
+
+pp_check(deceleration_latencies, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Deceleration Latency",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Time (ms)"
+  )
+
+deceleration_latencies_describe <- bayestestR::describe_posterior(
+  deceleration_latencies,
+  centrality = "map",
+  ci_method="hdi"
+  ) %>% 
+  dplyr::filter(
+    Parameter == "b_timePost"
+    ) %>% 
+  mutate("Outcome" = "Deceleration Latency")
+
+declatbf <- bayesfactor_pointnull(deceleration_latencies) %>% as.data.table()
+
+(
+  dec_lat_describe <- bind_cols(
+    deceleration_latencies_describe,
+    "BF" = exp(
+        declatbf[Parameter == "b_timePost",
+        log_BF]
+        )
+    )
+    )
+```
+
+# Summary Table
+
+```{r table_one, results='asis'}
+#| tbl-cap: Bongers Model Summary Table
+model_params <- bind_rows(
+  vel_describe,
+  acc_describe,
+  dec_describe,
+  vel_lat_describe,
+  acc_lat_describe,
+  dec_lat_describe
+) %>% select(
+  Outcome,
+  BF,
+  MAP,
+  CI_low,
+  CI_high
+) %>% rename("Lower" = CI_low,
+             "Upper" = CI_high,
+             "Mode" = MAP)
+
+fwrite(model_params, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "supplementary", "model_params_bongers.csv"))
+
+model_table <- flextable::qflextable(model_params) %>%
+  add_header_row(T, 
+                 c(" ", "95% Highest Density Interval"), 
+                 colwidths = c(3, 2)) %>% 
+  add_header_lines("Table 1. Parameters of Kinematic Models") %>%
+  border_outer(border = officer::fp_border(style = "none", 
+                                           width = 0), 
+               part = "header") %>%
+  hline(i = 1, 
+        border = officer::fp_border(style = "solid", 
+                                    width = 1.5), 
+        part = "header") %>%
+  hline(i = 2, j= c(1:3), 
+        border = officer::fp_border(style = "none", 
+                                    width = 0), 
+        part = "header") %>%
+  hline(i = 2, j= c(4, 5), 
+        border = officer::fp_border(style = "solid", 
+                                    width = 1), 
+        part = "header") %>%
+  hline(i = 3, 
+        border = officer::fp_border(style = "solid", 
+                                    width = 1), 
+        part = "header") %>%
+  hline(i = 6, 
+        border = officer::fp_border(style = "solid", 
+                                    width = 1.5), 
+        part = "body") %>%
+  flextable::footnote(i = 3, j=c(1:2),
+           value = as_paragraph(
+             c(
+               "Parameters given as standardized values, and represent the effect of time (tool-use).", 
+               "Bayes Factors represent multiplicative evidence in favor of effect (Savage-Dickey Ratios).")
+             ), 
+           ref_symbols = c("a", "b"),
+           part = "header"
+          ) %>%
+  font(fontname = "Times New Roman",
+       part = "all") %>%
+  fontsize(size = 9, part = "footer") %>%
+  flextable::colformat_double(i=c(1:6), j = 3:5, digits = 3) %>%
+  flextable::colformat_double(i=c(1:6), j = 2, digits = 2)
+  
+
+model_table
+
+saveRDS(model_table, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "supplementary", "kinematic_table_bongers.rds"))
+
+```
+
+
+# Twelve-trial Models (Cardinali 2009)
+
+Cardinali (2009) only had 12 trials in each of the two reaching blocks. This analysis only considers the last 12 of the pre-tool-use block, and first 12 of the post-tool-use block.
+
+```{r cardinali-replication, include=FALSE}
+ppt_peaks_cardinali <- ppt_m_std %>%
+    dplyr::filter(
+        (time == "Post" & 
+        trial_num_in_block %in% c(1:12)) 
+        | 
+        (time == "Pre" & 
+        trial_num_in_block %in% c(7:18))
+        )
+
+ppt_acceleration_and_latencies_cardinali <- ppt_m %>%
+  mutate(acc_m_filtfilt_std = standardize(acc_m_filtfilt)) %>%
+  dplyr::filter(
+      ppid != "d1-001",
+      (time == "Post" & 
+      trial_num_in_block %in% c(1:12)) 
+      | 
+      (time == "Pre" & 
+      trial_num_in_block %in% c(7:18))
+      )
+
+```
+
+## Peaks
+### Velocity
+#### Prior
+```{r velocity-peak-prior-cardinali}
+velocity_peak_priors <- brm(
+  vel_m_filt_std ~ 1 + time + (1 + time | ppid), 
+  data = ppt_peaks_cardinali, 
+  family = gaussian,
+  prior = c(
+    set_prior(prior = "normal(-.2, 2)", class = "b", coef = "timePost"),
+    set_prior(prior = "normal(0, 2)", class = "Intercept"),
+    set_prior(prior = "exponential(1)", class = "sd"), 
+    set_prior(prior = "exponential(1)", class = "sigma"),
+    set_prior(prior = "lkj(1)", class = "cor", group = "ppid")
+  ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = TRUE, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(velocity_peak_priors)
+summary(velocity_peak_priors)
+```
+
+#### Posterior
+
+```{r velocity-peak-posterior-cardinali}
+velocity_peaks <- update(
+  velocity_peak_priors,
+  sample_prior = "no",
+  refresh = 0,
+  seed = 1337,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakvelocity_ppt_cardinali")
+  )
+
+plot(velocity_peaks)
+summary(velocity_peaks)
+
+pp_check(velocity_peaks, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Peak Velocity",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Velocity (mm/s)"
+  )
+
+velbf <- bayesfactor_pointnull(
+  velocity_peaks,
+  prior = velocity_peak_priors
+  ) %>% as.data.table()
+
+vel_describe <- bayestestR::describe_posterior(
+  velocity_peaks,
+  centrality = "map",
+  ci_method="hdi"
+  ) %>% 
+  dplyr::filter(Parameter == "b_timePost") %>% 
+  mutate("Outcome" = "Peak Velocity")
+
+(
+  vel_describe <- bind_cols(
+    vel_describe,
+    "BF" = exp(
+        velbf[Parameter == "b_timePost",
+        log_BF]
+        )
+        )
+)
+```
+
+### Acceleration
+#### Prior
+```{r acceleration-peak-prior-cardinali}
+acceleration_peak_priors <- brm(
+  acc_m_filtfilt_std ~ 1 + time + (1 + time | ppid), 
+  data = ppt_acceleration_and_latencies_cardinali, 
+  family = gaussian,
+  prior = c(
+    set_prior(prior = "normal(-.2, 2)", class = "b", coef = "timePost"),
+    set_prior(prior = "normal(0, 2)", class = "Intercept"),
+    set_prior(prior = "exponential(1)", class = "sd"), 
+    set_prior(prior = "exponential(1)", class = "sigma"),
+    set_prior(prior = "lkj(1)", class = "cor", group = "ppid")
+    ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = TRUE, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(acceleration_peak_priors)
+summary(acceleration_peak_priors)
+```
+
+#### Posterior
+
+```{r acceleration-peak-posterior-cardinali}
+acceleration_peaks <- update(
+  acceleration_peak_priors,
+  sample_prior = "no",
+  refresh = 0,
+  seed = 1337,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakacceleration_ppt_cardinali")
+  )
+
+plot(acceleration_peaks)
+summary(acceleration_peaks)
+
+pp_check(acceleration_peaks, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Acceleration Peak",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Acceleration (mm/s^2)"
+  )
+
+accbf <- bayesfactor_pointnull(acceleration_peaks) %>% as.data.table()
+
+acc_describe <- bayestestR::describe_posterior(
+  acceleration_peaks,
+  centrality = "map",
+  ci_method="hdi"
+  ) %>% dplyr::filter(
+    Parameter == "b_timePost"
+  ) %>% 
+  mutate("Outcome" = "Peak Acceleration")
+
+(
+  acc_describe <- bind_cols(
+    acc_describe,
+    "BF" = exp(
+        accbf[Parameter == "b_timePost",
+        log_BF]
+        )
+    )
+  )
+
+```
+
+### Deceleration
+#### Prior
+```{r deceleration-peak-prior-cardinali}
+deceleration_peak_priors <- brm(
+  dec_m_filtfilt_std ~ 1 + time + (1 + time | ppid), 
+  data = ppt_peaks_cardinali, 
+  family = gaussian,
+  prior = c(
+    set_prior(prior = "normal(.2, 2)", class = "b", coef = "timePost"),
+    set_prior(prior = "normal(0, 2)", class = "Intercept"),
+    set_prior(prior = "exponential(1)", class = "sd"), 
+    set_prior(prior = "exponential(1)", class = "sigma"),
+    set_prior(prior = "lkj(1)", class = "cor", group = "ppid")
+            ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = TRUE, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(deceleration_peak_priors)
+summary(deceleration_peak_priors)
+```
+
+#### Posterior
+```{r deceleration-peak-posterior-cardinali}
+
+deceleration_peaks <- update(
+  deceleration_peak_priors,
+  sample_prior = "no",
+  seed = 1337,
+  refresh = 0,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakdeceleration_ppt_cardinali")
+  )
+
+plot(deceleration_peaks)
+summary(deceleration_peaks)
+
+pp_check(deceleration_peaks, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Deceleration Peak",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Deceleration (mm/s^2)"
+  )
+
+dec_describe <- bayestestR::describe_posterior(
+  deceleration_peaks,
+  centrality = "map",
+  ci_method="hdi"
+  ) %>% dplyr::filter(
+    Parameter == "b_timePost"
+  ) %>% 
+  mutate("Outcome" = "Peak Deceleration")
+
+decbf <- bayesfactor_pointnull(deceleration_peaks) %>% as.data.table()
+
+(
+  dec_describe <- bind_cols(
+    dec_describe,
+    "BF" = exp(
+        decbf[Parameter == "b_timePost",
+        log_BF]
+        )
+    )
+    )
+
+```
+
+## Peak Latencies
+### Preregistration changes
+Changes from preregistration:  
+- Lognormal distribution over gaussian due to better posterior fit  
+- Unstandardized due to lognormal, and negative parameter estimates from standardization  
+- Intercepts centered at empirical mean, with an SD equal to empirical SD * 2.5  
+- Time effect centered at empirical SD / 5, with spread of empirical SD * 2.5  
+- These changes do not change the interpretable results of the models, but do improve the fit of the models  
+
+### Velocity
+
+#### Prior
+
+```{r velocity-latency-prior-cardinali}
+
+velocity_latency_priors <- brm(
+  vel_lat_filt ~ 1 + time + (1 + time | ppid), 
+  data = ppt_acceleration_and_latencies_cardinali, 
+  family = lognormal,
+  prior = c(
+     prior_string(
+       prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,sd(vel_lat_filt)] / 5
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,sd(vel_lat_filt)] * 2.5
+         ), 2), ")"
+       ),
+       class = "b"),
+    # Use rstanarm approach to set Intercept prior
+    # Use normal with mean of response, and sd of response * 2.5
+    prior_string(
+      prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,mean(vel_lat_filt)]
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,sd(vel_lat_filt)] * 2.5
+         ), 2), ")"
+       ),
+      class = "Intercept"),
+    prior(prior = "exponential(1)", class = "sd"),
+    prior(prior = "exponential(1)", class = "sigma"),
+    prior(prior = "lkj(1)", class = "cor", group = "ppid")
+            ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = 2, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(velocity_latency_priors)
+summary(velocity_latency_priors)
+```
+
+#### Posterior
+```{r velocity-latency-posterior-cardinali}
+
+velocity_latencies <- update(
+  velocity_latency_priors,
+  sample_prior = "no",
+  refresh = 0,
+  seed = 1337,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "velocity_latency_ppt_cardinali")
+  )
+
+plot(velocity_latencies)
+summary(velocity_latencies)
+
+pp_check(velocity_latencies, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Velocity Latency",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Time (ms)"
+  )
+
+velocity_latencies_describe <- bayestestR::describe_posterior(
+  velocity_latencies,
+  centrality = "map",
+  ci_method="hdi"
+  ) %>% 
+  dplyr::filter(
+  Parameter == "b_timePost"
+  ) %>% 
+  mutate("Outcome" = "Velocity Latency")
+
+vellatbf <- bayesfactor_pointnull(velocity_latencies) %>% as.data.table()
+
+vel_lat_describe <- bind_cols(
+    velocity_latencies_describe,
+    "BF" = exp(
+        vellatbf[Parameter == "b_timePost",
+        log_BF]
+        )
+    )
+```
+
+### Acceleration
+#### Prior
+```{r acceleration-latency-prior-cardinali}
+
+# Acceleration Latency -------------
+
+acceleration_latency_priors <- brm(
+  acc_lat_filtfilt ~ 1 + time + (1 + time | ppid), 
+  data = ppt_acceleration_and_latencies_cardinali, 
+  family = lognormal(link = "identity"),
+  prior = c(
+     prior_string(
+       prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,sd(acc_lat_filtfilt)] / 5
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,sd(acc_lat_filtfilt)] * 2.5
+         ), 2), ")"
+       ),
+       class = "b"),
+    # Use rstanarm approach to set Intercept prior
+    # Use normal with mean of response, and sd of response * 2.5
+    prior_string(
+      prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,mean(acc_lat_filtfilt)]
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,sd(acc_lat_filtfilt)] * 2.5
+         ), 2), ")"
+       ),
+      class = "Intercept"),
+    prior(prior = "exponential(1)", class = "sd"),
+    prior(prior = "exponential(1)", class = "sigma"),
+    prior(prior = "lkj(1)", class = "cor", group = "ppid")
+            ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = 2, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(acceleration_latency_priors) 
+
+```
+
+#### Posterior
+```{r acceleration-latency-posterior-cardinali}
+
+acceleration_latencies <- update(
+  acceleration_latency_priors,
+  sample_prior = "no",
+  refresh = 0,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "acceleration_latency_ppt_cardinali")
+  )
+
+plot(acceleration_latencies)
+summary(acceleration_latencies)
+
+pp_check(acceleration_latencies, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Acceleration Latency",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Time (ms)"
+  )
+
+acc_lat_describe <- bayestestR::describe_posterior(
+  acceleration_latencies, centrality = "map",
+  ci_method="hdi"
+  ) %>% 
+  dplyr::filter(
+    Parameter == "b_timePost"
+  ) %>% 
+  mutate("Outcome" = "Acceleration Latency")
+
+acclatbf <- bayesfactor_pointnull(acceleration_latencies) %>% as.data.table()
+
+(
+  acc_lat_describe <- bind_cols(
+    acc_lat_describe,
+    "BF" = exp(
+        acclatbf[
+          Parameter == "b_timePost",
+          log_BF
+          ]
+        )
+    )
+    )
+```
+
+### Deceleration
+#### Prior
+```{r deceleration-latency-prior-cardinali}
+
+deceleration_latency_priors <- brm(dec_lat_filtfilt ~ 1 + time + (1 + time | ppid), 
+  data = ppt_acceleration_and_latencies_cardinali, 
+  family = lognormal(link = "identity"),
+  prior = c(
+     prior_string(
+       prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,sd(dec_lat_filtfilt)] / 5
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,sd(dec_lat_filtfilt)] * 2.5
+         ), 2), ")"
+       ),
+       class = "b"),
+    # Use rstanarm approach to set Intercept prior
+    # Use normal with mean of response, and sd of response * 2.5
+    prior_string(
+      prior = paste0("normal(",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,mean(dec_lat_filtfilt)]
+         ), 2), ",",
+         round(log(
+          ppt_acceleration_and_latencies_cardinali[,sd(dec_lat_filtfilt)] * 2.5
+         ), 2), ")"
+       ),
+      class = "Intercept"),
+    prior(prior = "exponential(1)", class = "sd"),
+    prior(prior = "exponential(1)", class = "sigma"),
+    prior(prior = "lkj(1)", class = "cor", group = "ppid")
+            ),
+  sample_prior = "only",
+  seed = 1337,
+  silent = 2, refresh = 0,
+  save_pars = save_pars(all = TRUE),
+  warmup = b, iter = i, chains = ch, cores = co,
+  control = control_list
+  )
+
+plot(deceleration_latency_priors)
+summary(deceleration_latency_priors)
+```
+
+#### Posterior
+
+```{r deceleration-latency-posterior-cardinali}
+
+deceleration_latencies <- update(
+  deceleration_latency_priors,
+  sample_prior = "no",
+  seed = 1337,
+  refresh = 0,
+  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "deceleration_latency_ppt_cardinali")
+  )
+
+plot(deceleration_latencies)
+summary(deceleration_latencies)
+
+pp_check(deceleration_latencies, ndraws = 50) +
+  theme_tidybayes() +
+  theme(
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    title = "Deceleration Latency",
+    subtitle = "Posterior Draws vs. Empirical Distribution",
+    x = "Time (ms)"
+  )
+
+deceleration_latencies_describe <- bayestestR::describe_posterior(
+  deceleration_latencies,
+  centrality = "map",
+  ci_method="hdi"
+  ) %>% 
+  dplyr::filter(
+    Parameter == "b_timePost"
+    ) %>% 
+  mutate("Outcome" = "Deceleration Latency")
+
+declatbf <- bayesfactor_pointnull(deceleration_latencies) %>% as.data.table()
+
+(
+  dec_lat_describe <- bind_cols(
+    deceleration_latencies_describe,
+    "BF" = exp(
+        declatbf[Parameter == "b_timePost",
+        log_BF]
+        )
+    )
+    )
+```
+
+# Summary Table
+
+```{r table_one-cardinali, results='asis'}
+#| tbl-cap: Cardinali Model Summary Table
+model_params <- bind_rows(
+  vel_describe,
+  acc_describe,
+  dec_describe,
+  vel_lat_describe,
+  acc_lat_describe,
+  dec_lat_describe
+) %>% select(
+  Outcome,
+  BF,
+  MAP,
+  CI_low,
+  CI_high
+) %>% rename("Lower" = CI_low,
+             "Upper" = CI_high,
+             "Mode" = MAP)
+
+fwrite(model_params, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "supplementary", "model_params_cardinali.csv"))
+
+model_table <- flextable::qflextable(model_params) %>%
+  add_header_row(T, 
+                 c(" ", "95% Highest Density Interval"), 
+                 colwidths = c(3, 2)) %>% 
+  add_header_lines("Parameters of Kinematic Models") %>%
+  border_outer(border = officer::fp_border(style = "none", 
+                                           width = 0), 
+               part = "header") %>%
+  hline(i = 1, 
+        border = officer::fp_border(style = "solid", 
+                                    width = 1.5), 
+        part = "header") %>%
+  hline(i = 2, j= c(1:3), 
+        border = officer::fp_border(style = "none", 
+                                    width = 0), 
+        part = "header") %>%
+  hline(i = 2, j= c(4, 5), 
+        border = officer::fp_border(style = "solid", 
+                                    width = 1), 
+        part = "header") %>%
+  hline(i = 3, 
+        border = officer::fp_border(style = "solid", 
+                                    width = 1), 
+        part = "header") %>%
+  hline(i = 6, 
+        border = officer::fp_border(style = "solid", 
+                                    width = 1.5), 
+        part = "body") %>%
+  flextable::footnote(i = 3, j=c(1:2),
+           value = as_paragraph(
+             c(
+               "Parameters given as standardized values, and represent the effect of time (tool-use).", 
+               "Bayes Factors represent multiplicative evidence in favor of effect (Savage-Dickey Ratios).")
+             ), 
+           ref_symbols = c("a", "b"),
+           part = "header"
+          ) %>%
+  font(fontname = "Times New Roman",
+       part = "all") %>%
+  fontsize(size = 9, part = "footer") %>%
+  flextable::colformat_double(i=c(1:6), j = 3:5, digits = 3) %>%
+  flextable::colformat_double(i=c(1:6), j = 2, digits = 2)
+  
+
+model_table
+
+saveRDS(model_table, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "supplementary", "kinematic_table_cardinali.rds"))
+
+```
+
+### Does Forearm Length Influence Baseline Reaching Kinematics?
+
+```{r}
+ppt_forearmlength <- landmark[, .(forearmlength = mean(forearmlength)),
+    by = c("ppid")
+] %>%
+    merge(ppt_m, by = "ppid") %>%
+    as.data.table()
+
+
+```
+
+```{r}
+participant_info <- fread(here::here("data", "1_tooluseinvr", "participant_info.csv")) %>%
+  select(
+    ppid, age, gender, fatigue, performance_hypothesis
+  ) %>%
+  mutate(study = "VR") %>%
+bind_rows(
+  fread(here::here("data", "2_toolusenotinvr", "participant_info.csv")) %>%
+    select(
+      ppid, age, gender, fatigue, performance_hypothesis
+    ) %>%
+    mutate(study = "Real")
+  ) %>%
+  mutate(
+    study = factor(study, levels = c("VR", "Real"), labels = c("VR", "Real")),
+    fatigue = factor(fatigue, levels = c(0, 1), labels = c("No", "Yes")),
+    performance_hypothesis = factor(performance_hypothesis, levels = c(0, 1), labels = c("No", "Yes"))
+  )
+
+# Use ggplot to plot the number of participants who reported a performance hypothesis in each study
+participant_info %>%
+  ggplot(
+    aes(
+    fill = performance_hypothesis,
+    y = study)
+  ) +
+  geom_bar(position = position_dodge()) +
+  labs(title = "Performance Hypothesis", subtitle = "Studies 1 & 2", x = "Study", y = "Number of Participants") +
+  theme_tidybayes() +
+  theme(text = element_text(size = 26)) +
+  scale_fill_manual(
+    values = c("#001015", "#09A1D7")
+    )
+
+# Use ggplot to plot the number of participants who reported fatigue in each study
+participant_info %>%
+  ggplot(
+    aes(
+    fill = fatigue,
+    y = study)
+  ) +
+  geom_bar(position = position_stack()) +
+  labs(title = "Fatigue", subtitle = "Studies 1 & 2", x = "Study", y = "Number of Participants") +
+  theme_tidybayes() +
+  theme(text = element_text(size = 26)) +
+  scale_fill_manual(
+    values = c("#001015", "#09A1D7")
+    )
+```
+
+### Is the effect influenced by a performance hypothesis?
+
+```{r}
+participant_info_and_kinematics <- ppt_m %>%
+  left_join(participant_info, by = "ppid") %>%
+  mutate(
+    overall_trial = fifelse(
+      block_num > 3,
+      trial_num_in_block + 18,
+      trial_num_in_block
+    ),
+    order = fcase(
+      block_num == 4,
+      "First",
+      block_num == 5,
+      "Second",
+      block_num < 4,
+      "Pre"
+    )
+  )
+
+participant_info_and_kinematics %>%
+group_by(time, performance_hypothesis, fatigue) %>%
+dplyr::summarise(
+  m_vel = mean(vel_m_filt),
+  m_acc = mean(acc_m_filtfilt),
+  m_dec = mean(dec_m_filtfilt), n = n()/18
+  )
+```
+
+```{r}
+# Use ggplot to plot a point and line plot of the mean peak velocity on the y axis 
+# across each trial on the x axis, grouping by performance hypothesis and using the 
+# color aesthetic to differentiate the two groups
+performance_hypothesis_plot <- participant_info_and_kinematics %>%
+  group_by(overall_trial, time, performance_hypothesis, fatigue) %>%
+  dplyr::summarise(
+    m_vel = mean(vel_m_filt),
+    m_acc = mean(acc_m_filtfilt),
+    m_dec = mean(dec_m_filtfilt)
+  ) %>%
+  ggplot(aes(x = overall_trial,
+  y = m_vel, 
+  group = interaction(
+    time,
+    performance_hypothesis
+    ), 
+    color = performance_hypothesis
+    )
+    ) +
+    geom_line(size = 2) +
+    labs(
+      title = "Peak Velocity By Trial",
+      subtitle = "Studies 1 & 2",
+      x = "Trial",
+      y = "Peak Velocity (mm/s)",
+      color = "Performance Hypothesis"
+      ) +
+    theme_tidybayes()+
+    scale_color_manual(
+    breaks = c("No", "Yes"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("No", "Yes")
+    ) +
+    theme(text = element_text(size = 34))
+```
+
+```{r}
+performance_hypothesis_plot +
+facet_wrap(~fatigue, ncol = 1, scales = "free_y")
+```
+
+### Is the effect influenced by fatigue?
+
+```{r}
+# Use ggplot to plot a point and line plot of the mean peak velocity on the y axis 
+# across each trial on the x axis, grouping by fatigue and using the 
+# color aesthetic to differentiate the two groups
+participant_info_and_kinematics %>%
+  group_by(overall_trial, time, fatigue) %>%
+  dplyr::summarise(m_vel = mean(vel_m_filt),
+            m_acc = mean(acc_m_filtfilt),
+            m_dec = mean(dec_m_filtfilt)) %>%
+  ggplot(aes(x = overall_trial,
+  y = m_vel, 
+  group = interaction(
+    time,
+    fatigue
+    ), 
+    color = fatigue
+    )
+    ) +
+    geom_line(size = 2) +
+    labs(
+      title = "Peak Velocity By Trial",
+      subtitle = "Studies 1 & 2",
+      x = "Trial",
+      y = "Peak Velocity (mm/s)",
+      color = "Fatigue"
+      ) +
+    theme_tidybayes()+
+    scale_color_manual(
+    breaks = c("No", "Yes"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("No", "Yes")
+    ) +
+    theme(text = element_text(size = 34))
+```
+
+```{r}
+# Recreates the previous plot twice, once for each order in the post-test (one for "First" and one for "Second")
+# Then combine the two plots into one using the patchwork package
+(
+  participant_info_and_kinematics %>%
+  dplyr::filter(order == "First" | order == "Pre") %>%
+  group_by(overall_trial, time, fatigue) %>%
+  dplyr::summarise(m_vel = mean(vel_m_filt),
+            m_acc = mean(acc_m_filtfilt),
+            m_dec = mean(dec_m_filtfilt)) %>%
+  ggplot(aes(x = overall_trial,
+  y = m_vel, 
+  group = interaction(
+    time,
+    fatigue
+    ), 
+    color = fatigue
+    )
+    ) +
+    geom_line(size = 2) +
+    labs(
+      title = "Reaching First",
+      x = "Trial",
+      y = "Peak Velocity (mm/s)",
+      color = "Fatigue"
+      ) +
+    theme_tidybayes()+
+    scale_color_manual(
+    breaks = c("No", "Yes"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("No", "Yes")
+    ) +
+    theme(text = element_text(size = 34))
+) / (
+  participant_info_and_kinematics %>%
+  dplyr::filter(order == "Second" | order == "Pre") %>%
+  group_by(overall_trial, time, fatigue) %>%
+  dplyr::summarise(m_vel = mean(vel_m_filt),
+            m_acc = mean(acc_m_filtfilt),
+            m_dec = mean(dec_m_filtfilt)) %>%
+  ggplot(aes(x = overall_trial,
+  y = m_vel, 
+  group = interaction(
+    time,
+    fatigue
+    ), 
+    color = fatigue
+    )
+    ) +
+    geom_line(size = 2) +
+    labs(
+      title = "Reaching Second",
+      x = "Trial",
+      y = "Peak Velocity (mm/s)",
+      color = "Fatigue"
+      ) +
+    theme_tidybayes()+
+    scale_color_manual(
+    breaks = c("No", "Yes"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("No", "Yes")
+    ) +
+    theme(text = element_text(size = 34))
+) +
+    patchwork::plot_annotation(
+      title = "Peak Velocity By Trial",
+      subtitle = "Studies 1 & 2",
+      caption = "Figure 1: Peak velocity by trial for each order in the post-test. The line plot shows the mean peak velocity for each trial, with the color representing fatigue and the line representing the order in the post-test. The first order in the post-test is the first time the participant used the tool in the virtual reality environment. The second order in the post-test is the second time the participant used the tool in the virtual reality environment.",
+      theme = theme_tidybayes()
+    )
+```
+
+```{r}
+ participant_info_and_kinematics %>%
+  dplyr::filter(overall_trial %in% c(1:36)) %>%
+  group_by(time, order, fatigue) %>%
+  dplyr::summarise(
+    m_vel = mean(vel_m_filt),
+    m_acc = mean(acc_m_filtfilt),
+    m_dec = mean(dec_m_filtfilt)
+    )
+```
+
+
+```{r}
+sessioninfo::package_info()
+```

@@ -1,0 +1,1023 @@
+---
+title: "Avatar VR - Trial-level Data - Landmark"
+author: "Joshua Bell"
+date: "2/14/2022"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-float: true
+    toc-placement: left
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+pkgs <- c("data.table", "ggplot2", "skimr", "tidybayes", "dplyr", "readr", "tidyfast", "stringr", "tidyr", "magrittr", "purrr", "signal", "here")
+for(i in pkgs)
+{
+  if(!i %in% rownames(installed.packages())){
+    install.packages(i) 
+    library(i, character.only = TRUE)
+  }
+  else(library(i, character.only = TRUE))
+}
+
+landmark <- read_csv(here::here("data", "study_three", "landmark_full.csv")) %>%
+  select(!experiment:participant) %>%
+  mutate(
+    target = factor(target, levels = c("Wrist", "Forearm", "Elbow")),
+    time = factor(time, levels = c("pre", "post"))
+  ) %>%
+  as.data.table()
+
+landmark_fix <- read_csv(here::here("data", "study_three", "landmark_full.csv")) %>%
+  select(!experiment:participant) %>%
+  mutate(
+    target = factor(lapse_fix_target, levels = c("Wrist", "Forearm", "Elbow")),
+    time = factor(time, levels = c("pre", "post"))
+  ) %>%
+  as.data.table()
+showtext::showtext_auto()
+#Flip wide to long, xyz across targets
+#Take average for each participant, block. Plot as veridical location.
+#Plot estimates/reality in pair of columns: Point, or dotplot. Means & reality high alpha, individual estimates low alpha.
+#Plot participant on the x axis
+#Colors?
+
+landmark_long <- melt(landmark,
+  id.vars = c("ppid", "block", "time", "trial", "target"),
+  measure.vars = colnames(select(landmark, ends_with(c("pos_z")))),
+  variable.name = "armlocation",
+  value.name = "position") %>% as.data.table()
+
+landmark_long_fix <- melt(landmark_fix,
+  id.vars = c("ppid", "block", "time", "trial", "target"),
+  measure.vars = colnames(select(landmark, ends_with(c("pos_z")))),
+  variable.name = "armlocation",
+  value.name = "position") %>% as.data.table()
+
+landmark_veridical <- landmark_long %>%
+  dplyr::filter(armlocation != "spos_z") %>%
+  group_by(ppid, time, armlocation) %>%
+  summarise(position = mean(position)) %>%
+  mutate(target = factor(armlocation,
+    levels = c("wpos_z", "fpos_z", "epos_z"),
+    labels = c("Wrist", "Forearm", "Elbow"))) %>%
+  as.data.table()
+
+landmark_veridical_fix <- landmark_long_fix %>%
+  dplyr::filter(armlocation != "spos_z") %>%
+  group_by(ppid, time, armlocation) %>%
+  summarise(position = mean(position)) %>%
+  mutate(target = factor(armlocation,
+    levels = c("wpos_z", "fpos_z", "epos_z"),
+    labels = c("Wrist", "Forearm", "Elbow"))) %>%
+  as.data.table()
+
+landmark_estimates <- landmark_long %>%
+dplyr::filter(armlocation == "spos_z") %>%
+group_by(ppid, time, armlocation, target) %>%
+  summarise(position = mean(position)) %>%
+  mutate(target = factor(target,
+    levels = c("Wrist", "Forearm", "Elbow"),
+    labels = c("Wrist", "Forearm", "Elbow"))) %>%
+  as.data.table()
+
+landmark_estimates_fix <- landmark_long_fix %>%
+dplyr::filter(armlocation == "spos_z") %>%
+group_by(ppid, time, armlocation, target) %>%
+  summarise(position = mean(position)) %>%
+  mutate(target = factor(target,
+    levels = c("Wrist", "Forearm", "Elbow"),
+    labels = c("Wrist", "Forearm", "Elbow"))) %>%
+  as.data.table()
+```
+
+# Landmark Trial Visualizations
+
+## No Lapse Fix Applied
+
+### By-Participant
+
+```{r nofix_plots, echo=FALSE}
+# For-loop to plot each participants' estimated and veridical arm landmarks
+
+
+# Create empty lists to fill
+
+nonfix_plots <- list()
+l <- list()
+v <- list()
+e <- list()
+armlength <- list()
+pre_perceived <- list()
+post_perceived <- list()
+pre_veridical <- list()
+post_veridical <- list()
+pre_ratio <- list()
+post_ratio <- list()
+armlength_df <- data.frame()
+change_df <- data.table()
+
+x_limits <- c(
+  round(min(landmark$spos_z) - sd(landmark$spos_z), 1), 
+  round(max(landmark$spos_z) + sd(landmark$spos_z), 1)
+  )
+
+for(p in unique(landmark$ppid))
+  {
+      # Fill three data frames for plotting
+      l[[p]] <- data.table::copy(landmark[ppid == p])
+      v[[p]] <- data.table::copy(landmark_veridical[ppid == p])
+      e[[p]] <- data.table::copy(landmark_estimates[ppid == p])
+
+      # Calculate perceived arm length in pre-test as the absolute difference between the
+      # average wrist and elbow estimate (previously established on the z-axis)
+      pre_perceived[[p]] <- abs(
+        abs(
+          e[[p]][target == "Wrist" & time == "pre"]$position) 
+        
+        - 
+        
+        abs(
+          e[[p]][target == "Elbow" & time == "pre"]$position
+          )
+        )
+      
+      # Post-test perceived arm length
+      post_perceived[[p]] <- abs(abs(e[[p]][target == "Wrist" & time == "post"]$position) - abs(e[[p]][target == "Elbow" & time == "post"]$position))
+      
+      # Pre-test veridical arm length
+      pre_veridical[[p]] <- abs(abs(v[[p]][target == "Wrist" & time == "pre"]$position) - abs(v[[p]][target == "Elbow" & time == "pre"]$position))
+      
+      # Post-test veridical arm length
+      post_veridical[[p]] <- abs(abs(v[[p]][target == "Wrist" & time == "post"]$position) - abs(v[[p]][target == "Elbow" & time == "post"]$position))
+      
+      # Take average of pre- and post-veridical as ground truth
+      armlength[[p]] <- round(mean(c(pre_veridical[[p]], post_veridical[[p]])), 2) * 100
+
+      # Calculate ratio of perceived to veridical arm length for pre- and post-test
+      pre_ratio[[p]] <- round(pre_perceived[[p]] / pre_veridical[[p]], 2) * 100
+      post_ratio[[p]] <- round(post_perceived[[p]] / post_veridical[[p]], 2) * 100
+
+      veridical_change <- round(pre_veridical[[p]] - post_veridical[[p]], 3)
+      perceived_change <- round(pre_perceived[[p]] - post_perceived[[p]], 3)
+
+      ####
+      # Plot construction ----------------------------------
+      ####
+
+      plot <- ggplot(
+        data = l[[p]],
+        aes(
+          y = time,
+          x = spos_z,
+          color = target
+        )
+      ) +
+
+        # Veridical line and points -------------------------
+        geom_point(alpha = .5) +
+        geom_segment(aes(
+          y = 1.5,
+          yend = 1.5,
+          x = mean(v[[p]][target == "Elbow"]$position),
+          xend = mean(v[[p]][target == "Wrist"]$position)
+        ),
+        color = "darkgray"
+        ) +
+        geom_point(
+          data = v[[p]] %>%
+            group_by(target) %>%
+            summarise(position = mean(position)),
+          aes(
+            x = position,
+            color = target,
+            y = 1.5
+          )
+        ) +
+
+        # Estimated line and points --------------------------
+        geom_segment(aes(
+          y = 1.9,
+          yend = 1.9,
+          x = mean(e[[p]][target == "Elbow" & time == "pre"]$position),
+          xend = mean(e[[p]][target == "Wrist" & time == "pre"]$position)
+        ),
+        linetype = "longdash",
+        color = "darkgray"
+        ) +
+        geom_segment(aes(
+          y = 1.1,
+          yend = 1.1,
+          x = mean(e[[p]][target == "Elbow" & time == "post"]$position),
+          xend = mean(e[[p]][target == "Wrist" & time == "post"]$position)
+        ),
+        linetype = "longdash",
+        color = "darkgray"
+        ) +
+        geom_point(
+          data = e[[p]][time == "pre"],
+          aes(x = position, color = target),
+          position = position_nudge(y = -.1)
+        ) +
+        geom_point(
+          data = e[[p]][time == "post"],
+          aes(x = position, color = target),
+          position = position_nudge(y = .1)
+        ) +
+
+        # Line ratios ----------------------------------------
+        geom_text(aes(
+          y = 1.85,
+          x = mean(e[[p]][target == "Wrist"]$position),
+          label = paste("P/A: ", pre_ratio[[p]], "%", sep = "")
+        ),
+        color = "black",
+        check_overlap = T
+        ) +
+        geom_text(aes(
+          y = 1.15,
+          x = mean(e[[p]][target == "Wrist"]$position),
+          label = paste("P/A: ", post_ratio[[p]], "%", sep = "")
+        ),
+        color = "black",
+        check_overlap = T
+        ) +
+
+        # Line labels ----------------------------------------
+        geom_text(aes(
+          x = mean(e[[p]][target == "Forearm"]$position),
+          y = 1.15,
+          label = paste("Perceived: ",
+            round(post_perceived[[p]], 2) * 100,
+            "cm",
+            sep = ""
+          )
+        ),
+        color = "black",
+        check_overlap = T
+        ) +
+        geom_text(aes(
+          x = mean(e[[p]][target == "Forearm"]$position),
+          y = 1.85,
+          label = paste("Perceived: ",
+            round(pre_perceived[[p]], 2) * 100,
+            "cm",
+            sep = ""
+          )
+        ),
+        color = "black",
+        check_overlap = T
+        ) +
+        geom_text(aes(
+          x = mean(v[[p]][target == "Forearm"]$position),
+          label = paste("Actual: ", armlength[[p]], "cm", sep = ""),
+          y = 1.55
+        ),
+        color = "black",
+        check_overlap = T
+        ) +
+
+        # Plot aesthetics ------------------------------------
+        theme_tidybayes() +
+        labs(
+          y = "Time", x = "Z-coordinate (meters)", color = "Target",
+          title = paste("Perceived vs. Actual Arm Length - Participant: ", p)
+        ) +
+        scale_color_viridis_d() +
+        scale_linetype_manual(
+          values = c("solid", "longdash"),
+          labels = c("Actual", "Perceived")
+        ) +
+        scale_y_discrete(
+          limits = rev,
+          labels = c("Post", "Pre")
+        ) +
+        scale_x_continuous(
+          limits = x_limits,
+          breaks = seq(x_limits[[1]], x_limits[[2]], by = .1)
+        )
+      
+      # Append two rows to new dataframe for later analysis
+      # One for pre-test, one for post-test
+      armlength_df <- bind_rows(
+        armlength_df,
+        data.frame(
+          ppid = p,
+          time = "Pre",
+          armlength = armlength[[p]],
+          perceived = pre_perceived[[p]],
+          veridical = pre_veridical[[p]],
+          ratio = pre_ratio[[p]]
+        ),
+        data.frame(
+          ppid = p,
+          time = "Post",
+          armlength = armlength[[p]],
+          perceived = post_perceived[[p]],
+          veridical = post_veridical[[p]],
+          ratio = post_ratio[[p]]
+        )
+      )
+      
+      change_df <- bind_rows(
+        change_df,
+        data.table(
+          ppid = p,
+          veridical_change = veridical_change,
+          perceived_change = perceived_change
+        )
+      )
+
+      nonfix_plots[[p]] <- plot
+  }
+
+```
+
+```{r plot_print_nofix,echo=FALSE}
+for(p in unique(landmark$ppid)){
+  print(nonfix_plots[[p]])
+}
+```
+
+### Overall
+
+```{r overall, echo=FALSE}
+# Calculate average perceived and veridical arm length, across all participants.
+# Similar to above, but with all participants combined.
+
+
+l <- landmark
+v <- landmark_veridical
+e <- landmark_estimates
+
+pre_perceived <- mean(
+  abs(abs(e[target == "Wrist" & time == "pre"]$position) 
+  - abs(e[target == "Elbow" & time == "pre"]$position))
+  )
+
+post_perceived <- mean(
+  abs(abs(e[target == "Wrist" & time == "post"]$position) 
+  - abs(e[target == "Elbow" & time == "post"]$position))
+  )
+
+pre_veridical <- mean(
+  abs(abs(v[target == "Wrist" & time == "pre"]$position) 
+  - abs(v[target == "Elbow" & time == "pre"]$position))
+  )
+
+post_veridical <- mean(
+  abs(abs(v[target == "Wrist" & time == "post"]$position) 
+  - abs(v[target == "Elbow" & time == "post"]$position))
+  )
+
+armlength <- round(mean(c(pre_veridical, post_veridical)), 2) * 100
+pre_ratio =  round(pre_perceived/pre_veridical, 2)*100
+post_ratio = round(post_perceived/post_veridical, 2)*100
+
+nonfix_overallplot <- l %>%
+  ggplot(
+    aes(
+      y = time,
+      x = spos_z,
+      color = target
+    )
+    ) +
+  # Veridical line and points ----------------------------
+  geom_segment(
+    aes(
+      y = 1.5,
+      yend = 1.5,
+      x = mean(v[target == "Elbow"]$position),
+      xend = mean(v[target == "Wrist"]$position)
+    ),
+    color = "forestgreen"
+    ) +
+
+    geom_point(
+      data = v %>% group_by(target) %>% summarise(position = mean(position)),
+      aes(x = position, y = 1.5),
+      color = "forestgreen",
+      size = 2
+    ) +
+
+    # Estimated line and points ----------------------------
+    geom_segment(
+      aes(
+        y = 1,
+        yend = 1,
+        x = mean(e[target == "Elbow" & time == "pre"]$position),
+        xend = mean(e[target == "Wrist" & time == "pre"]$position)
+      ),
+      linetype = "longdash",
+      color = "darkgray"
+      ) +
+
+      geom_segment(
+        aes(
+          y = 2,
+          yend = 2,
+          x = mean(e[target == "Elbow" & time == "post"]$position),
+          xend = mean(e[target == "Wrist" & time == "post"]$position)
+        ),
+        linetype = "longdash",
+        color = "darkgray"
+      ) +
+
+      geom_point(
+        data = e[time == "pre"] %>% group_by(target, time) %>% summarise(position = mean(position)),
+        aes(x = position,
+          color = target),
+          size = 2
+      ) +
+
+      geom_point(
+        data = e[time == "post"] %>% group_by(target, time) %>% summarise(position = mean(position)),
+        aes(x = position,
+          color = target),
+          size = 2
+      ) +
+
+      geom_point(
+        data = e,
+        aes(
+          x = position,
+          color = target
+        ),
+        alpha = .5,
+        position = position_jitter(height = .1)
+      ) +
+
+      # Line ratios -----------------------------------------
+      geom_text(aes(
+        y = 2.3, x = mean(e[target == "Wrist"]$position),
+        label = paste("P/A: ", mean(pre_ratio), "%", sep = "")
+      ),
+      color = "black",
+      check_overlap = T
+      ) +
+
+      geom_text(aes(
+        y = 1.3, x = mean(e[target == "Wrist"]$position),
+        label = paste("P/A: ", mean(post_ratio), "%", sep = "")
+      ),
+      color = "black",
+      check_overlap = T
+      ) +
+
+      # Line labels ----------------------------------------
+      geom_text(aes(
+        x = mean(e[target == "Forearm"]$position),
+        y = 1.15,
+        label = paste("Perceived: ",
+          round(post_perceived, 2) * 100,
+          "cm",
+          sep = ""
+        )
+      ),
+      color = "black",
+      check_overlap = T
+      ) +
+
+      geom_text(aes(
+        x = mean(e[target == "Forearm"]$position),
+        y = 1.85,
+        label = paste("Perceived: ",
+          round(pre_perceived, 2) * 100,
+          "cm",
+          sep = ""
+        )
+      ),
+      color = "black",
+      check_overlap = T
+      ) +
+
+      geom_text(aes(
+        x = mean(v[target == "Forearm"]$position),
+        label = paste("Actual: ", armlength, "cm", sep = ""),
+        y = 1.55
+      ),
+      color = "black",
+      check_overlap = T
+      ) +
+      theme_tidybayes() +
+      labs(
+        y = "Time",
+        x = "Z-coordinate (meters)",
+        color = "Target"
+      ) +
+      scale_linetype_manual(
+        values = c("solid", "longdash"),
+        labels = c("Actual", "Perceived")
+      ) +
+      scale_y_discrete(
+        limits = rev,
+        labels = c("Post", "Pre")
+      ) +
+      scale_x_continuous(
+            limits = x_limits,
+            breaks = seq(x_limits[[1]], x_limits[[2]], by = .1)
+      )
+
+    nonfix_overallplot
+```
+
+```{r armlength_ratio, echo=FALSE}
+pre_ratio_ <- unlist(pre_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "pre")
+post_ratio_ <- unlist(post_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "post")
+d <- full_join(pre_ratio_, post_ratio_)
+d %>% group_by(time) %>% summarise(m_length = mean(perceived_length))
+sum(landmark$lapse)
+```
+
+## Lapse-fixed Plots
+
+### By Participant
+
+```{r lapsefix_plots, echo=FALSE}
+
+# Create empty lists to fill
+
+lapsefix_plots <- list()
+l <- list()
+v <- list()
+e <- list()
+armlength <- list()
+pre_perceived <- list()
+post_perceived <- list()
+pre_veridical <- list()
+post_veridical <- list()
+pre_ratio <- list()
+post_ratio <- list()
+armlength_df_lapsefix <- data.frame()
+
+for(p in unique(landmark_fix$ppid))
+  {
+      # Fill three data frames for plotting
+      l[[p]] <- landmark_fix[ppid == p]
+      v[[p]] <- landmark_veridical_fix[ppid == p]
+      e[[p]] <- landmark_estimates_fix[ppid == p]
+      
+      # Arm length calculations
+      pre_perceived[[p]] <- abs(abs(e[[p]][target == "Wrist" & time == "pre"]$position) - abs(e[[p]][target == "Elbow" & time == "pre"]$position))
+      post_perceived[[p]] <- abs(abs(e[[p]][target == "Wrist" & time == "post"]$position) - abs(e[[p]][target == "Elbow" & time == "post"]$position))
+      pre_veridical[[p]] <- abs(abs(v[[p]][target == "Wrist" & time == "pre"]$position) - abs(v[[p]][target == "Elbow" & time == "pre"]$position))
+      post_veridical[[p]] <- abs(abs(v[[p]][target == "Wrist" & time == "post"]$position) - abs(v[[p]][target == "Elbow" & time == "post"]$position))
+      armlength[[p]] <- round(mean(c(pre_veridical[[p]], post_veridical[[p]])), 2) * 100
+      pre_ratio[[p]] <-  round(pre_perceived[[p]]/pre_veridical[[p]], 2)*100
+      post_ratio[[p]] <- round(post_perceived[[p]]/post_veridical[[p]], 2)*100
+      
+
+      # Plot creation
+      plot <- ggplot(
+        data = l[[p]],
+        aes(
+          y = time,
+          x = spos_z,
+          color = target
+        )
+        ) +
+
+        #Veridical line and points ----------------------------
+        geom_point(alpha = .5) +
+          geom_segment(aes(
+            y = 1.5,
+            yend = 1.5,
+            x = mean(v[[p]][target == "Elbow"]$position),
+            xend = mean(v[[p]][target == "Wrist"]$position)
+          ),
+          color = "darkgray"
+          ) +
+
+        geom_point(
+          data = v[[p]] %>%
+            group_by(target) %>%
+            summarise(position = mean(position)),
+          aes(
+            x = position,
+            color = target,
+            y = 1.5
+          )
+        ) +
+
+        # Estimated line and points -----------------------------
+        geom_segment(
+        aes(
+          y = 1.9,
+          yend = 1.9,
+          x = mean(e[[p]][target == "Elbow" & time == "pre"]$position),
+          xend = mean(e[[p]][target == "Wrist" & time == "pre"]$position)
+        ),
+        linetype = "longdash",
+        color = "darkgray"
+        ) +
+
+        geom_segment(
+        aes(
+          y = 1.1,
+          yend = 1.1,
+          x = mean(e[[p]][target == "Elbow" & time == "post"]$position),
+          xend = mean(e[[p]][target == "Wrist" & time == "post"]$position)
+        ),
+        linetype = "longdash",
+        color = "darkgray"
+        ) +
+
+        geom_point(
+          data = e[[p]][time == "pre"],
+          aes(x = position, color = target),
+          position = position_nudge(y = -.1)
+        ) +
+          
+        geom_point(
+          data = e[[p]][time == "post"],
+          aes(x = position, color = target),
+          position = position_nudge(y = .1)
+        ) +
+
+        # Line ratios ----------------------------------------
+        geom_text(aes(
+          y = 1.85,
+          x = mean(e[[p]][target == "Wrist"]$position),
+          label = paste("P/A: ", pre_ratio[[p]], "%", sep = "")
+        ),
+        color = "black",
+        check_overlap = T
+        ) +
+
+        geom_text(aes(
+          y = 1.15,
+          x = mean(e[[p]][target == "Wrist"]$position),
+          label = paste("P/A: ", post_ratio[[p]], "%", sep = "")
+        ),
+        color = "black",
+        check_overlap = T
+        ) +
+
+        # Line labels ----------------------------------------
+        geom_text(aes(
+          x = mean(e[[p]][target == "Forearm"]$position),
+          y = 1.15,
+          label = paste("Perceived: ",
+            round(post_perceived[[p]], 2) * 100,
+            "cm",
+            sep = ""
+          )
+        ),
+        color = "black",
+        check_overlap = T
+        ) +
+
+        geom_text(aes(
+          x = mean(e[[p]][target == "Forearm"]$position),
+          y = 1.85,
+          label = paste("Perceived: ",
+            round(pre_perceived[[p]], 2) * 100,
+            "cm",
+            sep = ""
+          )
+        ),
+        color = "black",
+        check_overlap = T
+        ) +
+
+        geom_text(aes(
+          x = mean(v[[p]][target == "Forearm"]$position),
+          label = paste("Actual: ", armlength[[p]], "cm", sep = ""),
+          y = 1.55
+        ),
+        color = "black",
+        check_overlap = T
+        ) +
+
+        theme_tidybayes() +
+
+        labs(
+          y = "Time", x = "Z-coordinate (meters)", color = "Target",
+          title = paste("Perceived vs. Actual Arm Length - Participant: ", p)
+        ) +
+
+        scale_color_viridis_d() +
+        scale_linetype_manual(
+          values = c("solid", "longdash"),
+          labels = c("Actual", "Perceived")
+        ) +
+        scale_y_discrete(
+          limits = rev,
+          labels = c("Post", "Pre")
+        ) +
+        scale_x_continuous(
+            limits = x_limits,
+            breaks = seq(x_limits[[1]], x_limits[[2]], by = .1)
+      )
+
+      # Append two rows to new dataframe for later analysis
+      # One for pre-test, one for post-test
+      armlength_df_lapsefix <- bind_rows(
+        armlength_df_lapsefix,
+        data.frame(
+          ppid = p,
+          time = "Pre",
+          armlength = armlength[[p]],
+          perceived = pre_perceived[[p]],
+          veridical = pre_veridical[[p]],
+          ratio = pre_ratio[[p]]
+        ),
+        data.frame(
+          ppid = p,
+          time = "Post",
+          armlength = armlength[[p]],
+          perceived = post_perceived[[p]],
+          veridical = post_veridical[[p]],
+          ratio = post_ratio[[p]]
+        )
+      )
+
+        lapsefix_plots[[p]] <- plot
+        
+  }
+
+```
+
+```{r plot_print_lapsefix, echo=FALSE}
+for(p in unique(landmark$ppid)){
+  print(lapsefix_plots[[p]])
+}
+```
+
+### Overall
+
+```{r lapse-fix-overall, echo=FALSE}
+
+l <- landmark_fix
+
+v <- landmark_veridical_fix
+e <- landmark_estimates_fix
+
+pre_perceived <- mean(abs(abs(e[target == "Wrist" & time == "pre"]$position) - abs(e[target == "Elbow" & time == "pre"]$position)))
+post_perceived <- mean(abs(abs(e[target == "Wrist" & time == "post"]$position) - abs(e[target == "Elbow" & time == "post"]$position)))
+pre_veridical <- mean(abs(abs(v[target == "Wrist" & time == "pre"]$position) - abs(v[target == "Elbow" & time == "pre"]$position)))
+post_veridical <- mean(abs(abs(v[target == "Wrist" & time == "post"]$position) - abs(v[target == "Elbow" & time == "post"]$position)))
+armlength <- round(mean(c(pre_veridical, post_veridical)), 2) * 100
+pre_ratio <- round(pre_perceived / pre_veridical, 2) * 100
+post_ratio <- round(post_perceived / post_veridical, 2) * 100
+
+lapsefix_overallplot <- l %>%
+  ggplot(
+    aes(
+      y = time,
+      x = spos_z,
+      color = target
+    )
+  ) +
+  # Veridical line and points ----------------------------
+  geom_segment(
+    aes(
+      y = 1.5,
+      yend = 1.5,
+      x = mean(v[target == "Elbow"]$position),
+      xend = mean(v[target == "Wrist"]$position)
+    ),
+    color = "forestgreen"
+  ) +
+  geom_point(
+    data = v %>% group_by(target) %>% summarise(position = mean(position)),
+    aes(x = position, y = 1.5),
+    color = "forestgreen",
+    size = 2
+  ) +
+
+  # Estimated line and points ----------------------------
+  geom_segment(
+    aes(
+      y = 1,
+      yend = 1,
+      x = mean(e[target == "Elbow" & time == "pre"]$position),
+      xend = mean(e[target == "Wrist" & time == "pre"]$position)
+    ),
+    linetype = "longdash",
+    color = "darkgray"
+  ) +
+  geom_segment(
+    aes(
+      y = 2,
+      yend = 2,
+      x = mean(e[target == "Elbow" & time == "post"]$position),
+      xend = mean(e[target == "Wrist" & time == "post"]$position)
+    ),
+    linetype = "longdash",
+    color = "darkgray"
+  ) +
+  geom_point(
+    data = e[time == "pre"] %>% group_by(target, time) %>% summarise(position = mean(position)),
+    aes(
+      x = position,
+      color = target
+    ),
+    size = 2
+  ) +
+  geom_point(
+    data = e[time == "post"] %>% group_by(target, time) %>% summarise(position = mean(position)),
+    aes(
+      x = position,
+      color = target
+    ),
+    size = 2
+  ) +
+  geom_point(
+    data = e,
+    aes(
+      x = position,
+      color = target
+    ),
+    alpha = .5,
+    position = position_jitter(height = .1)
+  ) +
+
+  # Line ratios
+  geom_text(
+    aes(
+      y = 2.3, x = mean(e[target == "Wrist"]$position),
+      label = paste("P/A: ", mean(pre_ratio), "%", sep = "")
+    ),
+    color = "black",
+    check_overlap = T
+  ) +
+  geom_text(
+    aes(
+      y = 1.3, x = mean(e[target == "Wrist"]$position),
+      label = paste("P/A: ", mean(post_ratio), "%", sep = "")
+    ),
+    color = "black",
+    check_overlap = T
+  ) +
+
+  # Line labels ----------------------------------------
+  geom_text(aes(
+    x = mean(e[target == "Forearm"]$position),
+    y = 1.15,
+    label = paste("Perceived: ",
+        round(post_perceived, 2) * 100,
+        "cm",
+        sep = ""
+      )
+    ),
+    color = "black",
+    check_overlap = T
+    ) +
+    geom_text(aes(
+      x = mean(e[target == "Forearm"]$position),
+      y = 1.85,
+      label = paste("Perceived: ",
+        round(pre_perceived, 2) * 100,
+        "cm",
+        sep = ""
+      )
+    ),
+    color = "black",
+    check_overlap = T
+    ) +
+    geom_text(aes(
+      x = mean(v[target == "Forearm"]$position),
+      label = paste("Actual: ", armlength, "cm", sep = ""),
+      y = 1.55
+    ),
+    color = "black",
+    check_overlap = T
+    ) +
+    theme_tidybayes() +
+    labs(
+      y = "Time",
+      x = "Z-coordinate (meters)",
+      color = "Target"
+    ) +
+    scale_linetype_manual(
+      values = c("solid", "longdash"),
+      labels = c("Actual", "Perceived")
+    ) +
+    scale_y_discrete(
+      limits = rev,
+      labels = c("Post", "Pre")
+    ) +
+      scale_x_continuous(
+          limits = x_limits,
+          breaks = seq(x_limits[[1]], x_limits[[2]], by = .1)
+    )
+  lapsefix_overallplot
+```
+
+```{r ratio_lapsefix, echo = FALSE}
+pre_ratio_ <- unlist(pre_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "pre")
+post_ratio_ <- unlist(post_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "post")
+d <- full_join(pre_ratio_, post_ratio_)
+d %>% group_by(time) %>% summarise(m_length = mean(perceived_length))
+```
+
+## Effect of stimulus direction
+
+```{r }
+landmark %>%
+ggplot(
+  aes(
+    x = error,
+    y = target,
+    color = direction,
+    fill = direction
+  )
+) +
+stat_dotsinterval(
+  alpha = .6,
+  position = position_dodge(width = .1),
+  interval_alpha = 1,
+  point_size = 4.5) +
+scale_color_viridis_d() +
+scale_fill_viridis_d() +
+theme_tidybayes()
+
+```
+
+### Effect of stimulus direction (lapse-fixed)
+
+```{r }
+landmark %>%
+ggplot(
+  aes(
+    x = lapse_fix_error,
+    y = target,
+    color = direction,
+    fill = direction
+  )
+) +
+stat_dotsinterval(
+  alpha = .6,
+  position = position_dodge(width = .1),
+  interval_alpha = 1,
+  point_size = 4.5) +
+scale_color_viridis_d() +
+scale_fill_viridis_d() +
+theme_tidybayes()
+```
+
+## Outliers/Extreme Cases
+
+### Perceived-Veridical Ratio
+
+```{r perceived-veridical-ratio}
+as.data.table(armlength_df)[order(ratio, decreasing = TRUE)]
+```
+
+
+### Error in pre-post tracker placement
+When occluded, the elbow tracker in particular becomes unstable, and it will sometimes shift position between pre- and post-test blocks.
+```{r}
+as.data.table(change_df)[order(veridical_change, decreasing = TRUE)]
+```
+
+### Compounded perceived and veridical change
+
+```{r}
+as.data.table(change_df)[, .(abs_change = perceived_change + veridical_change)][
+  order(abs_change, decreasing = TRUE)
+]
+```
+
+### Response variability
+
+
+```{r response-variability}
+
+landmark[,
+  .(
+    variability = sd(error),
+    variability_as_ratio = sd(error) / mean(forearmlength)
+    ),
+  by = c("ppid")
+][order(variability, decreasing = T)]
+```
+
+#### Lapse Fix
+
+```{r response-variability-lapsefix}
+
+landmark[,
+  .(
+    variability_lf = sd(lapse_fix_error),
+    variability_as_ratio_lf = sd(lapse_fix_error) / mean(forearmlength),
+    lapsefix_improvement = sd(error) - sd(lapse_fix_error)
+    ),
+  by = c("ppid")
+][order(variability_lf, decreasing = T)]
+```
+
+```{r, echo = FALSE}
+fwrite(
+  armlength_df,
+  here::here("data", "study_three", "landmark_armlength.csv")
+  )
+fwrite(
+  armlength_df_lapsefix,
+  here::here("data", "study_three", "landmark_armlength_lapsefix.csv")
+  )
+```
+

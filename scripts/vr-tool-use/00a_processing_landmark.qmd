@@ -1,0 +1,175 @@
+---
+title: "VR - Processing - Landmark"
+author: "Joshua Bell"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-float: true
+    toc-placement: left
+---
+
+# Packages
+```{r package-import}
+pkgs <- c("dplyr", "readr", "tidyr", "stringr", "tidyfast", "data.table", "magrittr", "signal", "here", "purrr", "simputation", "sessioninfo")
+for (i in pkgs) {
+  if (!i %in% rownames(installed.packages())) {
+    install.packages(i)
+    library(i, character.only = TRUE)
+  } else {
+    (library(i, character.only = TRUE))
+  }
+}
+
+sessioninfo::session_info()
+```
+
+# Import data
+```{r data-import}
+# Processing data from UXF
+trial_details <- list.files(
+  path = here::here("data", "1_tooluseinVR"),
+  pattern = "trial_results.csv",
+  full.names = TRUE,
+  recursive = TRUE
+) %>%
+  map_dfr(fread)
+```
+
+
+# Wrangle data
+```{r data-cleaning}
+# Landmark ------------------------------------------
+landmark_files <- trial_details %>%
+    select(
+        ppid,
+        experiment, block_num, trial_num_in_block,
+        landmarkstimulus_estimates_location_0
+    ) %>%
+    # I accidentally a participant id
+    mutate(
+        ppid = case_when(
+            ppid == "d-002" ~ "d1-002",
+            ppid %in% c("d-1-001", "d-1-002") ~ "d1-003",
+            TRUE ~ ppid
+        ),
+        # Adjust filepaths to accommodate fix
+        landmarkstimulus_estimates_location_0 = ifelse(
+            !is.na(landmarkstimulus_estimates_location_0) &
+                str_detect(
+                    landmarkstimulus_estimates_location_0,
+                    "1_tooluseinVR\\/d-[\\d-][\\d-]\\d+\\/"
+                ),
+            paste0(
+                experiment, "/",
+                ppid, "/",
+                str_remove(
+                    landmarkstimulus_estimates_location_0,
+                    "^1_tooluseinVR\\/d-[\\d-][\\d-]\\d+\\/"
+                )
+            ),
+            landmarkstimulus_estimates_location_0
+        )
+    ) %>%
+    dplyr::filter(
+        !is.na(
+            landmarkstimulus_estimates_location_0
+        ) & landmarkstimulus_estimates_location_0 != ""
+    )
+
+landmark_tables <- landmark_files %>%
+  mutate(
+    landmark_estimates = map(
+      file.path(
+        here::here(
+          "data/",
+          `landmarkstimulus_estimates_location_0`
+        )
+      ),
+      fread
+      )
+      ) %>%
+  unnest(cols = c(`landmarkstimulus_estimates_location_0`))
+
+
+landmark_tables <- landmark_tables %>%
+  select(
+    -c(
+      `landmarkstimulus_estimates_location_0`,
+      trial_num_in_block, block_num
+    )
+  ) %>%
+    unnest(landmark_estimates)
+```
+
+# Lapse Fix
+```{r lapsefix}
+landmark_detail <- landmark_tables %>%
+  mutate(
+    time = factor(
+      ifelse(
+        block < 3,
+        "pre",
+        "post"
+        ),
+      levels = c(
+        "pre",
+        "post"
+        )
+    ),
+    order = case_when(
+      block < 3 ~ "pre",
+      block == 4 ~ "first",
+      block == 5 ~ "second"
+    ),
+    # Determines the landmark closest to the estimate
+    # using the absolute value of the difference along 
+    # the z-axis
+    closest_to = case_when(
+      (abs(abs(spos_z) - abs(wpos_z)) < abs(abs(spos_z) - abs(fpos_z)) &
+        abs(abs(spos_z) - abs(wpos_z)) < abs(abs(spos_z) - abs(epos_z)))
+      ~ "Wrist",
+      (abs(abs(spos_z) - abs(epos_z)) < abs(abs(spos_z) - abs(wpos_z)) &
+        abs(abs(spos_z) - abs(epos_z)) < abs(abs(spos_z) - abs(fpos_z)))
+      ~ "Elbow",
+      (abs(abs(spos_z) - abs(fpos_z)) < abs(abs(spos_z) - abs(epos_z)) &
+        abs(abs(spos_z) - abs(fpos_z)) < abs(abs(spos_z) - abs(wpos_z)))
+      ~ "Forearm"
+    ),
+    # Determines the error of the estimate relative to the
+    # closest landmark
+    error_closest_to = case_when(
+      closest_to == "Wrist" ~ spos_z - wpos_z,
+      closest_to == "Elbow" ~ spos_z - epos_z,
+      closest_to == "Forearm" ~ spos_z - fpos_z
+    ),
+    # Lapse determination:
+    # If the error is greater than half the length of the forearm
+    # and the closest landmark is not the target, the trial is a lapse
+    lapse = (closest_to != target) & abs(error) > forearmlength / 2,
+    # If the trial is a lapse, the target is the closest landmark
+    lapse_fix_target = ifelse(
+      lapse, closest_to, target
+    ),
+    # If the trial is a lapse, the error is the error relative to the closest landmark
+    lapse_fix_error = ifelse(
+      lapse, error_closest_to, error
+    )
+  )
+
+landmark_abbreviated <- landmark_detail %>%
+  select(
+    ppid,
+    experiment, order, block, trial, time,
+    target, lapse_fix_target,
+    error, lapse_fix_error,
+    forearmlength,
+    closest_to, lapse
+  )
+```
+
+# Write Data
+```{r write-files}
+fwrite(landmark_abbreviated, here::here("data", "study_one", "landmark.csv"))
+fwrite(landmark_detail, here::here("data", "study_one", "landmark_full.csv"))
+```

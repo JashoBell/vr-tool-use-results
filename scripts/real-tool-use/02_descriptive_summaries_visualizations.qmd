@@ -1,0 +1,578 @@
+---
+title: "Real-world - Descriptive Analyses"
+author: "Joshua Bell"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-float: true
+    toc-placement: left
+---
+
+# Imports
+
+```{r packages-import, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = "center", fig.width = 12, fig.height = 6)
+
+pkgs <- c("dplyr", "tidyr", "magrittr", "readr", "data.table", "here", "ggplot2", "gghalves", "ggthemes", "tidybayes", "patchwork", "datawizard")
+for(i in pkgs){
+  if(!i %in% rownames(installed.packages())){ 
+    install.packages(i) 
+    library(i, character.only = TRUE)
+  }
+  else(library(i, character.only = TRUE))
+}
+
+annotate_npc <- function(label, x, y, ...)
+{
+  ggplot2::annotation_custom(grid::textGrob(
+    x = unit(x, "npc"), y = unit(y, "npc"), label = label, gp = grid::gpar(fontsize = 20), ...))
+}
+# Function to create raincloud plots 8=using ggplot2, ggdist/tidybayes stats
+raincloud_plot <- function(dataframe, variable)
+{
+  plot_data = dataframe
+  plot_data %>%
+  ggplot() +
+  aes(
+    x = {{variable}}
+  ) +
+  stat_slab(
+    side = "top",
+    fill = "#09A1D7"
+  ) +
+  stat_dots(
+    side = "bottom",
+    dotsize = .9,
+    fill = "#09A1D7",
+    color = "#09A1D7"
+  ) +
+  stat_pointinterval(
+    point_interval = mode_hdi
+  ) +
+  theme_tidybayes()
+}
+
+ppt_m <- read_csv(
+  here::here("data", "study_two", "ppt_manual.csv")) %>% 
+  as.data.table() %>%
+  mutate(time = factor(
+    x = time, 
+    levels = c("pre", "post"), 
+    labels = c("Pre", "Post")
+    )
+  )
+
+landmark <- read_csv(
+  here::here("data", "study_two", "landmark.csv")) %>%
+  select(
+    ppid, 
+    trial, 
+    time, 
+    forearmlength, 
+    lapse_fix_target, 
+    lapse_fix_error
+  ) %>%
+  mutate(
+    error_std = standardize(
+      lapse_fix_error
+      ),
+    target = factor(
+      lapse_fix_target,
+      levels = c("Elbow", "Forearm", "Wrist")),
+    error_cm = lapse_fix_error * 100,
+    time = factor(
+      time,
+      levels = c("pre", "post"),
+      labels= c("Pre", "Post"))) %>%
+  as.data.table()
+
+```
+
+# Landmark Task
+
+## Empirical Distributions
+
+### Error (in cm)
+
+#### By Target
+
+```{r}
+(landmark_raincloud <- landmark %>% 
+  raincloud_plot(variable = error_cm) +
+  facet_wrap(~target, ncol = 1))
+```
+
+### By Time
+
+```{r}
+(landmark_raincloud <- landmark %>% 
+  raincloud_plot(variable = error_cm) +
+  facet_wrap(~time, ncol = 1))
+```
+
+#### Time x Target
+
+```{r landmark-empirical-plot}
+lm_empirical <- landmark %>%
+ggplot(aes(y = error_cm,
+  x = time,
+  fill = time,
+  color = time)) + 
+  stat_pointinterval(data = landmark[time == "Post"],
+                     point_interval = mean_qi, 
+                     show_slab = FALSE, 
+                     position = position_nudge(x = -.45)) +
+  stat_pointinterval(data = landmark[time == "Pre"],
+                   point_interval = mean_qi, 
+                   show_slab = FALSE, 
+                   position = position_nudge(x = .45)) +
+  geom_half_point(data = landmark[time == "Post"], 
+                  side = "r", 
+                  range_scale = .5,
+                  alpha = .6) +
+  geom_half_point(data = landmark[time == "Pre"],
+                  side = "l", 
+                  range_scale = .5,
+                  alpha = .6) +
+  stat_slab(data = landmark[time == "Post"],
+            alpha = .8, 
+            scale = .4,
+            side = "left") +  
+  stat_slab(data = landmark[time == "Pre"],
+            alpha = .8, 
+            scale = .4, 
+            side = "right") +
+  geom_hline(yintercept = 0, linetype = "longdash", color = "black", alpha = .8) +
+  facet_wrap(~target)+
+  theme_tidybayes() +
+  scale_x_discrete(limits = c("Pre", "Post"),
+                   expand = c(0, 0),
+                   labels = c("Pre", "Post"))+
+  scale_y_continuous(limits = c(-35, 35), expand = c(0, 0), breaks = seq(-20, 20, 5)) +
+  scale_fill_manual(breaks = c("Pre", "Post"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("Pre", "Post")) +
+  scale_color_manual(breaks = c("Pre", "Post"),
+    values = c("#001015", "#09A1D7"),
+    labels = c("Pre", "Post")) +
+  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time", title = "Body Landmark Task Response Distributions") +
+  theme(axis.text.y = element_text(hjust = 0),
+        title = element_text(size = 14),
+        text = element_text(size = 16, color = "black"),
+        strip.background = element_blank(),
+        strip.placement = "inside",
+        strip.switch.pad.wrap = unit(0, "in"),
+        panel.background = element_rect(fill = "transparent", colour = NA), 
+        legend.background = element_rect(fill = "transparent", colour = NA),  
+        plot.background = element_rect(fill = "transparent", colour = NA))
+
+ggsave(lm_empirical, filename = here::here("scripts", "for_osf", "tooluse_in_real",  "figures", "landmark-empirical-plot.svg"), width = 15, height = 8)
+saveRDS(lm_empirical, here::here("scripts", "for_osf", "tooluse_in_real",  "figures", "landmark-empirical-plot.rds"))
+
+lm_empirical
+```
+
+# Reaching Task
+
+## Empirical Distributions
+
+### Overall
+Intervals are 95% HDI, point estimates are the MAP.
+
+```{r reaching-empirical-plot}
+
+
+
+# A raincloud plot for each of the kinematic peaks and latencies, using ggdist's stat_slab and stat_dotplot.
+velocity_raincloud <- ppt_m %>% 
+  raincloud_plot(vel_m_filt)
+
+acceleration_raincloud <- ppt_m %>% 
+  raincloud_plot(acc_m_filtfilt)
+
+deceleration_raincloud <- ppt_m %>% 
+  raincloud_plot(dec_m_filtfilt)
+
+velocity_latency_raincloud <- ppt_m %>% 
+  raincloud_plot(vel_lat_filt)
+
+acceleration_latency_raincloud <- ppt_m %>% 
+  raincloud_plot(acc_lat_filtfilt)
+
+deceleration_latency_raincloud <- ppt_m %>%
+  raincloud_plot(dec_lat_filtfilt)
+
+```
+
+##### Velocity
+
+```{r velocity_raincloud, echo = FALSE, fig.cap = "Velocity Raincloud Plot"}
+velocity_raincloud
+```
+
+##### Acceleration
+
+```{r acceleration_raincloud, echo = FALSE, fig.cap = "Acceleration Raincloud Plot"}
+acceleration_raincloud
+```
+
+##### Deceleration
+ 
+```{r deceleration_raincloud, echo = FALSE, fig.cap = "Deceleration Raincloud Plot"}
+deceleration_raincloud
+```
+
+#### Latencies
+
+##### Velocity
+
+```{r velocity_latency_raincloud, echo = FALSE, fig.cap = "Velocity Latency Raincloud Plot"}
+velocity_latency_raincloud
+```
+
+##### Acceleration
+
+```{r acceleration_latency_raincloud, echo = FALSE, fig.cap = "Acceleration Latency Raincloud Plot"}
+acceleration_latency_raincloud
+```
+
+##### Deceleration
+
+```{r deceleration_latency_raincloud, echo = FALSE, fig.cap = "Deceleration Latency Raincloud Plot"}
+deceleration_latency_raincloud
+```
+
+
+### By Time
+```{r kinematics-empirical-plots}
+pptvel_dist <- ggplot(ppt_m, 
+                      aes(x = vel_m_filt, 
+                          fill = time, 
+                          color = time)) + 
+  stat_dots(alpha = .7) +
+  stat_pointinterval(data = ppt_m[time == "Post"], 
+                     point_interval = mode_hdi, show_slab = FALSE, 
+                     position = position_nudge(y = -.043)) +
+  stat_pointinterval(data = ppt_m[time == "Pre"], 
+                     point_interval = mode_hdi, 
+                     show_slab = FALSE, 
+                     position = position_nudge(y = -.01)) +
+  labs(x = "Peak Velocity (mm/s)", 
+       fill = "Time", 
+       color = "Time",
+       y = NULL) +
+  scale_fill_manual(values = c("#001015", "#09A1D7")) +
+  scale_color_manual(values = c("#001015", "#09A1D7")) +
+  theme_tidybayes() +
+  theme(text = element_text(size = 14)) +
+  scale_y_continuous(limits = c(-.05, 1)) +
+  scale_x_continuous(breaks = c(450, 900, 1350)) +
+  theme(axis.line.y = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.background = element_rect(fill = "transparent", colour = NA), 
+        legend.background = element_rect(fill = "transparent", colour = NA),  
+        plot.background = element_rect(fill = "transparent", colour = NA))
+
+pptacc_dist <- ggplot(ppt_m[], 
+                      aes(x = acc_m_filtfilt, 
+                          fill = time, 
+                          color = time)) + 
+  stat_dots(alpha = .7) +
+  stat_pointinterval(data = ppt_m[time == "Post"], 
+                     point_interval = mode_hdi, 
+                     show_slab = FALSE, 
+                     position = position_nudge(y = -.043)) +
+  stat_pointinterval(data = ppt_m[time == "Pre"], 
+                     point_interval = mode_hdi, 
+                     show_slab = FALSE, 
+                     position = position_nudge(y = -.01) ) +
+  labs(x = expression("Peak Acceleration "(mm/s^2)), 
+       fill = "Time", 
+       color = "Time",
+       y = NULL) +
+  scale_fill_manual(values = c("#001015", "#09A1D7")) +
+  scale_color_manual(values = c("#001015", "#09A1D7")) +
+  theme_tidybayes() +
+  theme(text = element_text(size = 14)) +
+  scale_y_continuous(limits = c(-.05, 1)) +
+  theme(axis.line.y = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.background = element_rect(fill = "transparent", colour = NA), 
+        legend.background = element_rect(fill = "transparent", colour = NA),  
+        plot.background = element_rect(fill = "transparent", colour = NA))
+
+pptdec_dist <- ggplot(ppt_m[], 
+                      aes(x = -dec_m_filtfilt, 
+                          fill = time, 
+                          color = time)) + 
+stat_dots(alpha = .7) +
+  stat_pointinterval(data = ppt_m[time == "Post"], 
+                     point_interval = mode_hdi, 
+                     show_slab = FALSE, 
+                     position = position_nudge(y = -.043)) +
+  stat_pointinterval(data = ppt_m[time == "Pre"], 
+                     point_interval = mode_hdi, 
+                     show_slab = FALSE, 
+                     position = position_nudge(y = -.01)) +
+  labs(x = expression("Peak Deceleration "(mm/s^2)), 
+       fill = "Time", 
+       color = "Time",
+       y = NULL) +
+  scale_fill_manual(values = c("#001015", "#09A1D7")) +
+  scale_color_manual(values = c("#001015", "#09A1D7")) +
+  theme_tidybayes() +
+  theme(text = element_text(size = 14)) +
+  scale_x_continuous(breaks = c(0, 2500, 5000, 7500, 10000), labels = c("0", "-2500", "-5000", "-7500", "-10000")) +
+  scale_y_continuous(limits = c(-.05, 1)) +
+  theme(axis.line.y = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.background = element_rect(fill = "transparent", colour = NA), 
+        legend.background = element_rect(fill = "transparent", colour = NA),  
+        plot.background = element_rect(fill = "transparent", colour = NA))
+
+pptvel_lat_dist <- ggplot(ppt_m[], 
+                          aes(x = vel_lat_filt,
+                              fill = time, 
+                              color = time)) + 
+  stat_dots(alpha = .7) +
+  stat_pointinterval(data = ppt_m[time == "Post"], 
+                     point_interval = mode_hdi, show_slab = FALSE, 
+                     position = position_nudge(y = -.043)) +
+  stat_pointinterval(data = ppt_m[time == "Pre"], 
+                     point_interval = mode_hdi, 
+                     show_slab = FALSE, 
+                     position = position_nudge(y = -.01) ) +
+  labs(x = "Peak Velocity Latency (ms)", 
+       fill = "Time", 
+       color = "Time",
+       y = NULL) +
+  scale_fill_manual(values = c("#001015", "#09A1D7")) +
+  scale_color_manual(values = c("#001015", "#09A1D7")) +
+  theme_tidybayes() +
+  theme(text = element_text(size = 14)) +
+  scale_y_continuous(limits = c(-.05, 1)) +
+  scale_x_continuous(limits = c(0, max(ppt_m[, vel_lat_filt]))) +
+  theme(axis.line.y = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.background = element_rect(fill = "transparent", colour = NA), 
+        legend.background = element_rect(fill = "transparent", colour = NA),  
+        plot.background = element_rect(fill = "transparent", colour = NA))
+
+pptacc_lat_dist <- ggplot(
+  ppt_m[],
+  aes(
+    x = acc_lat_filtfilt, 
+    fill = time, 
+    color = time
+    )
+  ) + 
+  stat_dots(alpha = .7) +
+  stat_pointinterval(data = ppt_m[time == "Post"], 
+                     point_interval = mode_hdi, show_slab = FALSE, 
+                     position = position_nudge(y = -.043)) +
+  stat_pointinterval(data = ppt_m[time == "Pre"], 
+                     point_interval = mode_hdi, 
+                     show_slab = FALSE, 
+                     position = position_nudge(y = -.01) ) +
+  labs(x = "Peak Acceleration Latency (ms)", 
+       fill = "Time", 
+       color = "Time",
+       y = NULL) +
+  scale_fill_manual(values = c("#001015", "#09A1D7")) +
+  scale_color_manual(values = c("#001015", "#09A1D7")) +
+  theme_tidybayes() +
+  theme(text = element_text(size = 14)) +
+  scale_y_continuous(limits = c(-.05, 1)) +
+  scale_x_continuous(limits = c(0, max(ppt_m[, acc_lat_filtfilt]))) +
+  theme(axis.line.y = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.background = element_rect(fill = "transparent", colour = NA), 
+        legend.background = element_rect(fill = "transparent", colour = NA),  
+        plot.background = element_rect(fill = "transparent", colour = NA))
+
+pptdec_lat_dist <- ggplot(
+  ppt_m[],
+  aes(
+    x = dec_lat_filtfilt, 
+    fill = time, 
+    color = time
+    )
+  ) + 
+  stat_dots(alpha = .7) +
+  stat_pointinterval(data = ppt_m[time == "Post"], 
+                     point_interval = mode_hdi, show_slab = FALSE, 
+                     position = position_nudge(y = -.043)) +
+  stat_pointinterval(data = ppt_m[time == "Pre"], 
+                     point_interval = mode_hdi, 
+                     show_slab = FALSE, 
+                     position = position_nudge(y = -.01) )+
+  labs(x = "Peak Deceleration Latency (ms)", 
+       fill = "Time", 
+       color = "Time",
+       y = NULL) +
+  scale_fill_manual(values = c("#001015", "#09A1D7")) +
+  scale_color_manual(values = c("#001015", "#09A1D7")) +
+  theme_tidybayes() +
+  theme(text = element_text(size = 14)) +
+  scale_y_continuous(limits = c(-.05, 1)) +
+  scale_x_continuous(limits = c(0, max(ppt_m[, dec_lat_filtfilt]))) +
+  theme(axis.line.y = element_blank(), 
+        axis.ticks.y = element_blank(), 
+        axis.text.y = element_blank(),
+        panel.background = element_rect(fill = "transparent", colour = NA), 
+        legend.background = element_rect(fill = "transparent", colour = NA),  
+        plot.background = element_rect(fill = "transparent", colour = NA))
+
+kinematic_empirical_plots <- 
+(
+  pptacc_dist +  pptvel_dist + pptdec_dist + 
+  pptacc_lat_dist + pptvel_lat_dist + pptdec_lat_dist
+  ) + plot_layout(
+    guides = "collect", 
+    nrow = 2, 
+    ncol = 3
+    ) + patchwork::plot_annotation(
+      title = "Kinematic peak and latency empirical distributions"
+      ) & theme(
+        plot.title = element_text(size = 14),
+        panel.background = element_rect(fill = "transparent", colour = NA), 
+        legend.background = element_rect(fill = "transparent", colour = NA),  
+        plot.background = element_rect(fill = "transparent", colour = NA)
+      )
+
+ggsave(kinematic_empirical_plots, filename = here::here("scripts", "for_osf", "tooluse_in_real", "figures", "kinematics-empirical-plot.svg"), width = 18, height = 12, bg = "transparent")
+saveRDS(kinematic_empirical_plots, here::here("scripts", "for_osf", "tooluse_in_real", "figures", "kinematics-empirical-plot.rds"))
+
+kinematic_empirical_plots
+```
+
+# By-participant Kinematic Changes
+
+## Table
+```{r }
+# Compute change scores by casting ppt_m to wide format and computing the difference between pre and post for each kinematic variable
+change <- ppt_m %>%
+pivot_wider(
+  id_cols = c(ppid, trial_num_in_block),
+  names_from = time,
+  values_from = c(
+    vel_m_filt,
+    acc_m_filtfilt,
+    dec_m_filtfilt,
+    vel_lat_filt,
+    acc_lat_filtfilt,
+    dec_lat_filtfilt
+    )
+    ) %>%
+  dplyr::group_by(ppid) %>%
+  dplyr::summarise(
+    vel_change = round(
+      mean(vel_m_filt_Post) - mean(vel_m_filt_Pre), 
+      2
+      ),
+    acc_change = round(
+      mean(acc_m_filtfilt_Post) - mean(acc_m_filtfilt_Pre),
+      2
+      ),
+    dec_change = round(
+      mean(dec_m_filtfilt_Post) - mean(dec_m_filtfilt_Pre),
+      2
+      ),
+    vel_lat_change = round(
+      mean(vel_lat_filt_Post) - mean(vel_lat_filt_Pre),
+      2
+      ),
+    acc_lat_change = round(
+      mean(acc_lat_filtfilt_Post) - mean(acc_lat_filtfilt_Pre),
+      2
+      ),
+    dec_lat_change = round(
+      mean(dec_lat_filtfilt_Post) - mean(dec_lat_filtfilt_Pre),
+      2
+      )
+  ) %>% as.data.table()
+
+change[order(vel_change)]
+```
+
+## Plots
+
+```{r}
+
+# Plot change scores
+velocity_change <- change %>%
+  raincloud_plot(vel_change) +
+  geom_vline(xintercept = 0, linetype = "dashed")
+
+acceleration_change <- change %>%
+  raincloud_plot(acc_change) +
+  geom_vline(xintercept = 0, linetype = "dashed")
+
+deceleration_change <- change %>%
+  raincloud_plot(dec_change) +
+  geom_vline(xintercept = 0, linetype = "dashed")
+
+velocity_lat_change <- change %>%
+  raincloud_plot(vel_lat_change) +
+  geom_vline(xintercept = 0, linetype = "dashed")
+
+acceleration_lat_change <- change %>%
+  raincloud_plot(acc_lat_change) +
+  geom_vline(xintercept = 0, linetype = "dashed")
+
+deceleration_lat_change <- change %>%
+  raincloud_plot(dec_lat_change) +
+  geom_vline(xintercept = 0, linetype = "dashed")
+
+```
+
+### Peaks
+#### Velocity
+
+```{r}
+velocity_change
+```
+
+#### Acceleration
+
+```{r}
+acceleration_change
+```
+
+#### Deceleration
+
+```{r}
+deceleration_change
+```
+
+### Latencies
+#### Velocity
+
+```{r}
+velocity_lat_change
+```
+
+#### Acceleration
+
+```{r}
+acceleration_lat_change
+```
+
+#### Deceleration
+
+```{r}
+deceleration_lat_change
+```
+
+
+# Session Info
+
+```{r}
+sessioninfo::package_info()
+```

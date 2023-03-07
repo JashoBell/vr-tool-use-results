@@ -1,0 +1,8 @@
+ppid,trial_num_in_block,time,start_time,ovr_start_time,combined_start_time
+d3-006,1,pre,2460,2460,2460
+d3-008,1,pre,5000,,
+d3-010,2,post,485,,
+d3-010,8,post,215,,
+d3-011,2,pre,385,,
+d3-011,4,pre,310,,
+d3-013,1,pre,117300,,

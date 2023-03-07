@@ -1,0 +1,26 @@
+ppid,age,gender,strategy_yn,strategy_text,strategy_modify,notice_yn,video_game_hrs,exercise_1,exercise_2,exercise_3,exercise_4,correct_guess,fatigue,performance_hypothesis,data_qc
+d2-001,20,Male,2,"During the tool trials, I tried relying on where the block was lifted the most effectively through trial and error. I mostly just used perception for other methods.",N/A,1,3,4,3,3,2,0,0,0,1
+d2-002,25,Female,1,,,1,7,3,5,3,2,0,1,1,1
+d2-003,35,Male,2,I tried to keep my head positioned in a similar location. I wiggled my wrist a bit which gave a little feedback as well. ,Not really,1,1,5,4,4,2,0,1,1,1
+d2-004,19,Female,1,,N/a tried to use primarily perception,2,5,2,4,2,1,1,1,0,1
+d2-005,40,Female,1,,No,1,3,5,3,5,3,0,1,1,1
+d2-006,24,Male,1,,No,1,6,3,4,3,3,0,1,0,1
+d2-007,32,Female ,1,,No,2,7,4,3,4,2,0,0,1,1
+d2-008,20,Female,2,"For the first exercise, I would try to look at where I thought the certain body part was and wait until the ball reached that area to click the button. For the next two, I mostly just followed the same body positions to repeat the task.",No,1,2,5,4,5,3,0,1,1,1
+d2-009,43,Female,1,,No,1,0,4,2,4,2,1,1,0,1
+d2-010,66,Female,1,,,1,0,1,4,1,1,0,1,0,1
+d2-011,46,Male,1,,No,1,35,3,5,2,2,1,0,0,1
+d2-012,19,Male,2,Putting pressure/tension on the joints I was trying to track,,1,1,2,2,2,1,0,1,1,1
+d2-013,21,Male,2,"For the second time I did the landmarks task, I tried a strategy where instead of tracking the sphere I would just stare at the desired landmark and wait for the sphere to come into the center of my vision.",N/A,1,30,1,2,1,2,0,0,1,1
+d2-014,19,Male,1,,N/A,1,5,4,3,3,3,0,0,1,1
+d2-015,68,Female,1,,"Yes, I rested my arm between grips",1,0,4,3,4,2,0,0,1,1
+d2-016,22,Female,2,I could feel where the Velcro or band was on parts o my arm as well as the lip of the table and I tried to use that as a reference point. I also know where my elbow and finger hit the table and tried to use those as reference points.,"A bit, I got more comfortable knowing where my arm is and relied less on reference points.",1,0,4,4,4,1,0,1,1,1
+d2-017,45,Male,1,,No,1,0,3,3,3,5,0,0,1,1
+d2-018,20,Female,2,I liked to listen to the beeps and move faster so the beeps would be more together. I thought of it as a fun game,,1,6,2,3,1,2,0,1,1,1
+d2-019,53,Female,2,Watch for ball appearance close to elbow. Brace hand on table to place object quickly and accurately.,"Developed strategies over time, more on second trial",2,0,5,3,5,1,0,1,1,1
+d2-020,27,Female,1,,No strategy ,1,0,4,4,4,3,0,0,0,1
+d2-021,47,Male,1,,,1,0,3,3,3,2,0,0,1,1
+d2-022,22,Female,1,,No,1,0,4,2,4,1,0,1,1,1
+d2-023,48,Female ,2,I tried to grab the cube in the same place each time to improve precision when replacing. ,"In the grabbing task with my hand, I learned that it was easier to be precise when grabbing the upper part of the cube.",2,0,5,5,5,4,0,0,1,1
+d2-024,54,Male,1,,,2,0,5,5,4,4,0,1,1,1
+d2-025,20,Female,1,,,1,0,4,3,3,2,0,1,0,1

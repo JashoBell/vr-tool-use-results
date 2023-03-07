@@ -1,0 +1,2 @@
+participant,trial,block,wpos_x,wpos_y,wpos_z,epos_x,epos_y,epos_z,fpos_x,fpos_y,fpos_z,spos_x,spos_y,spos_z,target,error,forearmlength,noisewrist,noiseelbow,startposition,direction,trialtime
+203,4,1,0.3397,0.7907,-0.5728,0.3242,0.822,-0.8188,0.332,0.8064,-0.6958,0.3304,0.7707,-0.7178,Forearm,-0.022,0.2484,0.2586,0.1981,0.7231873,forward,0.9863

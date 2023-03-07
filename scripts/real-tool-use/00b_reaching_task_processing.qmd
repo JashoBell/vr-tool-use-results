@@ -1,0 +1,905 @@
+---
+title: "Real-world - Processing - Reaching"
+author: "Joshua Bell"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-float: true
+    toc-placement: left
+---
+
+# Package and Session Info
+```{r setup-and-import}
+# PPT Reaching Data -------------------------------------------------------
+
+
+# Load necessary libraries ------------------------------------------------
+pkgs <- c("data.table", "dplyr", "readr", "tidyfast", "stringr", "tidyr", "magrittr", "purrr", "signal", "here", "missForest", "simputation")
+for (i in pkgs) {
+  if (!i %in% rownames(installed.packages())) {
+      install.packages(i)
+      library(i, character.only = TRUE)
+  } else {
+      (library(i, character.only = TRUE))
+  }
+}
+data.table::setDTthreads(percent = 90)
+
+# Set-up: Filter specification and .csv import ----------------------------
+# 10hz used for analyses
+b_10hz <- butter(
+  1, # order
+  c(.1), # cutoff
+  type = "low"
+  )
+
+# Parse data from UXF
+trial_details <- list.files(
+  path = here::here("data", "2_toolusenotinVR"),
+  pattern = "trial_results.csv",
+  full.names = TRUE,
+  recursive = TRUE
+) %>% 
+  map_dfr(fread) %>%
+  as.data.table()
+
+# Manually-defined latencies
+latency_fix <- read_csv(here::here("data", "study_two", "latency_fixes_revised.csv"))
+```
+
+
+```{r filter-and-import-raw}
+
+ppt_m_files <- trial_details %>%
+  dplyr::select(ppid, experiment, block_num, trial_num_in_block, manual_reach_ppt_hand_movement_location_0) %>%
+  mutate(
+    # Adjust filepaths to accommodate fix for participant 25 (mistyped id)
+    manual_reach_ppt_hand_movement_location_0 = ifelse(!is.na(manual_reach_ppt_hand_movement_location_0) & str_detect(manual_reach_ppt_hand_movement_location_0, "2_toolusenotinVR\\/25\\/"),
+      paste0(experiment, "/", ppid, "/", str_remove(manual_reach_ppt_hand_movement_location_0, "^2_toolusenotinVR\\/25\\/")),
+      manual_reach_ppt_hand_movement_location_0
+    )
+  ) %>%
+  mutate(
+    # Adjust filepaths to accommodate fix for participant 13's session 1
+    # An error erased the original trial_results file, necessitating a fix.
+    manual_reach_ppt_hand_movement_location_0 = ifelse(!is.na(manual_reach_ppt_hand_movement_location_0) & str_detect(manual_reach_ppt_hand_movement_location_0, "1_tooluseinVR"),
+      paste0(experiment, "/", ppid, "/", str_remove(manual_reach_ppt_hand_movement_location_0, "^1_tooluseinVR\\/d[\\d-][\\d-]\\d+\\/")),
+      manual_reach_ppt_hand_movement_location_0
+    )
+  ) %>%
+  dplyr::filter(!is.na(manual_reach_ppt_hand_movement_location_0) & !manual_reach_ppt_hand_movement_location_0 == "")
+
+# Read in the csv files using the paths from the trial_results files and unnest those
+ppt_trials_nested <- ppt_m_files %>%
+  dplyr::mutate(
+    manual_movement_ppt = map(
+      file.path(here::here("data", manual_reach_ppt_hand_movement_location_0)),
+      fread
+    )
+  ) %>%
+  unnest(cols = c(manual_reach_ppt_hand_movement_location_0)) %>%
+  as.data.table()
+
+# Unnest again, and fix ms values that were recorded with "_"
+ppt_trials_unnested <- dt_unnest(ppt_trials_nested[
+  ,
+  manual_movement_ppt := map(
+    manual_movement_ppt,
+    ~ dplyr::mutate(.x, time_ms = as.double(gsub("_", "", time_ms)))
+  )
+], manual_movement_ppt)
+
+ppt_prefilter <- ppt_trials_unnested[
+  ,
+  ppid := paste0("d2-", stringr::str_replace(as.character(ppid), "^2", "0"))
+][
+  ppid %in% c("d2-001", "d2-009") &
+    manual_reach_ppt_hand_movement_location_0 %like% "S002",
+  block_num := 4
+][
+  ppid %in% c("d2-013") &
+    manual_reach_ppt_hand_movement_location_0 %like% "S002",
+  block_num := 5
+][,
+  `:=`(
+    time = if_else(block_num < 3, "pre", "post"),
+    time_second = signif(time_ms / 1000, 6),
+    time_ms = (0:(.N - 1)) * 5
+  ),
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+    "tracked"
+  )
+]
+
+```
+
+
+# Position Filter
+
+```{r buffer-and-filter-position}
+
+# Manually impute a time_ms column that increments in steps of 5.
+ppt_prefilter <- ppt_trials_unnested[,
+  `:=`(
+    time = if_else(block_num < 3, "pre", "post"),
+    time_second = signif(time_ms / 1000, 6),
+    time_ms = (0:(.N - 1)) * 5
+  ),
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+    "tracked"
+  )
+][time_ms > 25]
+
+rm(ppt_trials_unnested)
+
+gc()
+
+leadcols <- c("pos_x_lead", "pos_y_lead", "pos_z_lead", "time_lead")
+
+bytrial <- c(
+  "ppid",
+  "block_num",
+  "trial_num_in_block",
+  "time",
+  "tracked",
+  "phase"
+)
+
+buffercols <- colnames(ppt_prefilter)
+buffer_samples <- 20
+
+# Create a buffer to reduce the distortion caused by the filtering process
+# Mostly relevant for the first few participants,
+# others have much more of a buffer built in to the recording.
+
+buffer <- ppt_prefilter[,
+  .(
+    pos_x = c(
+      seq(
+        first(pos_x),
+        nth(pos_x, buffer_samples - 1),
+        length.out = buffer_samples
+      ),
+      seq(
+        nth(pos_x, buffer_samples - 1),
+        first(pos_x),
+        length.out = buffer_samples
+        )
+      ),
+    pos_y = c(
+      seq(
+        first(pos_y),
+        nth(pos_y, buffer_samples - 1),
+        length.out = buffer_samples
+        ),
+      seq(
+        nth(pos_y, buffer_samples - 1),
+        first(pos_y),
+        length.out = buffer_samples
+        )
+      ),
+    pos_z = c(
+      seq(
+        first(pos_z),
+        nth(pos_z, buffer_samples),
+        length.out = buffer_samples
+        ),
+      seq(
+        nth(pos_z, buffer_samples - 1),
+        first(pos_z),
+        length.out = buffer_samples
+        )
+      ),
+    time_ms = seq(
+      25,
+      (-5*buffer_samples*2)+25,
+      length.out = (buffer_samples*2)
+      ),
+    phase = "buffer"
+  ),
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+    "tracked",
+    "time"
+  )
+]
+ppt_prefilter_buffered <- merge.data.table(
+  ppt_prefilter,
+  buffer,
+  all = TRUE
+) %>% dplyr::select(!manual_reach_ppt_hand_movement_location_0)
+
+# Fix ordering
+ppt_prefilter_buffered <- ppt_prefilter_buffered[
+    order(
+        ppid,
+        block_num,
+        trial_num_in_block,
+        tracked,
+        time_ms
+    )
+]
+
+# Apply Butterworth filter to position values
+ppt_position_filtered <- ppt_prefilter_buffered[!(ppid %like% "pilot"), ] %>%
+    dplyr::group_by(
+        ppid,
+        block_num,
+        trial_num_in_block,
+        time,
+        tracked
+    ) %>%
+    dplyr::mutate(
+        dplyr::across(
+          pos_x:pos_z, 
+          ~ filtfilt(b_10hz, .x), 
+          .names = "{.col}_10hz")
+    ) %>%
+    as.data.table()
+
+# Pull column names from the position variables
+filteredcolnames <- colnames(
+    dplyr::select(
+        ppt_position_filtered,
+        ends_with(
+            c("x", "y", "z")
+        )
+    )
+)
+
+cutoffs <- c(
+  "raw",
+  "10hz"
+)
+
+# Filter out buffer and melt the data into long format.
+ppt_position_filtered_long <- ppt_position_filtered %>%
+    data.table::melt(
+        c(
+            "ppid",
+            "block_num",
+            "trial_num_in_block",
+            "tracked",
+            "time_ms",
+            "time_second",
+            "time",
+            "phase"
+        ),
+        measure.vars = patterns("^pos_x", "^pos_y", "^pos_z"),
+        variable.name = "filter",
+        value.name = c("pos_x", "pos_y", "pos_z")
+    )
+
+# Establish the different filters as the cutoffs.
+levels(ppt_position_filtered_long$filter) <- cutoffs
+
+bytrial_filter <- c(
+  "ppid",
+  "block_num",
+  "trial_num_in_block",
+  "time",
+  "tracked",
+  "filter"
+)
+
+# Save position data
+fwrite(
+  ppt_position_filtered_long,
+  here::here(
+    "data",
+    "study_two",
+    "ppt_position_filtered_long.csv"
+  )
+)
+```
+
+# Velocity calculation
+
+```{r velocity}
+
+ppt_velocity <- ppt_position_filtered_long[,
+  # create lead columns for position and time
+  c(
+    "pos_x_lead",
+    "pos_y_lead",
+    "pos_z_lead",
+    "time_ms_lead",
+    "time_s_lead"
+    ) := lapply(
+      .SD,
+      data.table::shift,
+      1,
+      type = "lead"
+      ),
+  .SDcols = c("pos_x", "pos_y", "pos_z", "time_ms", "time_second"),
+  by = bytrial_filter
+][,
+
+  # create lag columns for position and time
+  c(
+    "pos_x_lag",
+    "pos_y_lag",
+    "pos_z_lag",
+    "time_ms_lag",
+    "time_s_lag"
+  ) := lapply(.SD, data.table::shift, 1, type = "lag"),
+  .SDcols = c("pos_x", "pos_y", "pos_z", "time_ms", "time_second"),
+
+  by = bytrial_filter
+][,
+
+  `:=`(
+    xdiff = (pos_x_lead - pos_x_lag),
+    ydiff = (pos_y_lead - pos_y_lag),
+    zdiff = (pos_z_lead - pos_z_lag),
+    time_diff_ms = (time_ms_lead - time_ms_lag),
+    time_diff_s = (time_s_lead - time_s_lag)
+  ),
+  by = bytrial_filter
+][,
+
+  # Calculate velocity in mm/s^2
+  `:=`(
+    velocity = fifelse(
+      !is.na(time_diff_s),
+      (sqrt(xdiff^2 + ydiff^2 + zdiff^2) / time_diff_s) * 1000,
+      (sqrt(xdiff^2 + ydiff^2 + zdiff^2) / (time_diff_ms / 1000)) * 1000
+    ),
+    displacement = sqrt(pos_x^2 + pos_y^2 + pos_z^2)
+  ),
+  by = bytrial_filter
+][,
+
+  # Create lead column for velocity
+  `:=`(
+    velocity_lead = data.table::shift(velocity, 1, type = "lead"),
+    velocity_lag = data.table::shift(velocity, 1, type = "lag")
+  ),
+  by = bytrial_filter
+][,
+
+  # Compute differences
+  vel_diff := (velocity_lead - velocity_lag),
+  by = bytrial_filter
+][,
+
+  # Calculate acceleration
+  accel := fifelse(
+    !is.na(time_diff_s),
+    vel_diff / (time_diff_s),
+    vel_diff / (time_diff_ms / 1000)
+  ),
+  by = bytrial_filter
+][,
+
+  time_ms_perphase := (
+    0:(.N - 1)
+    ) * 5,
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+    "time",
+    "phase",
+    "tracked",
+    "filter"
+  )
+]
+
+```
+
+# Kinematic filtering
+
+```{r kinematic-filtering}
+
+ppt_filt <- ppt_velocity[
+  order(ppid, block_num, trial_num_in_block, tracked, filter, time_ms)
+][!is.na(velocity) & !is.infinite(velocity),
+
+  # Filter velocity w/ 10hz butterworth
+  `:=`(velocity_10hz = filtfilt(b_10hz, velocity)),
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+    "tracked",
+    "filter"
+  )
+][,
+
+  # Create lead column for velocity
+  `:=`(
+    velocity_10hzlead = data.table::shift(velocity_10hz, 1, type = "lead"),
+    velocity_10hzlag = data.table::shift(velocity_10hz, 1, type = "lag")
+  ),
+  by = bytrial_filter
+][,
+
+  # Compute differences
+  `:=`(vel_10hzdiff = (velocity_10hzlead - velocity_10hzlag)),
+  by = bytrial_filter
+][,
+
+  # Compute acceleration
+  accel_filtvel := fifelse(
+    !is.na(time_diff_s),
+    vel_10hzdiff / (time_diff_s),
+    vel_10hzdiff / (time_diff_ms / 1000)
+  ),
+  by = bytrial_filter
+][
+  order(ppid, block_num, trial_num_in_block, tracked, filter, time_ms)
+][
+
+  !is.na(accel) &
+    !is.na(accel_filtvel) &
+    !is.infinite(accel) &
+    !is.infinite(accel_filtvel),
+
+  `:=`(
+    accelfilt = filtfilt(b_10hz, accel),
+    accel_filtvel_filt = filtfilt(b_10hz, accel_filtvel)
+  ),
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+    "tracked",
+    "filter"
+  )
+][order(ppid, block_num, trial_num_in_block, tracked, filter, time_ms)]
+
+
+```
+
+# Movement Onset
+
+```{r movement-onset}
+
+# Write full data for plotting individual trials/visual quality checks.
+ppt_filt_ <- ppt_filt[
+  phase != "buffer" &
+    filter == "10hz" &
+    tracked == "wrist" &
+    # Remove cases that would break analyses-
+    # these are at the ends of the movement when the markers are hopping around.
+    !is.infinite(velocity_10hz) &
+    !is.infinite(accel) &
+    !is.infinite(accel_filtvel),
+  .(
+    ppid,
+    time, block_num,
+    trial_num_in_block, phase,
+    time_ms, time_ms_perphase,
+    velocity, velocity_10hz,
+    accel, accelfilt, accel_filtvel,
+    accel_filtvel_filt
+  )
+]
+
+ppt_filt_latfix <- merge(
+  ppt_filt_,
+  latency_fix,
+  by = c(
+    "ppid",
+    "trial_num_in_block",
+    "time"
+  ),
+  all.x = TRUE
+  ) %>%
+  dplyr::mutate(
+    start_time = fifelse(!is.na(start_time), start_time, 0),
+    time_ms_fix = time_ms - start_time) %>%
+  arrange(
+    ppid,
+    time,
+    trial_num_in_block,
+    time_ms
+  ) %>%
+  as.data.table()
+
+
+# Set start time as the first sample where velocity increases
+# by 25 over the subsequent 10 samples. When a manual start
+# time is specified, use that instead.
+
+ppt_filt_latfix[
+  ,
+  leadvel := lead(velocity_10hz, 10),
+  by = c("ppid", "trial_num_in_block", "time")
+  ][
+  ,
+  dif := leadvel - velocity_10hz
+  ][,
+  `:=`(
+    start_time = fifelse(
+      is.na(start_time) | start_time == 0,
+      .SD[
+        (!phase %in% c("replace", "return", "returned")) 
+        & dif > 25]$time_ms_fix[1],
+      start_time
+    )
+    ),
+  by = c(
+    "ppid",
+    "trial_num_in_block",
+    "time"
+  )
+  ][
+  ,
+
+  `:=`(
+      order = fcase(
+          block_num < 3, "pre",
+          block_num == 4, "first",
+          block_num == 5, "second",
+          default = "NA"
+      )
+  )
+]
+
+# Merge with manually-identified start points
+
+time_correction <- ppt_filt_latfix[,
+  time_ms_fix := time_ms - start_time,
+  by = c(
+    "ppid",
+    "trial_num_in_block",
+    "time"
+  )
+] %>%
+  arrange(ppid, time, trial_num_in_block, time_ms)
+
+fwrite(time_correction, here::here("data", "study_two", "ppt_m_fulltrials.csv"))
+
+start_times <- time_correction[, .(start_time = median(start_time)), by = c("ppid", "trial_num_in_block", "time")]
+
+start_times %>%
+  fwrite(here::here("data", "study_two", "ppt_start_times.csv"))
+
+
+# Manual data fixes/filters
+ppt_m <- time_correction[
+  # Only beginning and out phases, 10hz filter. Remove values that would break an analysis.
+  (phase %in% c("start", "begin", "out") |
+    (phase == "lift" & time_ms_perphase < 100)) &
+    !is.infinite(velocity) &
+    !is.infinite(accel) &
+    !is.infinite(accel_filtvel) &
+    time_ms_fix >= 0
+  ][
+  ,
+  .(
+    ppid, time, phase,
+    block_num, trial_num_in_block, order,
+    time_ms_perphase, time_ms, time_ms_fix,
+    velocity, velocity_10hz,
+    accel, accelfilt, accel_filtvel,
+    accel_filtvel_filt
+  )
+]
+
+```
+
+# Individualized Adjustments
+
+The below code lays out the individualized adjustments made to ensure the correct peaks and latencies are chosen for each participant. To see the consequences of these choices, see the individual trial plots in 01b_reaching_trials.qmd.
+
+```{r individual-adjustments}
+ppt_m_ <- ppt_m[,
+  # Compute kinematic peaks and latencies
+  # Fcase (fast case-when) used to specify individual adjustments
+  # When a parameter is not salvageable, it is set to 0 and filtered out after this step
+  # due to fcase's constraint that all output values must share type.
+  # Kinematic value calculations not used in the final analysis are commented out.
+  .(
+    # Filtered peaks (10hz butterworth)
+    vel_m_filt = fcase(
+      # Find the maximum velocity_10hz value.
+      # If velocity_lb or velocity_ub are defined, only find the max between those bounds of time_ms_fix.
+      # If velocity_lb and velocity_ub are not defined, find the max without filtering.
+      (ppid == "d2-006" &
+        trial_num_in_block == 5 &
+        time == "post"),
+      max(ppt_m[
+        ppid == "d2-006" &
+          trial_num_in_block == 5 &
+          time == "post" &
+          time_ms_fix %between% c(400, 650),
+        velocity_10hz
+      ], na.rm = TRUE),
+      (ppid == "d2-011" &
+        trial_num_in_block == 8 &
+        time == "pre"),
+      0,
+      (ppid == "d2-018" &
+        trial_num_in_block == 17 &
+        time == "pre"),
+      0,
+      default = max(velocity_10hz, na.rm = TRUE)
+    ),
+
+    # Filtered latencies
+    vel_lat_filt = fcase(
+
+      (ppid == "d2-006" &
+        trial_num_in_block == 5 &
+        time == "post"),
+      ppt_m[
+        ppid == "d2-006" &
+          trial_num_in_block == 5 &
+          time == "post" &
+          time_ms_fix %between% c(400, 650)
+      ][
+        which.max(velocity_10hz),
+        time_ms_fix
+      ][1],
+      (ppid == "d2-011" &
+        trial_num_in_block == 8 &
+        time == "pre"),
+      0,
+      (ppid == "d2-018" &
+        trial_num_in_block == 17 &
+        time == "pre"),
+      0,
+      default = .SD[
+        which.max(velocity_10hz),
+        time_ms_fix
+      ][1]
+    ),
+
+    # Peak Accel
+    acc_m_filtfilt = fcase(
+      (ppid == "d2-006" &
+        trial_num_in_block == 5 &
+        time == "post"),
+      0,
+      (ppid == "d2-011" &
+        trial_num_in_block == 8 &
+        time == "pre"),
+      max(ppt_m[
+        ppid == "d2-011" &
+          trial_num_in_block == 8 &
+          time == "pre" &
+          time_ms_fix %between% c(0, 300),
+        accel_filtvel_filt
+      ], na.rm = TRUE),
+      (ppid == "d2-017" &
+        trial_num_in_block == 9 &
+        time == "post"),
+      max(ppt_m[
+        ppid == "d2-017" &
+          trial_num_in_block == 9 &
+          time == "post" &
+          time_ms_fix %between% c(0, 320),
+        accel_filtvel_filt
+      ], na.rm = TRUE),
+      (ppid == "d2-017" &
+        trial_num_in_block == 18 &
+        time == "post"),
+      max(ppt_m[
+        ppid == "d2-017" &
+          trial_num_in_block == 18 &
+          time == "post" &
+          time_ms_fix %between% c(0, 320),
+        accel_filtvel_filt
+      ], na.rm = TRUE),
+      (ppid == "d2-018" &
+        trial_num_in_block == 17 &
+        time == "pre"),
+      max(ppt_m[
+        ppid == "d2-018" &
+          trial_num_in_block == 17 &
+          time == "pre" &
+          time_ms_fix %between% c(0, 220),
+        accel_filtvel_filt
+      ], na.rm = TRUE),
+      default = max(accel_filtvel_filt, na.rm = TRUE)
+    ),
+
+    # Peak Decel
+    dec_m_filtfilt = fcase(
+      (ppid == "d2-006" &
+        trial_num_in_block == 5 &
+        time == "post"),
+      min(ppt_m[
+        ppid == "d2-006" &
+          trial_num_in_block == 5 &
+          time == "post" &
+          time_ms_fix %between% c(500, 900),
+        accel_filtvel_filt
+      ], na.rm = TRUE),
+      (ppid == "d2-011" &
+        trial_num_in_block == 8 &
+        time == "pre"),
+      0,
+      (ppid == "d2-018" &
+        trial_num_in_block == 17 &
+        time == "pre"),
+      min(ppt_m[
+        ppid == "d2-018" &
+          trial_num_in_block == 17 &
+          time == "pre" &
+          time_ms_fix %between% c(460, 700),
+        accel_filtvel_filt
+      ], na.rm = TRUE),
+      default = min(accel_filtvel_filt, na.rm = TRUE)
+    ),
+
+    # Acc/Dec peaks & Latencies when calculated from filtered velocity and filtered again
+    # which.max and which.min used to find index of peak and extract the time_ms_fix value
+    # Peak Accel Latency
+    acc_lat_filtfilt = fcase(
+      (ppid == "d2-006" &
+        trial_num_in_block == 5 &
+        time == "post"),
+      0,
+      (ppid == "d2-011" &
+        trial_num_in_block == 8 &
+        time == "pre"),
+      ppt_m[ppid == "d2-018" &
+        trial_num_in_block == 17 &
+        time == "pre" &
+        time_ms_fix %between% c(0, 300)][
+        which.max(accel_filtvel_filt),
+        time_ms_fix
+      ][1],
+      (ppid == "d2-017" &
+        trial_num_in_block == 9 &
+        time == "post"),
+      ppt_m[ppid == "d2-017" &
+        trial_num_in_block == 9 &
+        time == "post" &
+        time_ms_fix %between% c(0, 325)][
+        which.max(accel_filtvel_filt),
+        time_ms_fix
+      ][1],
+      (ppid == "d2-017" &
+        trial_num_in_block == 18 &
+        time == "post"),
+      ppt_m[ppid == "d2-017" &
+        trial_num_in_block == 18 &
+        time == "post" &
+        time_ms_fix %between% c(0, 325)][
+        which.max(accel_filtvel_filt),
+        time_ms_fix
+      ][1],
+      (ppid == "d2-018" &
+        trial_num_in_block == 17 &
+        time == "pre"),
+      ppt_m[ppid == "d2-018" &
+        trial_num_in_block == 17 &
+        time == "pre" &
+        time_ms_fix %between% c(0, 220)][
+        which.max(accel_filtvel_filt),
+        time_ms_fix
+      ][1],
+      default = .SD[which.max(accel_filtvel_filt), time_ms_fix][1]
+    ),
+
+    # Peak Decel Latency
+    dec_lat_filtfilt = fcase(
+      (ppid == "d2-006" &
+        trial_num_in_block == 5 &
+        time == "post"),
+      ppt_m[ppid == "d2-006" &
+        trial_num_in_block == 5 &
+        time == "post" &
+        time_ms_fix %between% c(500, 900)][
+        which.min(accel_filtvel_filt),
+        time_ms_fix
+      ][1],
+      (ppid == "d2-011" &
+        trial_num_in_block == 8 &
+        time == "pre"),
+      0,
+      (ppid == "d2-018" &
+        trial_num_in_block == 17 &
+        time == "pre"),
+      ppt_m[ppid == "d2-018" &
+        trial_num_in_block == 17 &
+        time == "pre" &
+        time_ms_fix %between% c(460, 700)][
+        which.min(accel_filtvel_filt),
+        time_ms_fix
+      ][1],
+      default = .SD[
+        which.min(accel_filtvel_filt),
+        time_ms_fix
+      ][1]
+    )
+  ),
+  by = c(
+    "ppid",
+    "trial_num_in_block",
+    "order",
+    "time"
+  )
+]
+
+ppt_adjusted <- ppt_m_[,
+ `:=`(
+  vel_m_filt = ifelse(
+    vel_m_filt == 0,
+    NA,
+    vel_m_filt
+  ),
+  acc_m_filtfilt = ifelse(
+    acc_m_filtfilt == 0,
+    NA,
+    acc_m_filtfilt
+  ),
+  dec_m_filtfilt = ifelse(
+    dec_m_filtfilt == 0,
+    NA,
+    dec_m_filtfilt
+  ),
+  vel_lat_filt = ifelse(
+    vel_lat_filt == 0,
+    NA,
+    vel_lat_filt
+  ),
+  acc_lat_filtfilt = ifelse(
+    acc_lat_filtfilt == 0,
+    NA,
+    acc_lat_filtfilt
+  ),
+  dec_lat_filtfilt = ifelse(
+    dec_lat_filtfilt == 0,
+    NA,
+    dec_lat_filtfilt
+  )
+ )
+]
+
+
+test <- ppt_adjusted[dec_lat_filtfilt < acc_lat_filtfilt |
+  dec_lat_filtfilt < vel_lat_filt |
+  acc_lat_filtfilt > vel_lat_filt]
+
+test
+
+```
+
+
+# Removals, Imputation and Export
+
+```{r imputation-and-export}
+d <- complete(ppt_adjusted, ppid, trial_num_in_block, time) %>% as.data.table()
+d <- d[
+  ,
+  `:=`(
+    ppid = factor(ppid),
+    time = factor(time),
+    trial_num_in_block = factor(trial_num_in_block)
+  )
+]
+
+skimr::skim(d)
+
+# Use multivariate random forest imputation to impute any missing values
+set.seed(1337)
+d_imputed <- d %>% 
+simputation::impute_mf(
+  formula = vel_m_filt + vel_lat_filt 
+    + acc_m_filtfilt + dec_m_filtfilt 
+    + acc_lat_filtfilt + dec_lat_filtfilt 
+    ~ trial_num_in_block 
+    + ppid 
+    + time
+  )
+
+write_csv(
+    d_imputed, here::here("data", "study_two", "ppt_manual.csv")
+)
+
+```

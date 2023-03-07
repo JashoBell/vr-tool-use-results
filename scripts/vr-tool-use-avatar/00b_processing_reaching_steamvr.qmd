@@ -1,0 +1,915 @@
+---
+title: "Avatar VR - Processing - Reaching - SteamVR"
+author: "Joshua Bell"
+date: "03/04/2023"
+format: 
+  html:
+    toc: true
+    toc-float: true
+    toc-depth: 2
+---
+
+Processes the SteamVR tracking data for the participants whose PPT data did not record in the pre-test. Ultimately, averages both filtered position and IMU-based velocity data to create a single kinematic profile, which reasonably approximates the PPT data.
+
+## Package and Session Info
+```{r setup-and-import}
+# PPT Reaching Data -------------------------------------------------------
+
+
+# Load necessary libraries ------------------------------------------------
+pkgs <- c("data.table", "dplyr", "readr", "tidyfast", "stringr", "tidyr", "magrittr", "purrr", "signal", "here", "missForest", "simputation")
+for (i in pkgs) {
+  if (!i %in% rownames(installed.packages())) {
+      install.packages(i)
+      library(i, character.only = TRUE)
+  } else {
+      (library(i, character.only = TRUE))
+  }
+}
+
+data.table::setDTthreads(percent = 90)
+
+sessionInfo()
+```
+
+## Import Data
+```{r filter-and-import-raw}
+
+# Set-up: Filter specification and .csv import ----------------------------
+
+# 10hz Butterworth low-pass filter used for analyses
+b_10hz <- butter(1, c(.1), type = "low")
+
+# Parse data from UXF
+trial_details <- list.files(
+    path = here::here("data", "3_avatartooluse"),
+    pattern = "trial_results.csv",
+    full.names = TRUE,
+    recursive = TRUE
+) %>% purrr::map_dfr(fread) %>% as.data.table() %>%
+dplyr::filter(
+  ppid %in% c("d3-006", "d3-007", "d3-012", "d3-024")
+)
+
+# Read manually-adjusted start times
+manual_latency_fix <-  fread(here::here("data", "study_three", "latency_fixes_steamvr.csv"))
+
+# Manual - Wrist ------------------------------------------------
+
+# Parse file locations
+steamvr_m_files <- trial_details %>%
+    dplyr::select(
+        ppid, experiment,
+        block_num, trial_num_in_block,
+        manual_reach_openvr_movement_steamvr_location_0
+    )  %>%
+    dplyr::filter(!is.na(manual_reach_openvr_movement_steamvr_location_0) &
+        manual_reach_openvr_movement_steamvr_location_0 != "") %>%
+    as.data.table() %>%
+        dplyr::mutate(
+            manual_reach_openvr_movement_steamvr_location_0 = fifelse(
+                str_detect(manual_reach_openvr_movement_steamvr_location_0, "3_avatartooluse 1"),
+                str_replace(manual_reach_openvr_movement_steamvr_location_0, "3_avatartooluse 1", "3_avatartooluse"),
+                manual_reach_openvr_movement_steamvr_location_0
+            )
+        )
+
+# Read files
+steamvr_m_trials_nested <- steamvr_m_files[
+    ,
+    `:=`(manual_movement_steamvr = map(
+        file.path(here::here("data", manual_reach_openvr_movement_steamvr_location_0)),
+        fread
+    ))
+]
+
+# Unnest list columns
+steamvr_m_trials_unnested <- dt_unnest(
+    steamvr_m_trials_nested,
+    manual_movement_steamvr
+)
+
+# Unnest list columns
+steamvr_trials_unnested <- steamvr_m_trials_unnested
+```
+
+
+# Position Filter
+
+```{r buffer-and-filter-position}
+
+# Manually impute a time_ms column that increments in steps of 5.
+steamvr_prefilter <- steamvr_trials_unnested[,
+  `:=`(
+    time = if_else(block_num < 3, "pre", "post"),
+    time_second = signif(time_ms / 1000, 6),
+    time_ms = (0:(.N - 1)) * 5
+  ),
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+    "tracker"
+  )
+][time_ms > 25 & tracker == "right_hand"]
+
+leadcols <- c("pos_x_lead", "pos_y_lead", "pos_z_lead", "time_lead")
+
+bytrial <- c(
+  "ppid",
+  "block_num",
+  "trial_num_in_block",
+  "time",
+  "phase"
+)
+
+buffercols <- colnames(steamvr_prefilter)
+buffer_samples <- 25
+
+# Create a buffer to reduce the distortion caused by the filtering process
+# Mostly relevant for the first few participants,
+# others have much more of a buffer built in to the recording.
+
+buffer <- steamvr_prefilter[,
+  .(
+    pos_x = c(
+      seq(
+        first(pos_x),
+        nth(pos_x, buffer_samples - 1),
+        length.out = buffer_samples
+      ),
+      seq(
+        nth(pos_x, buffer_samples - 1),
+        first(pos_x),
+        length.out = buffer_samples
+        )
+      ),
+    pos_y = c(
+      seq(
+        first(pos_y),
+        nth(pos_y, buffer_samples - 1),
+        length.out = buffer_samples
+        ),
+      seq(
+        nth(pos_y, buffer_samples - 1),
+        first(pos_y),
+        length.out = buffer_samples
+        )
+      ),
+    pos_z = c(
+      seq(
+        first(pos_z),
+        nth(pos_z, buffer_samples),
+        length.out = buffer_samples
+        ),
+      seq(
+        nth(pos_z, buffer_samples - 1),
+        first(pos_z),
+        length.out = buffer_samples
+        )
+      ),
+      velocity_x = c(
+      seq(
+        first(velocity_x),
+        nth(velocity_x, buffer_samples - 1),
+        length.out = buffer_samples
+      ),
+      seq(
+        nth(velocity_x, buffer_samples - 1),
+        first(velocity_x),
+        length.out = buffer_samples
+        )
+      ),
+      velocity_y = c(
+      seq(
+        first(velocity_y),
+        nth(velocity_y, buffer_samples - 1),
+        length.out = buffer_samples
+      ),
+      seq(
+        nth(velocity_y, buffer_samples - 1),
+        first(velocity_y),
+        length.out = buffer_samples
+        )
+      ),
+      velocity_z = c(
+      seq(
+        first(velocity_z),
+        nth(velocity_z, buffer_samples - 1),
+        length.out = buffer_samples
+      ),
+      seq(
+        nth(velocity_z, buffer_samples - 1),
+        first(velocity_z),
+        length.out = buffer_samples
+        )
+      ),
+    time_ms = seq(
+      25,
+      (-5*buffer_samples*2)+25,
+      length.out = (buffer_samples*2)
+      ),
+    phase = "buffer"
+  ),
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+      "time"
+  )
+]
+steamvr_prefilter_buffered <- merge.data.table(
+  steamvr_prefilter,
+  buffer,
+  all = TRUE
+) %>% dplyr::select(!manual_reach_openvr_movement_steamvr_location_0)
+
+# Fix ordering
+steamvr_prefilter_buffered <- steamvr_prefilter_buffered[
+    order(
+        ppid,
+        block_num,
+        trial_num_in_block,
+        tracker,
+        time_ms
+    )
+]
+
+# Apply Butterworth filter to position values
+steamvr_position_filtered <- steamvr_prefilter_buffered[!(ppid %like% "pilot"), ] %>%
+    dplyr::group_by(
+        ppid,
+        block_num,
+        trial_num_in_block,
+        time,
+        tracker
+    ) %>%
+    dplyr::mutate(
+        dplyr::across(
+          c(pos_x:pos_z, velocity_x:velocity_z) ,
+          ~ filtfilt(b_10hz, .x), 
+          .names = "{.col}_10hz")
+    ) %>%
+    as.data.table()
+
+# Pull column names from the position variables
+filteredcolnames <- colnames(
+    dplyr::select(
+        steamvr_position_filtered,
+        ends_with(
+            c("x", "y", "z")
+        )
+    )
+)
+
+cutoffs <- c(
+  "raw",
+  "10hz"
+)
+
+# Filter out buffer and melt the data into long format.
+steamvr_position_filtered_long <- steamvr_position_filtered %>%
+    data.table::melt(
+        c(
+            "ppid",
+            "block_num",
+            "trial_num_in_block",
+            "time_ms",
+            "time_second",
+            "time",
+            "phase"
+        ),
+        measure.vars = patterns("^pos_x", "^pos_y", "^pos_z", "^velocity_x", "^velocity_y", "^velocity_z"),
+        variable.name = "filter",
+        value.name = c("pos_x", "pos_y", "pos_z", "ovr_vel_x", "ovr_vel_y", "ovr_vel_z")
+    )
+
+# Establish the different filters as the cutoffs.
+levels(steamvr_position_filtered_long$filter) <- cutoffs
+
+bytrial_filter <- c(
+  "ppid",
+  "block_num",
+  "trial_num_in_block",
+  "time",
+  "filter"
+)
+
+fwrite(
+    steamvr_position_filtered_long,
+    here::here(
+        "data",
+        "study_three",
+        "steamvr_position_filtered_long.csv"
+    )
+)
+
+```
+
+# Velocity calculation
+
+```{r velocity}
+
+steamvr_velocity <- steamvr_position_filtered_long[,
+  # create lead columns for position and time
+  c(
+    "pos_x_lead",
+    "pos_y_lead",
+    "pos_z_lead",
+    "ovr_vel_x_lead",
+    "ovr_vel_y_lead",
+    "ovr_vel_z_lead",
+    "time_ms_lead",
+    "time_s_lead"
+    ) := lapply(
+      .SD,
+      data.table::shift,
+      1,
+      type = "lead"
+      ),
+  .SDcols = c("pos_x", "pos_y", "pos_z", "ovr_vel_x", "ovr_vel_y", "ovr_vel_z", "time_ms", "time_second"),
+  by = bytrial_filter
+][,
+
+  # create lag columns for position and time
+  c(
+    "pos_x_lag",
+    "pos_y_lag",
+    "pos_z_lag",
+    "ovr_vel_x_lag",
+    "ovr_vel_y_lag",
+    "ovr_vel_z_lag",
+    "time_ms_lag",
+    "time_s_lag"
+  ) := lapply(.SD, data.table::shift, 1, type = "lag"),
+  .SDcols = c("pos_x", "pos_y", "pos_z", "ovr_vel_x", "ovr_vel_y", "ovr_vel_z", "time_ms", "time_second"),
+
+  by = bytrial_filter
+][,
+
+  `:=`(
+    xdiff = (pos_x_lead - pos_x_lag),
+    ydiff = (pos_y_lead - pos_y_lag),
+    zdiff = (pos_z_lead - pos_z_lag),
+    time_diff_ms = (time_ms_lead - time_ms_lag),
+    time_diff_s = (time_s_lead - time_s_lag)
+  ),
+  by = bytrial_filter
+][,
+
+  # Calculate velocity in mm/s^2
+  `:=`(
+    velocity = fifelse(
+      !is.na(time_diff_s),
+      (sqrt(xdiff^2 + ydiff^2 + zdiff^2) / time_diff_s) * 1000,
+      (sqrt(xdiff^2 + ydiff^2 + zdiff^2) / (time_diff_ms / 1000)) * 1000
+    ),
+    ovr_vel = (abs(ovr_vel_x) + abs(ovr_vel_y) + abs(ovr_vel_z)) * 1000,
+    displacement = sqrt(pos_x^2 + pos_y^2 + pos_z^2)
+  ),
+  by = bytrial_filter
+][,
+
+  # Create lead column for velocity
+  `:=`(
+    velocity_lead = data.table::shift(velocity, 1, type = "lead"),
+    velocity_lag = data.table::shift(velocity, 1, type = "lag"),
+    ovr_vel_lead = data.table::shift(ovr_vel, 1, type = "lead"),
+    ovr_vel_lag = data.table::shift(ovr_vel, 1, type = "lag")
+  ),
+  by = bytrial_filter
+][,
+
+  # Compute differences
+  `:=`(
+    vel_diff = (velocity_lead - velocity_lag),
+    ovr_vel_diff = (ovr_vel_lead - ovr_vel_lag)
+    ),
+  by = bytrial_filter
+][,
+
+  # Calculate acceleration
+  `:=`(accel = fifelse(
+    !is.na(time_diff_s),
+    vel_diff / (time_diff_s),
+    vel_diff / (time_diff_ms / 1000)
+  ),
+  ovr_acc = fifelse(
+    !is.na(time_diff_s),
+    ovr_vel_diff / (time_diff_s),
+    ovr_vel_diff / (time_diff_ms / 1000)
+  )),
+  by = bytrial_filter
+][,
+
+  time_ms_perphase := (
+    0:(.N - 1)
+    ) * 5,
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+    "time",
+    "phase",
+      "filter"
+  )
+]
+
+```
+
+# Kinematic filtering
+
+```{r kinematic-filtering}
+
+steamvr_filt <- steamvr_velocity[
+  order(ppid, block_num, trial_num_in_block, filter, time_ms)
+][!is.na(velocity) & !is.infinite(velocity),
+
+  # Filter velocity w/ 10hz butterworth
+  `:=`(velocity_10hz = filtfilt(b_10hz, velocity)),
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+      "filter"
+  )
+][!is.infinite(velocity_10hz) & !is.na(velocity_10hz),
+  `:=`(velocity_combined = (velocity_10hz + ovr_vel)/2),
+][!is.infinite(ovr_acc) & !is.na(ovr_acc),
+    `:=`(ovr_acc_10hz = filtfilt(b_10hz, ovr_acc)),
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+      "filter"
+  )][,
+
+  # Create lead/lag columns for velocity
+  `:=`(
+    velocity_10hzlead = data.table::shift(velocity_10hz, 1, type = "lead"),
+    velocity_10hzlag = data.table::shift(velocity_10hz, 1, type = "lag"),
+    combined_vel_lead = data.table::shift(velocity_combined, 1, type = "lead"),
+    combined_vel_lag = data.table::shift(velocity_combined, 1, type = "lag")
+  ),
+  by = bytrial_filter
+][,
+
+  # Compute differences
+  `:=`(
+    vel_10hzdiff = (velocity_10hzlead - velocity_10hzlag),
+    combined_vel_diff = (combined_vel_lead - combined_vel_lag)
+    ),
+  by = bytrial_filter
+][,
+
+  # Compute acceleration
+  `:=`(
+    accel_filtvel = fifelse(
+    !is.na(time_diff_s),
+    vel_10hzdiff / (time_diff_s),
+    vel_10hzdiff / (time_diff_ms / 1000)
+  ),
+  combined_acc = fifelse(
+    !is.na(time_diff_s),
+    combined_vel_diff / (time_diff_s),
+    combined_vel_diff / (time_diff_ms / 1000)
+  )
+  ),
+  by = bytrial_filter
+][
+  order(ppid, block_num, trial_num_in_block, filter, time_ms)
+][
+
+  !is.na(accel) &
+    !is.na(accel_filtvel) &
+    !is.infinite(accel) &
+    !is.infinite(accel_filtvel),
+
+  `:=`(
+    accelfilt = filtfilt(b_10hz, accel),
+    accel_filtvel_filt = filtfilt(b_10hz, accel_filtvel),
+    combined_acc_filt = filtfilt(b_10hz, combined_acc)
+  ),
+  by = c(
+    "ppid",
+    "block_num",
+    "trial_num_in_block",
+      "filter"
+  )
+][order(ppid, block_num, trial_num_in_block, filter, time_ms)]
+
+
+```
+
+# Movement Onset
+
+```{r movement-onset}
+
+# Write full data for plotting individual trials/visual quality checks.
+steamvr_filt_ <- steamvr_filt[
+  phase != "buffer" &
+    filter == "10hz" &
+    # Remove cases that would break analyses-
+    # these are at the ends of the movement when the markers are hopping around.
+    !is.infinite(velocity_10hz) &
+    !is.infinite(combined_acc) &
+    !is.infinite(accel_filtvel),
+  .(
+    ppid,
+    time, block_num,
+    trial_num_in_block, phase,
+    time_ms, time_ms_perphase,
+    velocity_10hz, velocity_combined,
+    ovr_vel, ovr_acc, ovr_acc_10hz, combined_acc_filt,
+    #velocity,accel, accelfilt, accel_filtvel,
+    accel_filtvel_filt
+  )
+]
+
+steamvr_filt_latfix <- merge(
+  steamvr_filt_,
+  manual_latency_fix,
+  by = c(
+    "ppid",
+    "trial_num_in_block",
+    "time"
+  ),
+  all.x = TRUE
+  ) %>%
+  dplyr::mutate(
+    start_time = fifelse(
+      !is.na(start_time),
+      start_time,
+      0
+    ),
+    ovr_start_time = fifelse(
+      !is.na(ovr_start_time),
+      ovr_start_time,
+      0
+    ),
+    combined_start_time = fifelse(
+      !is.na(combined_start_time),
+      combined_start_time,
+      0
+    ),
+    time_ms_fix = time_ms - start_time,
+    ovr_time_ms_fix = time_ms - ovr_start_time,
+    combined_time_ms_fix = time_ms - combined_start_time
+    ) %>%
+  dplyr::filter(time_ms_fix > 0 | ovr_start_time > 0 | combined_start_time > 0) %>%
+  arrange(
+    ppid,
+    time,
+    trial_num_in_block,
+    time_ms
+  ) %>%
+  as.data.table()
+
+
+# Set start time as the first sample where velocity changes
+# by 50 over the subsequent 5 samples. When a manual start
+# time is specified, use that instead.
+
+steamvr_filt_latfix[
+  ,
+  `:=`(
+    leadvel = lead(velocity_10hz, 10),
+  leadovr = lead(ovr_vel, 10),
+  leadcombined = lead(velocity_combined, 10)
+  ),
+  by = c("ppid", "trial_num_in_block", "time")
+  ][
+  ,
+  `:=`(
+    dif = -(velocity_10hz - leadvel),
+    difovr = -(ovr_vel - leadovr),
+    difcombined = -(velocity_combined - leadcombined)
+    )
+  ][,
+  `:=`(
+    start_time = fifelse(start_time != 0, start_time,
+      .SD[
+        (!phase %in% c("replace", "return", "returned")) 
+        & dif > 25]$time_ms[1],
+    ),
+    ovr_start_time = fifelse(ovr_start_time != 0, ovr_start_time,
+      .SD[
+        (!phase %in% c("replace", "return", "returned")) 
+        & difovr > 25]$time_ms[1],
+    ),
+    combined_start_time = fifelse(combined_start_time != 0, combined_start_time,
+      .SD[
+        (!phase %in% c("replace", "return", "returned")) 
+        & difcombined > 25]$time_ms[1],
+    )
+    ),
+  by = c(
+    "ppid",
+    "trial_num_in_block",
+    "time"
+  )
+  ][
+  ,
+
+  `:=`(
+      order = case_when(
+          block_num < 3 ~ "pre",
+          block_num == 4 ~ "first",
+          block_num == 5 ~ "second"
+      )
+  )
+]
+
+# Merge with manually-identified start points
+
+time_correction <- steamvr_filt_latfix[,
+  `:=`(
+    time_ms_fix = time_ms - start_time,
+    ovr_time_ms_fix = time_ms - ovr_start_time,
+    combined_time_ms_fix = time_ms - combined_start_time
+  ),
+  by = c(
+    "ppid",
+    "trial_num_in_block",
+    "time"
+  )
+] %>%
+  arrange(ppid, time, trial_num_in_block, time_ms)
+
+fwrite(time_correction, here::here("data", "study_three", "steamvr_m_fulltrials.csv"))
+
+start_times <- time_correction[, 
+.(start_time = median(start_time),
+ovr_start_time = median(ovr_start_time),
+combined_start_time = median(combined_start_time)
+), 
+by = c("ppid", "trial_num_in_block", "time")
+]
+
+start_times %>%
+  fwrite(here::here("data", "study_three", "steamvr_start_times.csv"))
+
+
+# Manual data fixes/filters
+steamvr_m <- time_correction[
+  # Only beginning and out phases, 10hz filter. Remove values that would break an analysis.
+  phase %in% c("begin", "out") &
+    !is.infinite(velocity_10hz) &
+    !is.infinite(ovr_vel) &
+    !is.infinite(accel_filtvel_filt) &
+    time_ms_fix >= 0,
+  ][
+  ,
+  .(
+    ppid, time, phase, order,
+    block_num, trial_num_in_block,
+    time_ms_perphase, 
+    time_ms, time_ms_fix, ovr_time_ms_fix, combined_time_ms_fix,
+    ovr_vel, ovr_acc_10hz, combined_acc_filt,
+    velocity_10hz, velocity_combined,
+    #velocity, accel, accelfilt, accel_filtvel,
+    accel_filtvel_filt
+  )
+]
+```
+
+# Individualized Adjustments
+
+The below code lays out the individualized adjustments made to ensure the correct peaks and latencies are chosen for each participant. To see the consequences of these choices, see the individual trial plots in 01b_reaching_trials.qmd.
+
+```{r individual-adjustments-pos-derived}
+steamvr_m_ <- steamvr_m[
+    !(ppid == "d3-006" & trial_num_in_block == 11 & time == "pre" & time_ms_fix > 1000)
+][,
+    # Compute kinematic peaks and latencies
+    # Fcase (fast case-when) used to specify individual adjustments
+    # When a parameter is not salvageable, it is set to 0 and filtered out after this step
+    # due to fcase's constraint that all output values must share type.
+    # Kinematic value calculations not used in the final analysis are commented out.
+    .(
+        # Filtered peaks (10hz butterworth)
+        vel_m_filt = max(velocity_10hz, na.rm = TRUE),
+        ovr_vel_m_filt = max(ovr_vel, na.rm = TRUE),
+        combined_vel = max(velocity_combined, na.rm = TRUE),
+        # Filtered latencies
+        vel_lat_filt = .SD[
+            which.max(velocity_10hz),
+            time_ms_fix
+        ][1],
+        ovr_vel_lat_filt = .SD[
+            which.max(ovr_vel),
+            ovr_time_ms_fix
+        ][1],
+        combined_vel_lat = .SD[
+            which.max(velocity_combined),
+            combined_time_ms_fix
+        ][1],
+        # Peak Accel
+        acc_m_filtfilt = max(accel_filtvel_filt, na.rm = TRUE),
+        ovr_acc_m_filtfilt = max(ovr_acc_10hz, na.rm = TRUE),
+        combined_acc = max(combined_acc_filt, na.rm = TRUE),
+        # Peak Decel
+        dec_m_filtfilt =
+            fcase(
+                (ppid == "d3-004" &
+                 trial_num_in_block %in% c(1, 2) &
+                 time == "post"),
+                min(
+                    steamvr_m[
+                        ppid == "d3-004" &
+                          trial_num_in_block %in% c(1, 2) &
+                          time == "post" &
+                          time_ms_fix < 1100,
+                        accel_filtvel_filt
+                    ],
+                    na.rm = TRUE
+                ),
+                default = min(accel_filtvel_filt, na.rm = TRUE)
+            ),
+        ovr_dec_m_filtfilt =
+            fcase(
+                (ppid == "d3-004" &
+                 trial_num_in_block %in% c(1, 2) &
+                 time == "post"),
+                min(
+                    steamvr_m[
+                        ppid == "d3-004" &
+                          trial_num_in_block %in% c(1, 2) &
+                          time == "post" &
+                          time_ms_fix < 1100,
+                        ovr_acc_10hz
+                    ],
+                    na.rm = TRUE
+                ),
+                default = min(ovr_acc_10hz, na.rm = TRUE)
+            ),
+        combined_dec = min(combined_acc_filt, na.rm = TRUE),
+
+        # Acc/Dec peaks & Latencies when calculated from filtered velocity and filtered again
+        # which.max and which.min used to find index of peak and extract the time_ms_fix value
+        # Peak Accel Latency
+        acc_lat_filtfilt = .SD[which.max(accel_filtvel_filt), time_ms_fix][1],
+        ovr_acc_lat_filtfilt = .SD[which.max(ovr_acc_10hz), ovr_time_ms_fix][1],
+        combined_acc_lat = .SD[which.max(combined_acc_filt), combined_time_ms_fix][1],
+
+        # Peak Decel Latency
+        dec_lat_filtfilt = .SD[
+            which.min(accel_filtvel_filt),
+            time_ms_fix
+        ][1],
+        ovr_dec_lat_filtfilt = .SD[
+            which.min(ovr_acc_10hz),
+            ovr_time_ms_fix
+        ][1],
+        combined_dec_lat = .SD[
+            which.min(combined_acc_filt),
+            combined_time_ms_fix
+        ][1]
+    ),
+    by = c(
+        "ppid",
+        "order",
+        "trial_num_in_block",
+        "block_num",
+        "time"
+    )
+]
+
+steamvr_adjusted <- steamvr_m_[
+    ,
+    `:=`(
+        vel_m_filt = ifelse(
+            vel_m_filt == 0,
+            NA,
+            vel_m_filt
+        ),
+        ovr_vel_m_filt = ifelse(
+            ovr_vel_m_filt == 0,
+            NA,
+            ovr_vel_m_filt
+        ),
+        combined_vel = ifelse(
+            combined_vel == 0,
+            NA,
+            combined_vel
+        ),
+        acc_m_filtfilt = ifelse(
+            acc_m_filtfilt == 0,
+            NA,
+            acc_m_filtfilt
+        ),
+        ovr_acc_m_filtfilt = ifelse(
+            ovr_acc_m_filtfilt == 0,
+            NA,
+            ovr_acc_m_filtfilt
+        ),
+        dec_m_filtfilt = ifelse(
+            dec_m_filtfilt == 0,
+            NA,
+            dec_m_filtfilt
+        ),
+        ovr_dec_m_filtfilt = ifelse(
+            ovr_dec_m_filtfilt == 0,
+            NA,
+            ovr_dec_m_filtfilt
+        ),
+        vel_lat_filt = ifelse(
+            vel_lat_filt == 0,
+            NA,
+            vel_lat_filt
+        ),
+        ovr_vel_lat_filt = ifelse(
+            ovr_vel_lat_filt == 0,
+            NA,
+            ovr_vel_lat_filt
+        ),
+        combined_vel_lat = ifelse(
+            combined_vel_lat == 0,
+            NA,
+            combined_vel_lat
+        ),
+        acc_lat_filtfilt = ifelse(
+            acc_lat_filtfilt == 0,
+            NA,
+            acc_lat_filtfilt
+        ),
+        ovr_acc_lat_filtfilt = ifelse(
+            ovr_acc_lat_filtfilt == 0,
+            NA,
+            ovr_acc_lat_filtfilt
+        ),
+        dec_lat_filtfilt = ifelse(
+            dec_lat_filtfilt == 0,
+            NA,
+            dec_lat_filtfilt
+        ),
+        ovr_dec_lat_filtfilt = ifelse(
+            ovr_dec_lat_filtfilt == 0,
+            NA,
+            ovr_dec_lat_filtfilt
+        ),
+        combined_acc = ifelse(
+            combined_acc == 0,
+            NA,
+            combined_acc
+        ),
+        combined_dec = ifelse(
+            combined_dec == 0,
+            NA,
+            combined_dec
+        ),
+        combined_acc_lat = ifelse(
+            combined_acc_lat == 0,
+            NA,
+            combined_acc_lat
+        ),
+        combined_dec_lat = ifelse(
+            combined_dec_lat == 0,
+            NA,
+            combined_dec_lat
+        )
+    )
+]
+
+
+test <- steamvr_adjusted[
+  dec_lat_filtfilt < acc_lat_filtfilt |
+    dec_lat_filtfilt < vel_lat_filt |
+    acc_lat_filtfilt > vel_lat_filt
+    ]
+
+test
+
+```
+
+# Removals, Imputation and Export
+
+```{r imputation-and-export}
+d <- complete(steamvr_adjusted, ppid, trial_num_in_block, time) %>% as.data.table()
+d <- d[
+  ,
+  `:=`(
+    ppid = factor(ppid),
+    time = factor(time),
+    trial_num_in_block = factor(trial_num_in_block)
+  )
+]
+
+
+# Use a linear model to impute any missing trials
+set.seed(1337)
+d_imputed <- d %>% 
+simputation::impute_mf(
+  formula = vel_m_filt + vel_lat_filt 
+    + acc_m_filtfilt + dec_m_filtfilt 
+    + acc_lat_filtfilt + dec_lat_filtfilt 
+    ~ trial_num_in_block 
+    + ppid 
+    + time
+    )
+
+fwrite(
+    d_imputed, here::here("data", "study_three", "steamvr_manual.csv")
+)
+
+```

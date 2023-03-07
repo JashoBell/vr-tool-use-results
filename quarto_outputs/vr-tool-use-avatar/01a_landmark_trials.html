@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.186">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Joshua Bell">
+<meta name="dcterms.date" content="2022-02-14">
+
+<title>Avatar VR - Trial-level Data - Landmark</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="01a_landmark_trials_files/libs/clipboard/clipboard.min.js"></script>
+<script src="01a_landmark_trials_files/libs/quarto-html/quarto.js"></script>
+<script src="01a_landmark_trials_files/libs/quarto-html/popper.min.js"></script>
+<script src="01a_landmark_trials_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="01a_landmark_trials_files/libs/quarto-html/anchor.min.js"></script>
+<link href="01a_landmark_trials_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="01a_landmark_trials_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="01a_landmark_trials_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="01a_landmark_trials_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="01a_landmark_trials_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#landmark-trial-visualizations" id="toc-landmark-trial-visualizations" class="nav-link active" data-scroll-target="#landmark-trial-visualizations">Landmark Trial Visualizations</a>
+  <ul class="collapse">
+  <li><a href="#no-lapse-fix-applied" id="toc-no-lapse-fix-applied" class="nav-link" data-scroll-target="#no-lapse-fix-applied">No Lapse Fix Applied</a>
+  <ul class="collapse">
+  <li><a href="#by-participant" id="toc-by-participant" class="nav-link" data-scroll-target="#by-participant">By-Participant</a></li>
+  <li><a href="#overall" id="toc-overall" class="nav-link" data-scroll-target="#overall">Overall</a></li>
+  </ul></li>
+  <li><a href="#lapse-fixed-plots" id="toc-lapse-fixed-plots" class="nav-link" data-scroll-target="#lapse-fixed-plots">Lapse-fixed Plots</a>
+  <ul class="collapse">
+  <li><a href="#by-participant-1" id="toc-by-participant-1" class="nav-link" data-scroll-target="#by-participant-1">By Participant</a></li>
+  <li><a href="#overall-1" id="toc-overall-1" class="nav-link" data-scroll-target="#overall-1">Overall</a></li>
+  </ul></li>
+  <li><a href="#effect-of-stimulus-direction" id="toc-effect-of-stimulus-direction" class="nav-link" data-scroll-target="#effect-of-stimulus-direction">Effect of stimulus direction</a>
+  <ul class="collapse">
+  <li><a href="#effect-of-stimulus-direction-lapse-fixed" id="toc-effect-of-stimulus-direction-lapse-fixed" class="nav-link" data-scroll-target="#effect-of-stimulus-direction-lapse-fixed">Effect of stimulus direction (lapse-fixed)</a></li>
+  </ul></li>
+  <li><a href="#outliersextreme-cases" id="toc-outliersextreme-cases" class="nav-link" data-scroll-target="#outliersextreme-cases">Outliers/Extreme Cases</a>
+  <ul class="collapse">
+  <li><a href="#perceived-veridical-ratio" id="toc-perceived-veridical-ratio" class="nav-link" data-scroll-target="#perceived-veridical-ratio">Perceived-Veridical Ratio</a></li>
+  <li><a href="#error-in-pre-post-tracker-placement" id="toc-error-in-pre-post-tracker-placement" class="nav-link" data-scroll-target="#error-in-pre-post-tracker-placement">Error in pre-post tracker placement</a></li>
+  <li><a href="#compounded-perceived-and-veridical-change" id="toc-compounded-perceived-and-veridical-change" class="nav-link" data-scroll-target="#compounded-perceived-and-veridical-change">Compounded perceived and veridical change</a></li>
+  <li><a href="#response-variability" id="toc-response-variability" class="nav-link" data-scroll-target="#response-variability">Response variability</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Avatar VR - Trial-level Data - Landmark</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Joshua Bell </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">February 14, 2022</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="landmark-trial-visualizations" class="level1">
+<h1>Landmark Trial Visualizations</h1>
+<section id="no-lapse-fix-applied" class="level2">
+<h2 class="anchored" data-anchor-id="no-lapse-fix-applied">No Lapse Fix Applied</h2>
+<section id="by-participant" class="level3">
+<h3 class="anchored" data-anchor-id="by-participant">By-Participant</h3>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-6.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-7.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-8.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-9.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-10.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-11.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-12.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-13.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-14.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-15.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-16.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-17.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-18.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-19.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-20.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-21.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-22.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_nofix-23.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="overall" class="level3">
+<h3 class="anchored" data-anchor-id="overall">Overall</h3>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/overall-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  time  m_length
+  &lt;chr&gt;    &lt;dbl&gt;
+1 post       109
+2 pre        108</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 59</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="lapse-fixed-plots" class="level2">
+<h2 class="anchored" data-anchor-id="lapse-fixed-plots">Lapse-fixed Plots</h2>
+<section id="by-participant-1" class="level3">
+<h3 class="anchored" data-anchor-id="by-participant-1">By Participant</h3>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-6.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-7.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-8.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-9.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-10.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-11.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-12.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-13.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-14.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-15.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-16.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-17.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-18.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-19.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-20.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-21.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-22.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/plot_print_lapsefix-23.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="overall-1" class="level3">
+<h3 class="anchored" data-anchor-id="overall-1">Overall</h3>
+<div class="cell">
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/lapse-fix-overall-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  time  m_length
+  &lt;chr&gt;    &lt;dbl&gt;
+1 post       107
+2 pre        110</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="effect-of-stimulus-direction" class="level2">
+<h2 class="anchored" data-anchor-id="effect-of-stimulus-direction">Effect of stimulus direction</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>landmark <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> error,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> target,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> direction,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> direction</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">stat_dotsinterval</span>(</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha =</span> .<span class="dv">6</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="at">width =</span> .<span class="dv">1</span>),</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">interval_alpha =</span> <span class="dv">1</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">point_size =</span> <span class="fl">4.5</span>) <span class="sc">+</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_color_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_fill_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_tidybayes</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="effect-of-stimulus-direction-lapse-fixed" class="level3">
+<h3 class="anchored" data-anchor-id="effect-of-stimulus-direction-lapse-fixed">Effect of stimulus direction (lapse-fixed)</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>landmark <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> lapse_fix_error,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> target,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> direction,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> direction</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="fu">stat_dotsinterval</span>(</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">alpha =</span> .<span class="dv">6</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">position =</span> <span class="fu">position_dodge</span>(<span class="at">width =</span> .<span class="dv">1</span>),</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">interval_alpha =</span> <span class="dv">1</span>,</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">point_size =</span> <span class="fl">4.5</span>) <span class="sc">+</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_color_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_fill_viridis_d</span>() <span class="sc">+</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_tidybayes</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="01a_landmark_trials_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="outliersextreme-cases" class="level2">
+<h2 class="anchored" data-anchor-id="outliersextreme-cases">Outliers/Extreme Cases</h2>
+<section id="perceived-veridical-ratio" class="level3">
+<h3 class="anchored" data-anchor-id="perceived-veridical-ratio">Perceived-Veridical Ratio</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.table</span>(armlength_df)[<span class="fu">order</span>(ratio, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      ppid time armlength perceived veridical ratio
+ 1: d3-023 Post        23 0.3984167 0.2317222   172
+ 2: d3-019  Pre        23 0.3642167 0.2262500   161
+ 3: d3-023  Pre        23 0.3703000 0.2345111   158
+ 4: d3-007  Pre        26 0.3792167 0.2528222   150
+ 5: d3-019 Post        23 0.3328833 0.2247889   148
+ 6: d3-008  Pre        26 0.3784667 0.2625944   144
+ 7: d3-015  Pre        23 0.3049500 0.2196389   139
+ 8: d3-016 Post        25 0.3457833 0.2511611   138
+ 9: d3-014  Pre        22 0.3054333 0.2237056   137
+10: d3-011 Post        25 0.3326667 0.2531944   131
+11: d3-015 Post        23 0.3115833 0.2426778   128
+12: d3-012 Post        26 0.3245333 0.2563167   127
+13: d3-002 Post        34 0.4007500 0.3196722   125
+14: d3-014 Post        22 0.2717500 0.2183389   124
+15: d3-013 Post        24 0.2866000 0.2329000   123
+16: d3-013  Pre        24 0.2889667 0.2381222   121
+17: d3-021 Post        23 0.2722000 0.2260000   120
+18: d3-011  Pre        25 0.2900667 0.2482500   117
+19: d3-024  Pre        25 0.2812167 0.2498778   113
+20: d3-020  Pre        26 0.2875500 0.2575611   112
+21: d3-022  Pre        29 0.3149333 0.2823278   112
+22: d3-018  Pre        22 0.2376500 0.2247667   106
+23: d3-017  Pre        25 0.2528333 0.2459167   103
+24: d3-022 Post        29 0.2967500 0.2876889   103
+25: d3-007 Post        26 0.2689000 0.2639722   102
+26: d3-009 Post        26 0.2613833 0.2573500   102
+27: d3-010 Post        27 0.2749167 0.2686500   102
+28: d3-017 Post        25 0.2472500 0.2443056   101
+29: d3-018 Post        22 0.2209333 0.2188167   101
+30: d3-020 Post        26 0.2643167 0.2627556   101
+31: d3-010  Pre        27 0.2708667 0.2715389   100
+32: d3-008 Post        26 0.2541667 0.2567056    99
+33: d3-021  Pre        23 0.2226000 0.2248500    99
+34: d3-002  Pre        34 0.3544167 0.3624889    98
+35: d3-024 Post        25 0.2426500 0.2527889    96
+36: d3-009  Pre        26 0.2430000 0.2556000    95
+37: d3-001 Post        34 0.3153833 0.3445889    92
+38: d3-012  Pre        26 0.2310667 0.2552111    91
+39: d3-005 Post        27 0.2452167 0.2777222    88
+40: d3-001  Pre        34 0.2944167 0.3449167    85
+41: d3-016  Pre        25 0.2109833 0.2555444    83
+42: d3-004  Pre        30 0.2449500 0.3113833    79
+43: d3-003  Pre        34 0.2488167 0.3429000    73
+44: d3-005  Pre        27 0.1975500 0.2707111    73
+45: d3-004 Post        30 0.1969667 0.2956722    67
+46: d3-003 Post        34 0.2152500 0.3389389    64
+      ppid time armlength perceived veridical ratio</code></pre>
+</div>
+</div>
+</section>
+<section id="error-in-pre-post-tracker-placement" class="level3">
+<h3 class="anchored" data-anchor-id="error-in-pre-post-tracker-placement">Error in pre-post tracker placement</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.table</span>(change_df)[<span class="fu">order</span>(veridical_change, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      ppid veridical_change perceived_change
+ 1: d3-002            0.043           -0.046
+ 2: d3-004            0.016            0.048
+ 3: d3-008            0.006            0.124
+ 4: d3-018            0.006            0.017
+ 5: d3-013            0.005            0.002
+ 6: d3-014            0.005            0.034
+ 7: d3-003            0.004            0.034
+ 8: d3-016            0.004           -0.135
+ 9: d3-010            0.003           -0.004
+10: d3-023            0.003           -0.028
+11: d3-017            0.002            0.006
+12: d3-019            0.001            0.031
+13: d3-001            0.000           -0.021
+14: d3-012           -0.001           -0.093
+15: d3-021           -0.001           -0.050
+16: d3-009           -0.002           -0.018
+17: d3-024           -0.003            0.039
+18: d3-011           -0.005           -0.043
+19: d3-020           -0.005            0.023
+20: d3-022           -0.005            0.018
+21: d3-005           -0.007           -0.048
+22: d3-007           -0.011            0.110
+23: d3-015           -0.023           -0.007
+      ppid veridical_change perceived_change</code></pre>
+</div>
+</div>
+</section>
+<section id="compounded-perceived-and-veridical-change" class="level3">
+<h3 class="anchored" data-anchor-id="compounded-perceived-and-veridical-change">Compounded perceived and veridical change</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.table</span>(change_df)[, .(<span class="at">abs_change =</span> perceived_change <span class="sc">+</span> veridical_change)][</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">order</span>(abs_change, <span class="at">decreasing =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    abs_change
+ 1:      0.130
+ 2:      0.099
+ 3:      0.064
+ 4:      0.039
+ 5:      0.038
+ 6:      0.036
+ 7:      0.032
+ 8:      0.023
+ 9:      0.018
+10:      0.013
+11:      0.008
+12:      0.007
+13:     -0.001
+14:     -0.003
+15:     -0.020
+16:     -0.021
+17:     -0.025
+18:     -0.030
+19:     -0.048
+20:     -0.051
+21:     -0.055
+22:     -0.094
+23:     -0.131
+    abs_change</code></pre>
+</div>
+</div>
+</section>
+<section id="response-variability" class="level3">
+<h3 class="anchored" data-anchor-id="response-variability">Response variability</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>landmark[,</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  .(</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">variability =</span> <span class="fu">sd</span>(error),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">variability_as_ratio =</span> <span class="fu">sd</span>(error) <span class="sc">/</span> <span class="fu">mean</span>(forearmlength)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  by <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"ppid"</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>][<span class="fu">order</span>(variability, <span class="at">decreasing =</span> T)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      ppid variability variability_as_ratio
+ 1: d3-008  0.09533931            0.3662162
+ 2: d3-012  0.08667142            0.3381419
+ 3: d3-016  0.07362238            0.2898297
+ 4: d3-023  0.07110809            0.3035708
+ 5: d3-019  0.06426877            0.2846410
+ 6: d3-003  0.05738158            0.1670308
+ 7: d3-005  0.05406104            0.1958142
+ 8: d3-011  0.05285341            0.2107299
+ 9: d3-007  0.05283735            0.2023451
+10: d3-017  0.05249908            0.2140951
+11: d3-002  0.04828889            0.1408969
+12: d3-004  0.04673161            0.1530762
+13: d3-010  0.04638074            0.1711098
+14: d3-015  0.04432751            0.1913601
+15: d3-001  0.04239624            0.1216341
+16: d3-014  0.04095467            0.1848413
+17: d3-009  0.03848279            0.1499541
+18: d3-024  0.03829291            0.1519543
+19: d3-022  0.03485508            0.1219538
+20: d3-021  0.03447727            0.1523895
+21: d3-013  0.03158315            0.1314732
+22: d3-018  0.03088615            0.1391372
+23: d3-020  0.02994595            0.1147049
+      ppid variability variability_as_ratio</code></pre>
+</div>
+</div>
+<section id="lapse-fix" class="level4">
+<h4 class="anchored" data-anchor-id="lapse-fix">Lapse Fix</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>landmark[,</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  .(</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">variability_lf =</span> <span class="fu">sd</span>(lapse_fix_error),</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">variability_as_ratio_lf =</span> <span class="fu">sd</span>(lapse_fix_error) <span class="sc">/</span> <span class="fu">mean</span>(forearmlength),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">lapsefix_improvement =</span> <span class="fu">sd</span>(error) <span class="sc">-</span> <span class="fu">sd</span>(lapse_fix_error)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  by <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"ppid"</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>][<span class="fu">order</span>(variability_lf, <span class="at">decreasing =</span> T)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      ppid variability_lf variability_as_ratio_lf lapsefix_improvement
+ 1: d3-008     0.09533931               0.3662162         0.0000000000
+ 2: d3-023     0.06956669               0.2969904         0.0015413987
+ 3: d3-019     0.06426877               0.2846410         0.0000000000
+ 4: d3-003     0.05738158               0.1670308         0.0000000000
+ 5: d3-015     0.05346225               0.2307944        -0.0091347373
+ 6: d3-007     0.05283735               0.2023451         0.0000000000
+ 7: d3-005     0.05088063               0.1842945         0.0031804106
+ 8: d3-012     0.04948935               0.1930789         0.0371820681
+ 9: d3-017     0.04919090               0.2006041         0.0033081806
+10: d3-020     0.04796326               0.1837184        -0.0180173151
+11: d3-010     0.04769766               0.1759683        -0.0013169280
+12: d3-004     0.04673161               0.1530762         0.0000000000
+13: d3-016     0.04485505               0.1765812         0.0287673255
+14: d3-011     0.04476353               0.1784751         0.0080898817
+15: d3-024     0.04393706               0.1743515        -0.0056441533
+16: d3-014     0.04315122               0.1947550        -0.0021965528
+17: d3-001     0.04239624               0.1216341         0.0000000000
+18: d3-002     0.04205240               0.1227001         0.0062364886
+19: d3-013     0.04090130               0.1702625        -0.0093181538
+20: d3-009     0.03848279               0.1499541         0.0000000000
+21: d3-022     0.03541449               0.1239111        -0.0005594145
+22: d3-021     0.03447727               0.1523895         0.0000000000
+23: d3-018     0.02486565               0.1120159         0.0060204946
+      ppid variability_lf variability_as_ratio_lf lapsefix_improvement</code></pre>
+</div>
+</div>
+</section>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
