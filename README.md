@@ -1,9 +1,8 @@
-# Virtual tool-use: Exploring tool embodiment in virtual reality (Results Repository) 
+# Virtual Tool-use: Exploring Tool Embodiment in Virtual Reality (Results Repository) 
 
-This is a data repository for my dissertation work, including two studies on tool-use/tool embodiment (three samples of participants). The studies were pre-registered on the Open Science Framework (OSF) and the data, analysis and results are available here.
+This is a data repository for my dissertation work, including two studies on human tool-use/tool embodiment (three samples of participants, total *n* = 72). The studies were pre-registered on the Open Science Framework (OSF) and the data, analysis and results are available here.
 
-The source code for the studies will be released on Github once I figure out which assets need removal due 
-to licensing. The link will be added here once it is available.
+The source code for the studies is available [here](https://github.com/jashodb/vr-tool-use).
 
 The papers will be posted as preprints once I have passed my defense, and revised them to the point of being ready to submit. The links will be added here once they are available.
 
@@ -11,18 +10,18 @@ The papers will be posted as preprints once I have passed my defense, and revise
 
 - [OSF Pre-Registration](https://osf.io/c6xs5)
 
-This study is an extension of Cardinali et al. (2009) to a virtual environment. This original study was conducted in a physical environment, and the extension was conducted in virtual reality. Participants completed a series of tasks, including a reaching task, a landmark localization task, and a tool-use task. The reaching and landmark localization tasks occurred on either side of tool-use (a pre-post design).
+This study is an extension of the [Cardinali et al. (2009)](https://doi.org/10.1016/j.cub.2009.05.009) tool-use paradigm to a virtual environment. This original study was conducted in a physical environment, and the extension was conducted in virtual reality. Participants completed a series of tasks, including a reaching task, a landmark localization task, and a tool-use task. The reaching and landmark localization tasks occurred on either side of tool-use (a pre-post design).
 
 - Raw data in `data/1_tooluseinVR`
 - Processed data in `data/study_one`
 - Analysis code in `scripts/vr-tool-use`
 - Rendered analyses in `quarto_outputs/vr-tool-use`
 
-## Study 2: Just a Tool, After All? No Evidence for Tool Embodiment in Virtual or Real Environments
+## Study 2: Just a Tool, After All? No Emergence of Tool Embodiment in Virtual or Real Environments
 
 - [OSF Pre-Registration](https://osf.io/rw9c2)
 
-This study extends the first study by adding an avatar to the virtual environment, with accurate hand-tracking via Manus Quantum gloves. There was also a separately run real-world condition. Due to hardware-related delays, chronologically speaking, the real-world condition was run first, on essentially the same code as the first study, followed by the virtual environment condition, which was based on a revised codebase.
+This study extends the first study by adding an avatar and visual improvements (global illumination, high-resolution textures) to the virtual environment, with accurate hand-tracking via Manus Quantum gloves. There was also a separately run real-world condition. Due to hardware-related delays, chronologically speaking, the real-world condition was run first, on essentially the same code as the first study, followed by the virtual environment condition, which was based on a revised codebase.
 
 *Virtual with Avatar condition:*
 - Raw data in `data/3_avatartooluse`
@@ -77,7 +76,7 @@ There are individual folders for each study, and each folder contains files for:
 
 Feel free to shoot me any questions. I am happy to help.  
 
-Feel free also to criticize my organization, code, or conclusions, both privately and in public. You are right, I don't know what I'm doing. I don't know how I ended up here. I just keep slipping through the cracks and now I'm in way over my head. Please send help.
+Feel free also to criticize my organizational skills, code, or conclusions both privately and in public. You are right, I don't know what I'm doing. I don't know how I ended up here. I just keep slipping through the cracks and now I'm in way over my head. Please send help.
 
 # License
 
