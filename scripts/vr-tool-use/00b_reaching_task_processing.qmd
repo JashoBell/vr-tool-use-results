@@ -28,6 +28,7 @@ for (i in pkgs) {
 data.table::setDTthreads(percent = 90)
 
 sessionInfo()
+
 ```
 
 
@@ -44,7 +45,7 @@ trial_details <- list.files(
   pattern = "trial_results.csv",
   full.names = TRUE,
   recursive = TRUE
-) %>% # %>% as.data.table() %>%
+) %>%
   map_dfr(fread) %>%
       as.data.table()
 
@@ -147,8 +148,7 @@ ppt_prefilter <- ppt_prefilter[ppid == "d1-001",
   )
 ]
 
-rm(ppt_trials_unnested)
-
+rm(ppt_m_files, ppt_trials_nested, ppt_trials_unnested)
 gc()
 
 leadcols <- c("pos_x_lead", "pos_y_lead", "pos_z_lead", "time_lead")
@@ -162,12 +162,9 @@ bytrial <- c(
   "phase"
 )
 
+# Create buffer at beginning and end of each trial to reduce filter edge effects
 buffercols <- colnames(ppt_prefilter)
 buffer_samples <- 20
-
-# Create a buffer to reduce the distortion caused by the filtering process
-# Mostly relevant for the first few participants,
-# others have much more of a buffer built in to the recording.
 
 buffer <- ppt_prefilter[,
   .(
@@ -228,33 +225,21 @@ ppt_prefilter_buffered <- merge.data.table(
   all = TRUE
 ) %>% dplyr::select(!manual_reach_ppt_hand_movement_location_0)
 
-# Fix ordering
-ppt_prefilter_buffered <- ppt_prefilter_buffered[
-    order(
-        ppid,
-        block_num,
-        trial_num_in_block,
-        tracked,
-        time_ms
-    )
-]
+rm(ppt_prefilter, buffer)
+gc()
 
-# Apply Butterworth filter to position values
-ppt_position_filtered <- ppt_prefilter_buffered[!(ppid %like% "pilot"), ] %>%
-    dplyr::group_by(
-        ppid,
-        block_num,
-        trial_num_in_block,
-        time,
-        tracked
-    ) %>%
-    dplyr::mutate(
-        dplyr::across(
-          pos_x:pos_z, 
-          ~ filtfilt(b_10hz, .x), 
-          .names = "{.col}_10hz")
-    ) %>%
-    as.data.table()
+
+# Apply Butterworth filter to position values using data.table
+ppt_position_filtered <- ppt_prefilter_buffered[!(ppid %like% "pilot"), ][
+  order(ppid, block_num, trial_num_in_block, time, tracked, time_ms)
+][,
+  `:=`(
+    pos_x_10hz = filtfilt(b_10hz, pos_x),
+    pos_y_10hz = filtfilt(b_10hz, pos_y),
+    pos_z_10hz = filtfilt(b_10hz, pos_z)
+  ),
+  by = .(ppid, block_num, trial_num_in_block, time, tracked)
+]
 
 # Pull column names from the position variables
 filteredcolnames <- colnames(
@@ -270,6 +255,9 @@ cutoffs <- c(
   "raw",
   "10hz"
 )
+
+rm(ppt_prefilter_buffered)
+gc()
 
 # Filter out buffer and melt the data into long format.
 ppt_position_filtered_long <- ppt_position_filtered %>%
@@ -301,6 +289,8 @@ bytrial_filter <- c(
   "filter"
 )
 
+rm(ppt_position_filtered, ppt_prefilter_buffered)
+gc()
 ```
 
 # Velocity calculation
@@ -396,6 +386,8 @@ ppt_velocity <- ppt_position_filtered_long[,
   )
 ]
 
+rm(ppt_position_filtered_long)
+gc()
 ```
 
 # Kinematic filtering
@@ -459,7 +451,8 @@ ppt_filt <- ppt_velocity[
   )
 ][order(ppid, block_num, trial_num_in_block, tracked, filter, time_ms)]
 
-
+rm(ppt_velocity)
+gc()
 ```
 
 # Movement Onset
@@ -513,6 +506,8 @@ ppt_filt_latfix <- merge(
   ) %>%
   as.data.table()
 
+rm(ppt_filt_)
+gc()
 
 # Set start time as the first sample where velocity changes
 # by 50 over the subsequent 5 samples. When a manual start

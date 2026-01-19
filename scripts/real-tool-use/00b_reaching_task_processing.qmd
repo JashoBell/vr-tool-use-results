@@ -218,33 +218,17 @@ ppt_prefilter_buffered <- merge.data.table(
   all = TRUE
 ) %>% dplyr::select(!manual_reach_ppt_hand_movement_location_0)
 
-# Fix ordering
-ppt_prefilter_buffered <- ppt_prefilter_buffered[
-    order(
-        ppid,
-        block_num,
-        trial_num_in_block,
-        tracked,
-        time_ms
-    )
-]
-
 # Apply Butterworth filter to position values
-ppt_position_filtered <- ppt_prefilter_buffered[!(ppid %like% "pilot"), ] %>%
-    dplyr::group_by(
-        ppid,
-        block_num,
-        trial_num_in_block,
-        time,
-        tracked
-    ) %>%
-    dplyr::mutate(
-        dplyr::across(
-          pos_x:pos_z, 
-          ~ filtfilt(b_10hz, .x), 
-          .names = "{.col}_10hz")
-    ) %>%
-    as.data.table()
+ppt_position_filtered <- ppt_prefilter_buffered[!(ppid %like% "pilot"), ][
+  order(ppid, block_num, trial_num_in_block, time, tracked, time_ms)
+][,
+  `:=`(
+    pos_x_10hz = filtfilt(b_10hz, pos_x),
+    pos_y_10hz = filtfilt(b_10hz, pos_y),
+    pos_z_10hz = filtfilt(b_10hz, pos_z)
+  ),
+  by = .(ppid, block_num, trial_num_in_block, time, tracked)
+]
 
 # Pull column names from the position variables
 filteredcolnames <- colnames(
@@ -260,6 +244,9 @@ cutoffs <- c(
   "raw",
   "10hz"
 )
+
+rm(ppt_prefilter_buffered)
+gc()
 
 # Filter out buffer and melt the data into long format.
 ppt_position_filtered_long <- ppt_position_filtered %>%
@@ -300,6 +287,9 @@ fwrite(
     "ppt_position_filtered_long.csv"
   )
 )
+
+rm(ppt_position_filtered, ppt_prefilter_buffered)
+gc()
 ```
 
 # Velocity calculation
@@ -395,6 +385,8 @@ ppt_velocity <- ppt_position_filtered_long[,
   )
 ]
 
+rm(ppt_position_filtered_long)
+gc()
 ```
 
 # Kinematic filtering
@@ -458,7 +450,8 @@ ppt_filt <- ppt_velocity[
   )
 ][order(ppid, block_num, trial_num_in_block, tracked, filter, time_ms)]
 
-
+rm(ppt_velocity)
+gc()
 ```
 
 # Movement Onset
@@ -507,6 +500,8 @@ ppt_filt_latfix <- merge(
   ) %>%
   as.data.table()
 
+rm(ppt_filt_)
+gc()
 
 # Set start time as the first sample where velocity increases
 # by 25 over the subsequent 10 samples. When a manual start

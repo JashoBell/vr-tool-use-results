@@ -202,34 +202,18 @@ ppt_prefilter_buffered <- merge.data.table(
     all = TRUE
 ) %>% dplyr::select(!manual_reach_vrpn_movement_location_0)
 
-# Fix ordering
-ppt_prefilter_buffered <- ppt_prefilter_buffered[
-    order(
-        ppid,
-        block_num,
-        trial_num_in_block,
-        tracked,
-        time_ms
-    )
+# Apply Butterworth filter to position values
+ppt_position_filtered <- ppt_prefilter_buffered[!(ppid %like% "pilot"), ][
+  order(ppid, block_num, trial_num_in_block, time, tracked, time_ms)
+][,
+  `:=`(
+    pos_x_10hz = filtfilt(b_10hz, pos_x),
+    pos_y_10hz = filtfilt(b_10hz, pos_y),
+    pos_z_10hz = filtfilt(b_10hz, pos_z)
+  ),
+  by = .(ppid, block_num, trial_num_in_block, time, tracked)
 ]
 
-# Apply Butterworth filter to position values
-ppt_position_filtered <- ppt_prefilter_buffered[!(ppid %like% "pilot"), ] %>%
-    dplyr::group_by(
-        ppid,
-        block_num,
-        trial_num_in_block,
-        time,
-        tracked
-    ) %>%
-    dplyr::mutate(
-        dplyr::across(
-            pos_x:pos_z,
-            ~ filtfilt(b_10hz, .x),
-            .names = "{.col}_10hz"
-        )
-    ) %>%
-    as.data.table()
 
 # Pull column names from the position variables
 filteredcolnames <- colnames(
@@ -245,6 +229,9 @@ cutoffs <- c(
     "raw",
     "10hz"
 )
+
+rm(ppt_prefilter_buffered)
+gc()
 
 # Filter out buffer and melt the data into long format.
 ppt_position_filtered_long <- ppt_position_filtered %>%
@@ -285,6 +272,9 @@ fwrite(
         "ppt_position_filtered_long.csv"
     )
 )
+
+rm(ppt_position_filtered_long)
+gc()
 ```
 
 # Velocity calculation
@@ -380,6 +370,8 @@ ppt_velocity <- ppt_position_filtered_long[,
     )
 ]
 
+rm(ppt_position_filtered)
+gc()
 ```
 
 # Kinematic filtering
@@ -441,12 +433,15 @@ ppt_filt <- ppt_velocity[
         "filter"
     )
 ][order(ppid, block_num, trial_num_in_block, tracked, filter, time_ms)]
+
+rm(ppt_velocity)
+gc()
 ```
 
 # Movement Onset
 
 ```{r movement-onset}
-# Write full data for plotting individual trials/visual quality checks.
+
 ppt_filt_ <- ppt_filt[
     phase != "buffer" &
         filter == "10hz" &
@@ -569,6 +564,8 @@ ppt_m <- time_correction[
     )
 ]
 
+rm(time_correction)
+gc()
 ```
 
 # Individualized Adjustments
@@ -695,54 +692,4 @@ test
 
 fwrite(ppt_adjusted, here::here("data", "study_three", "ppt_manual_pre_cleaning.csv"))
 
-```
-
-
-
-
-
-
-# Read OpenVR Data
-As a backup to PPT
-
-```{r read-openvr}
-# openvr_m_files <- trial_details %>%
-#     dplyr::select(ppid, experiment, block_num, trial_num_in_block, manual_reach_openvr_movement_steamvr_location_0) %>%
-#     dplyr::filter(
-#         !is.na(manual_reach_openvr_movement_steamvr_location_0) & !manual_reach_openvr_movement_steamvr_location_0 == ""
-#     )
-
-# # Read in the csv files using the paths from the trial_results files and unnest those
-# openvr_trials_nested <- openvr_m_files %>%
-#     dplyr::mutate(
-#         manual_movement_openvr = map(
-#             file.path(here::here("data", manual_reach_openvr_movement_steamvr_location_0)),
-#             fread
-#         )
-#     ) %>%
-#     unnest(cols = c(manual_reach_openvr_movement_steamvr_location_0)) %>%
-#     as.data.table()
-
-# # Unnest again, and fix ms values that were recorded with "_"
-# openvr_trials_unnested <- dt_unnest(openvr_trials_nested[
-#     ,
-#     manual_movement_openvr := map(
-#         manual_movement_openvr,
-#         ~ dplyr::mutate(.x, time_ms = as.double(gsub("_", "", time_ms)))
-#     )
-# ], manual_movement_openvr)
-
-# openvr_prefilter <- openvr_trials_unnested[,
-#     `:=`(
-#         time = if_else(block_num < 3, "pre", "post"),
-#         time_second = signif(time_ms / 1000, 6),
-#         time_ms = (0:(.N - 1)) * 5
-#     ),
-#     by = c(
-#         "ppid",
-#         "block_num",
-#         "trial_num_in_block",
-#         "tracked"
-#     )
-#]
 ```

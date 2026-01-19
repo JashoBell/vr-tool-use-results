@@ -236,21 +236,17 @@ steamvr_prefilter_buffered <- steamvr_prefilter_buffered[
 ]
 
 # Apply Butterworth filter to position values
-steamvr_position_filtered <- steamvr_prefilter_buffered[!(ppid %like% "pilot"), ] %>%
-    dplyr::group_by(
-        ppid,
-        block_num,
-        trial_num_in_block,
-        time,
-        tracker
-    ) %>%
-    dplyr::mutate(
-        dplyr::across(
-          c(pos_x:pos_z, velocity_x:velocity_z) ,
-          ~ filtfilt(b_10hz, .x), 
-          .names = "{.col}_10hz")
-    ) %>%
-    as.data.table()
+steamvr_position_filtered <- steamvr_prefilter_buffered[!(ppid %like% "pilot"), ][
+  order(ppid, block_num, trial_num_in_block, time, tracker, time_ms)
+][,
+  `:=`(
+    pos_x_10hz = filtfilt(b_10hz, pos_x),
+    pos_y_10hz = filtfilt(b_10hz, pos_y),
+    pos_z_10hz = filtfilt(b_10hz, pos_z)
+  ),
+  by = .(ppid, block_num, trial_num_in_block, time, tracker)
+]
+
 
 # Pull column names from the position variables
 filteredcolnames <- colnames(
