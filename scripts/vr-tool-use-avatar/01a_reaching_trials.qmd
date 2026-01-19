@@ -118,15 +118,6 @@ ppt_m[order(ppid, tracking, time, trial_num_in_block)]
 
 ```
 
-# SteamVR - PPT correlation
-```{r steamvr_ppt_correlation}
-
-# For steamvr_participants, correlate the kinematic data from the two trackers in the ppt_m data
-
-
-
-```
-
 # Overlaid Trials per Participant
 
 ## PPT
