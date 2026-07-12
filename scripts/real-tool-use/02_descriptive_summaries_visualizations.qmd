@@ -167,8 +167,8 @@ ggplot(aes(y = error_cm,
         legend.background = element_rect(fill = "transparent", colour = NA),  
         plot.background = element_rect(fill = "transparent", colour = NA))
 
-ggsave(lm_empirical, filename = here::here("scripts", "for_osf", "tooluse_in_real",  "figures", "landmark-empirical-plot.svg"), width = 15, height = 8)
-saveRDS(lm_empirical, here::here("scripts", "for_osf", "tooluse_in_real",  "figures", "landmark-empirical-plot.rds"))
+ggsave(lm_empirical, filename = here::here("scripts", "real-tool-use",  "figures", "landmark-empirical-plot.svg"), width = 15, height = 8)
+saveRDS(lm_empirical, here::here("scripts", "real-tool-use",  "figures", "landmark-empirical-plot.rds"))
 
 lm_empirical
 ```
@@ -446,8 +446,8 @@ kinematic_empirical_plots <-
         plot.background = element_rect(fill = "transparent", colour = NA)
       )
 
-ggsave(kinematic_empirical_plots, filename = here::here("scripts", "for_osf", "tooluse_in_real", "figures", "kinematics-empirical-plot.svg"), width = 18, height = 12, bg = "transparent")
-saveRDS(kinematic_empirical_plots, here::here("scripts", "for_osf", "tooluse_in_real", "figures", "kinematics-empirical-plot.rds"))
+ggsave(kinematic_empirical_plots, filename = here::here("scripts", "real-tool-use", "figures", "kinematics-empirical-plot.svg"), width = 18, height = 12, bg = "transparent")
+saveRDS(kinematic_empirical_plots, here::here("scripts", "real-tool-use", "figures", "kinematics-empirical-plot.rds"))
 
 kinematic_empirical_plots
 ```

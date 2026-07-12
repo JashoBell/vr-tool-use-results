@@ -112,7 +112,7 @@ landmark_time_target <- update(
   refresh = 0,
   save_pars = save_pars(all = TRUE),
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "landmark_error_time_target.rds"),
+  file = here::here("scripts", "real-tool-use", "models", "landmark_error_time_target.rds"),
   file_refit = "on_change",
   silent = TRUE
   )
@@ -164,7 +164,7 @@ landmark_bfs <- brms::hypothesis(landmark_time_target, hypotheses, nlpar="b")$hy
   )
 )
               
-write_csv(landmark_error_table, file = here::here("scripts", "for_osf", "tooluse_in_real", "tables", "landmark_table.csv"))
+write_csv(landmark_error_table, file = here::here("scripts", "real-tool-use", "tables", "landmark_table.csv"))
 ```
 
 
@@ -203,7 +203,7 @@ write_csv(landmark_error_table, file = here::here("scripts", "for_osf", "tooluse
 #   sample_prior = "no",
 #   refresh = 0,
 #   seed = 1337,
-#   file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "landmark_lapsefix_error_time_target.rds"),
+#   file = here::here("scripts", "real-tool-use", "models", "landmark_lapsefix_error_time_target.rds"),
 #   file_refit = "on_change",
 #   silent = TRUE
 #   )
@@ -269,7 +269,7 @@ write_csv(landmark_error_table, file = here::here("scripts", "for_osf", "tooluse
 # )
               
 # landmark_lapsefix_error_table %>%
-# write_csv(file = here::here("scripts", "for_osf", "tooluse_in_real", "tables", "landmark_table_lapsefix.csv"))
+# write_csv(file = here::here("scripts", "real-tool-use", "tables", "landmark_table_lapsefix.csv"))
 ```
 
 
@@ -285,9 +285,9 @@ model_params <- landmark_error_table %>% select(
              "Upper" = HDI_high,
              "Mode" = MAP)
 
-fwrite(model_params, here::here("scripts", "for_osf", "tooluse_in_real", "tables", "landmark_model_params.csv"))
+fwrite(model_params, here::here("scripts", "real-tool-use", "tables", "landmark_model_params.csv"))
 
-saveRDS(model_params, here::here("scripts", "for_osf", "tooluse_in_real", "tables", "landmark_model_params.rds"))
+saveRDS(model_params, here::here("scripts", "real-tool-use", "tables", "landmark_model_params.rds"))
 
 # lapsefix_model_params <- landmark_lapsefix_error_table %>% select(
 #   Parameter,
@@ -299,7 +299,7 @@ saveRDS(model_params, here::here("scripts", "for_osf", "tooluse_in_real", "table
 #              "Upper" = CI_high,
 #              "Mode" = MAP)
 
-# fwrite(lapsefix_model_params, here::here("scripts", "for_osf", "tooluse_in_real", "tables", "landmark_lapsefix_model_params.csv"))
+# fwrite(lapsefix_model_params, here::here("scripts", "real-tool-use", "tables", "landmark_lapsefix_model_params.csv"))
 
-# saveRDS(lapsefix_model_params, here::here("scripts", "for_osf", "tooluse_in_real", "tables", "landmark_lapsefix_model_params.rds"))
+# saveRDS(lapsefix_model_params, here::here("scripts", "real-tool-use", "tables", "landmark_lapsefix_model_params.rds"))
 ```

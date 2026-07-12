@@ -258,7 +258,7 @@ velocity_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_avatar", "models", "supplementary", "peakvelocity_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use-avatar", "models", "supplementary", "peakvelocity_ppt_bongers")
   )
 
 plot(velocity_peaks)
@@ -333,7 +333,7 @@ acceleration_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_avatar", "models", "supplementary", "peakacceleration_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use-avatar", "models", "supplementary", "peakacceleration_ppt_bongers")
   )
 
 plot(acceleration_peaks)
@@ -407,7 +407,7 @@ deceleration_peaks <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_avatar", "models", "supplementary", "peakdeceleration_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use-avatar", "models", "supplementary", "peakdeceleration_ppt_bongers")
   )
 
 plot(deceleration_peaks)
@@ -513,7 +513,7 @@ velocity_latencies <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_avatar", "models", "supplementary", "velocity_latency_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use-avatar", "models", "supplementary", "velocity_latency_ppt_bongers")
   )
 
 plot(velocity_latencies)
@@ -608,7 +608,7 @@ acceleration_latencies <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_avatar", "models", "supplementary", "acceleration_latency_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use-avatar", "models", "supplementary", "acceleration_latency_ppt_bongers")
   )
 
 plot(acceleration_latencies)
@@ -704,7 +704,7 @@ deceleration_latencies <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_avatar", "models", "supplementary", "deceleration_latency_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use-avatar", "models", "supplementary", "deceleration_latency_ppt_bongers")
   )
 
 plot(deceleration_latencies)

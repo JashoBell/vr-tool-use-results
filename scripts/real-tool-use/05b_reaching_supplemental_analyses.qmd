@@ -341,7 +341,7 @@ velocity_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakvelocity_ppt_bongers")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "peakvelocity_ppt_bongers")
   )
 
 plot(velocity_peaks)
@@ -416,7 +416,7 @@ acceleration_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakacceleration_ppt_bongers")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "peakacceleration_ppt_bongers")
   )
 
 plot(acceleration_peaks)
@@ -490,7 +490,7 @@ deceleration_peaks <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakdeceleration_ppt_bongers")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "peakdeceleration_ppt_bongers")
   )
 
 plot(deceleration_peaks)
@@ -596,7 +596,7 @@ velocity_latencies <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "velocity_latency_ppt_bongers")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "velocity_latency_ppt_bongers")
   )
 
 plot(velocity_latencies)
@@ -691,7 +691,7 @@ acceleration_latencies <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "acceleration_latency_ppt_bongers")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "acceleration_latency_ppt_bongers")
   )
 
 plot(acceleration_latencies)
@@ -787,7 +787,7 @@ deceleration_latencies <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "deceleration_latency_ppt_bongers")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "deceleration_latency_ppt_bongers")
   )
 
 plot(deceleration_latencies)
@@ -963,7 +963,7 @@ velocity_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakvelocity_ppt_cardinali")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "peakvelocity_ppt_cardinali")
   )
 
 plot(velocity_peaks)
@@ -1038,7 +1038,7 @@ acceleration_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakacceleration_ppt_cardinali")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "peakacceleration_ppt_cardinali")
   )
 
 plot(acceleration_peaks)
@@ -1112,7 +1112,7 @@ deceleration_peaks <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "peakdeceleration_ppt_cardinali")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "peakdeceleration_ppt_cardinali")
   )
 
 plot(deceleration_peaks)
@@ -1218,7 +1218,7 @@ velocity_latencies <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "velocity_latency_ppt_cardinali")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "velocity_latency_ppt_cardinali")
   )
 
 plot(velocity_latencies)
@@ -1312,7 +1312,7 @@ acceleration_latencies <- update(
   acceleration_latency_priors,
   sample_prior = "no",
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "acceleration_latency_ppt_cardinali")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "acceleration_latency_ppt_cardinali")
   )
 
 plot(acceleration_latencies)
@@ -1408,7 +1408,7 @@ deceleration_latencies <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_real", "models", "supplementary", "deceleration_latency_ppt_cardinali")
+  file = here::here("scripts", "real-tool-use", "models", "supplementary", "deceleration_latency_ppt_cardinali")
   )
 
 plot(deceleration_latencies)
