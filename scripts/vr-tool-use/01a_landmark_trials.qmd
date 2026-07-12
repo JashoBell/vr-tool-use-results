@@ -346,9 +346,9 @@ for(p in unique(landmark$ppid))
       nonfix_plots[[p]] <- plot
       if(p == "d1-015")
       {
-        ggsave(here::here("scripts", "for_osf", "tooluse_in_vr", "landmark_trials_plot.svg"), dpi = 420, 
+        ggsave(here::here("figures", "vr-tool-use", "landmark_trials_plot.svg"), dpi = 420, 
         plot = plot, bg = "transparent")
-        saveRDS(plot, file = here::here("scripts", "for_osf", "tooluse_in_vr", "landmark_trials_plot.rds"))
+        saveRDS(plot, file = here::here("figures", "vr-tool-use", "landmark_trials_plot.rds"))
       }
   }
 

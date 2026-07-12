@@ -765,7 +765,7 @@ model_params <- bind_rows(
              "Upper" = CI_high,
              "Mode" = MAP)
 
-fwrite(model_params, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "supplementary", "model_params_bongers.csv"))
+fwrite(model_params, here::here("scripts", "vr-tool-use-avatar", "tables", "supplementary", "model_params_bongers.csv"))
 
 model_table <- flextable::qflextable(model_params) %>%
   add_header_row(T, 
@@ -813,7 +813,7 @@ model_table <- flextable::qflextable(model_params) %>%
 
 model_table
 
-saveRDS(model_table, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "supplementary", "kinematic_table_bongers.rds"))
+saveRDS(model_table, here::here("scripts", "vr-tool-use-avatar", "tables", "supplementary", "kinematic_table_bongers.rds"))
 
 ```
 
