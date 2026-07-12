@@ -12,7 +12,7 @@ format:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-pkgs <- c("dplyr", "tidyr", "magrittr", "readr", "data.table", "stringr", "here", "plotly", "ggplot2", "flextable", "officer", "equatags", "gghalves", "ggthemes", "tidybayes", "patchwork", "priorsense")
+pkgs <- c("dplyr", "tidyr", "magrittr", "readr", "data.table", "stringr", "here", "plotly", "ggplot2", "flextable", "officer", "equatags", "ggthemes", "tidybayes", "patchwork", "priorsense")
 for(i in pkgs){
   if(!i %in% rownames(installed.packages())){ 
     if(i == "priorsense")
@@ -65,344 +65,162 @@ model_params <- fread(here("scripts", "for_osf", "tooluse_in_real", "tables", "m
 ## Expected Values
 
 ```{r posterior_draws}
-velocity_peak_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_epred_draws(
-    vel_peak_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 25000
-    ) %>%
-  mutate(
-    .epred = (.epred * sd(ppt_m$vel_m_filt) + mean(ppt_m$vel_m_filt)),
-    Outcome = "Peak Velocity"
-   ) %>%
-  as.data.table()
+# Define a function to generate posterior predictions for each model
+add_posterior_parameter_draws <- function(model, data, var, outcome) {
+    d <- data %>%
+        distinct(time) %>%
+        add_epred_draws(
+            model,
+            re_formula = ~time,
+            seed = 1337,
+            allow_new_levels = F,
+            ndraws = 2500
+        ) 
+        
+    if(outcome == "Peak Velocity" | outcome == "Peak Acceleration" | outcome == "Peak Deceleration") {
+      d  %>%
+        mutate(
+            .epred = .epred * sd(data[[var]], na.rm = TRUE) + mean(data[[var]], na.rm = TRUE),
+            Outcome = outcome,
+            time = factor(
+                time,
+                levels = c("Post", "Pre"),
+                labels = c("Post", "Pre")
+            )
+        ) %>%
+        as.data.table()
+    } else {
+      d  %>%
+        mutate(
+            .epred = .epred,
+            Outcome = outcome,
+            time = factor(
+                time,
+                levels = c("Pre", "Post"),
+                labels = c("Pre", "Post")
+            )
+        ) %>%
+        as.data.table()
+    }
+}
 
-acceleration_peak_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_epred_draws(
-    acc_peak_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 25000
-    ) %>%
-  mutate(
-    .epred = (
-      .epred * sd(ppt_m$acc_m_filtfilt, na.rm = TRUE) 
-      + mean(ppt_m$acc_m_filtfilt, na.rm = TRUE)
-      ),
-    Outcome = "Peak Acceleration"
-   ) %>%
-  as.data.table()
+# Generate posterior predictions for each outcome variable using the function
+velocity_peak_posterior <- add_posterior_parameter_draws(
+  vel_peak_model, 
+  ppt_m, 
+  "vel_m_filt",
+  "Peak Velocity")
 
+acceleration_peak_posterior <- add_posterior_parameter_draws(
+  acc_peak_model, 
+  ppt_m, 
+  "acc_m_filtfilt",
+  "Peak Acceleration")
 
-deceleration_peak_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_epred_draws(
-    dec_peak_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 25000
-    ) %>%
-  mutate(
-    .epred = (
-      .epred * sd(ppt_m$dec_m_filtfilt, na.rm = TRUE) 
-      + mean(ppt_m$dec_m_filtfilt, na.rm = TRUE)
-      ),
-    Outcome = "Peak Deceleration"
-   ) %>%
-  as.data.table()
+deceleration_peak_posterior <- add_posterior_parameter_draws(
+  dec_peak_model, 
+  ppt_m, 
+  "dec_m_filtfilt",
+  "Peak Deceleration")
 
-velocity_latency_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_epred_draws(
-    vel_latency_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 25000
-    ) %>%
-  mutate(
-    Outcome = "Velocity Latency"
-  ) %>%
-  as.data.table()
+velocity_latency_posterior <- add_posterior_parameter_draws(
+  vel_latency_model, 
+  ppt_m, 
+  "vel_m_filt",
+  "Velocity Latency")
 
-acceleration_latency_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_epred_draws(
-    acc_latency_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 25000
-    ) %>%
-  mutate(
-    Outcome = "Acceleration Latency"
-  ) %>%
-  as.data.table()
+acceleration_latency_posterior <- add_posterior_parameter_draws(
+  acc_latency_model, 
+  ppt_m, 
+  "acc_m_filtfilt",
+  "Acceleration Latency")
 
-deceleration_latency_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_epred_draws(
-    dec_latency_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 25000
-    ) %>%
-  mutate(
-    Outcome = "Deceleration Latency"
-  ) %>%
-  as.data.table()
+deceleration_latency_posterior <- add_posterior_parameter_draws(
+  dec_latency_model, 
+  ppt_m, 
+  "dec_m_filtfilt",
+  "Deceleration Latency")
 
 posterior_draws <- rbindlist(
-  list(
-    velocity_peak_posterior,
-    acceleration_peak_posterior,
-    deceleration_peak_posterior,
-    velocity_latency_posterior,
-    acceleration_latency_posterior,
-    deceleration_latency_posterior
-  )
+    list(
+        velocity_peak_posterior,
+        acceleration_peak_posterior,
+        deceleration_peak_posterior,
+        velocity_latency_posterior,
+        acceleration_latency_posterior,
+        deceleration_latency_posterior
+    )
 )
 ```
 
 
 ```{r posterior_plots}
-pptvel_dist <- ggplot(velocity_peak_posterior, 
-                      aes(x = .epred, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = velocity_peak_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = velocity_peak_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = "Peak Velocity (mm/s)", 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  scale_x_continuous(
-    limits = c(min(velocity_peak_posterior[,.epred]) - sd(velocity_peak_posterior[,.epred]), 
-    max(velocity_peak_posterior[,.epred]) + sd(velocity_peak_posterior[,.epred])),
-   expand = c(0, 0)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
+create_epred_plot <- function(data, xlab) {
+    plot <- ggplot(data, aes(
+        x = .epred,
+        fill = time,
+        color = time
+    )) +
+        stat_slab(alpha = .4, scale = 1, height = 1) +
+        stat_pointinterval(
+            data = data[time == "Post"],
+            point_interval = mode_hdi, show_slab = FALSE,
+            position = position_nudge(y = -.043)
+        ) +
+        stat_pointinterval(
+            data = data[time == "Pre"],
+            point_interval = mode_hdi,
+            show_slab = FALSE,
+            position = position_nudge(y = -.01)
+        ) +
+        labs(
+            x = xlab,
+            fill = "Time",
+            color = "Time",
+            y = NULL
+        ) +
+        scale_fill_manual(breaks = c("Pre", "Post"), values = c("#001015", "#09A1D7")) +
+        scale_color_manual(breaks = c("Pre", "Post"), values = c("#001015", "#09A1D7")) +
+        theme_tidybayes() +
+        theme(text = element_text(size = 14)) +
+        scale_y_continuous(limits = c(-.05, 1)) +
+        scale_x_continuous(
+            limits = c(
+                min(data[, .epred])
+                - sd(data[, .epred]),
+                max(data[, .epred])
+                + sd(data[, .epred])
+            ),
+            expand = c(0, 0)
+        ) +
+        theme(
+            axis.line.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.text.y = element_blank(),
+            panel.background = element_rect(fill = "transparent", colour = NA),
+            legend.background = element_rect(fill = "transparent", colour = NA),
+            plot.background = element_rect(fill = "transparent", colour = NA)
+        )
+    return(plot)
+}
 
-pptacc_dist <- ggplot(acceleration_peak_posterior, 
-                      aes(x = .epred, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = acceleration_peak_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = acceleration_peak_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = expression("Peak Acceleration "(mm/s^2)), 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  scale_x_continuous(
-    limits = c(
-      min(acceleration_peak_posterior[,.epred])
-      - sd(acceleration_peak_posterior[,.epred]), 
-      max(acceleration_peak_posterior[,.epred])
-      + sd(acceleration_peak_posterior[,.epred])
-      ),
-   expand = c(0, 0)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
-
-pptdec_dist <- ggplot(deceleration_peak_posterior, 
-                      aes(x = .epred, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = deceleration_peak_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = deceleration_peak_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = expression("Peak Deceleration "(mm/s^2)), 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  scale_x_continuous(
-    limits = c(
-      min(deceleration_peak_posterior[,.epred])
-      - sd(deceleration_peak_posterior[,.epred]), 
-      max(deceleration_peak_posterior[,.epred])
-      + sd(deceleration_peak_posterior[,.epred])
-      ),
-   expand = c(0, 0)) +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
-
-pptvel_lat_dist <- ggplot(velocity_latency_posterior, 
-                      aes(x = .epred, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = velocity_latency_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = velocity_latency_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = expression("Peak Velocity Latency "(ms)), 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  scale_x_continuous(
-    limits = c(
-      min(velocity_latency_posterior[,.epred])
-      - sd(velocity_latency_posterior[,.epred]), 
-      max(velocity_latency_posterior[,.epred])
-      + sd(velocity_latency_posterior[,.epred])
-      ),
-   expand = c(0, 0)) +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
-
-pptacc_lat_dist <- ggplot(acceleration_latency_posterior, 
-                      aes(x = .epred, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = acceleration_latency_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = acceleration_latency_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = expression("Peak Acceleration Latency "(ms)), 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  scale_x_continuous(
-    limits = c(
-      min(acceleration_latency_posterior[,.epred])
-      - sd(acceleration_latency_posterior[,.epred]), 
-      max(acceleration_latency_posterior[,.epred])
-      + sd(acceleration_latency_posterior[,.epred])
-      ),
-   expand = c(0, 0)) +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
-
-pptdec_lat_dist <- ggplot(deceleration_latency_posterior, 
-                      aes(x = .epred, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = deceleration_latency_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = deceleration_latency_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = expression("Peak Deceleration Latency "(ms)), 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  scale_x_continuous(
-    limits = c(
-      min(deceleration_latency_posterior[,.epred])
-      - sd(deceleration_latency_posterior[,.epred]), 
-      max(deceleration_latency_posterior[,.epred])
-      + sd(deceleration_latency_posterior[,.epred])
-      ),
-   expand = c(0, 0)) +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
+pptvel_dist <- create_epred_plot(velocity_peak_posterior, "Peak Velocity (mm/s)")
+pptacc_dist <- create_epred_plot(acceleration_peak_posterior, expression("Peak Acceleration "(mm / s^2)))
+pptdec_dist <- create_epred_plot(deceleration_peak_posterior, expression("Peak Deceleration "(mm / s^2)))
+pptvel_lat_dist <- create_epred_plot(velocity_latency_posterior, "Velocity Latency (s)")
+pptacc_lat_dist <- create_epred_plot(acceleration_latency_posterior, "Acceleration Latency (s)")
+pptdec_lat_dist <- create_epred_plot(deceleration_latency_posterior, "Deceleration Latency (s)")
 
 kinematic_parameter_estimate_plots <- ( pptacc_dist + pptvel_dist + pptdec_dist +  
   pptacc_lat_dist + pptvel_lat_dist +
-  pptdec_lat_dist) + plot_layout(guides = "collect", nrow = 2, ncol = 3) + patchwork::plot_annotation(title = "Kinematic peak and latency posterior distributions") & theme(plot.title = element_text(size = 16),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
+  pptdec_lat_dist) + plot_layout(guides = "collect", nrow = 2, ncol = 3) & 
+  theme(
+    plot.title = element_text(size = 16),
+    panel.background = element_rect(fill = "transparent", colour = "transparent"), 
+    legend.background = element_rect(fill = "transparent", colour = "transparent"),
+    legend.position = "bottom",  
+    plot.background = element_rect(fill = "transparent", colour = "transparent")
+        )
 
 ggsave(
   kinematic_parameter_estimate_plots,
@@ -431,341 +249,159 @@ saveRDS(kinematic_parameter_estimate_plots, here::here(
 kinematic_parameter_estimate_plots
 ```
 
-
-```{r previous_effects}
-past_results <- data.table::data.table(
-  Experiment = c("Cardinali et al. (2009)",
-                 "Bongers (2010)",
-                 "Martel et al. (2019)",
-                 "Bahmad et al. (2020)",
-                 "Martel et al. (2021)"),
-  Velocity = c(),
-  Acceleration = c(),
-  Deceleration = c(),
-  Velocity_Latency = c(),
-  Acceleration_Latency = c(),
-  Deceleration_Latency = c()
-)
-```
-
 # Posterior Predictions
 
 ```{r posterior_predictions}
-velocity_peak_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_predicted_draws(
+# Define a function to generate posterior predictions for each model
+add_posterior_predictions <- function(model, data, var, outcome) {
+    d <- data %>%
+        distinct(time) %>%
+        add_predicted_draws(
+            model,
+            re_formula = ~time,
+            seed = 1337,
+            allow_new_levels = F,
+            ndraws = 2500
+        )
+    if (outcome == "Peak Velocity" | outcome == "Peak Acceleration" | outcome == "Peak Deceleration") {
+        d %>%
+            mutate(
+                .prediction = .prediction * sd(data[[var]], na.rm = TRUE) + mean(data[[var]], na.rm = TRUE),
+                Outcome = outcome,
+                time = factor(
+                    time,
+                    levels = c("Post", "Pre"),
+                    labels = c("Post", "Pre")
+                )
+            ) %>%
+            as.data.table()
+    } else {
+        d %>%
+            mutate(
+                .prediction = .prediction,
+                Outcome = outcome,
+                time = factor(
+                    time,
+                    levels = c("Pre", "Post"),
+                    labels = c("Pre", "Post")
+                )
+            ) %>%
+            as.data.table()
+    }
+}
+
+# Generate posterior predictions for each outcome variable using the function
+velocity_peak_posterior <- add_posterior_predictions(
     vel_peak_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 2500
-    ) %>%
-  mutate(
-    .prediction = (.prediction * sd(ppt_m$vel_m_filt) + mean(ppt_m$vel_m_filt))
-   ) %>%
-  as.data.table()
+    ppt_m,
+    "vel_m_filt",
+    "Peak Velocity"
+)
 
-acceleration_peak_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_predicted_draws(
+acceleration_peak_posterior <- add_posterior_predictions(
     acc_peak_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 2500
-    ) %>%
-  mutate(
-    .prediction = (
-      .prediction * sd(ppt_m$acc_m_filtfilt, na.rm = TRUE) 
-      + mean(ppt_m$acc_m_filtfilt, na.rm = TRUE)
-      )
-   ) %>%
-  as.data.table()
+    ppt_m,
+    "acc_m_filtfilt",
+    "Peak Acceleration"
+)
 
-
-deceleration_peak_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_predicted_draws(
+deceleration_peak_posterior <- add_posterior_predictions(
     dec_peak_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 2500
-    ) %>%
-  mutate(
-    .prediction = (
-      .prediction * sd(ppt_m$dec_m_filtfilt, na.rm = TRUE) 
-      + mean(ppt_m$dec_m_filtfilt, na.rm = TRUE)
-      )
-   ) %>%
-  as.data.table()
+    ppt_m,
+    "dec_m_filtfilt",
+    "Peak Deceleration"
+)
 
-velocity_latency_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_predicted_draws(
+velocity_latency_posterior <- add_posterior_predictions(
     vel_latency_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 2500
-    ) %>%
-  as.data.table()
+    ppt_m,
+    "vel_m_filt",
+    "Velocity Latency"
+)
 
-acceleration_latency_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_predicted_draws(
+acceleration_latency_posterior <- add_posterior_predictions(
     acc_latency_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 2500
-    ) %>%
-  as.data.table()
+    ppt_m,
+    "acc_m_filtfilt",
+    "Acceleration Latency"
+)
 
-deceleration_latency_posterior <- ppt_m %>%
-  distinct(
-    time
-    ) %>%
-  add_predicted_draws(
+deceleration_latency_posterior <- add_posterior_predictions(
     dec_latency_model,
-    re_formula = ~ time,
-    seed = 1337,
-    allow_new_levels = F,
-    ndraws = 2500
-    ) %>%
-  as.data.table()
+    ppt_m,
+    "dec_m_filtfilt",
+    "Deceleration Latency"
+)
 ```
 
 ```{r posterior_predictive_plots}
-pptvel_dist <- ggplot(velocity_peak_posterior, 
-                      aes(x = .prediction, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = velocity_peak_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = velocity_peak_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = "Peak Velocity (mm/s)", 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  scale_x_continuous(
-    limits = c(min(velocity_peak_posterior[,.prediction]) - sd(velocity_peak_posterior[,.prediction]), 
-    max(velocity_peak_posterior[,.prediction]) + sd(velocity_peak_posterior[,.prediction])),
-   expand = c(0, 0)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
+create_pp_plot <- function(data, xlab) {
+    plot <- ggplot(data, aes(
+        x = .prediction,
+        fill = time,
+        color = time
+    )) +
+        stat_slab(slab_alpha = .4, scale = 1, height = 1) +
+        stat_pointinterval(
+            data = data[time == "Post"],
+            point_interval = mode_hdi, show_slab = FALSE,
+            position = position_nudge(y = -.043)
+        ) +
+        stat_pointinterval(
+            data = data[time == "Pre"],
+            point_interval = mode_hdi,
+            show_slab = FALSE,
+            position = position_nudge(y = -.01)
+        ) +
+        labs(
+            x = xlab,
+            fill = "Time",
+            color = "Time",
+            y = NULL
+        ) +
+        scale_fill_manual(breaks = c("Pre", "Post"), values = c("#001015", "#09A1D7")) +
+        scale_color_manual(breaks = c("Pre", "Post"), values = c("#001015", "#09A1D7")) +
+        theme_tidybayes() +
+        theme(text = element_text(size = 14)) +
+        scale_y_continuous(limits = c(-.05, 1)) +
+        scale_x_continuous(
+            limits = c(
+                min(data[, .prediction])
+                - sd(data[, .prediction]),
+                max(data[, .prediction])
+                + sd(data[, .prediction])
+            ),
+            expand = c(0, 0)
+        ) +
+        theme(
+            axis.line.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.text.y = element_blank(),
+            panel.background = element_rect(fill = "transparent", colour = NA),
+            legend.background = element_rect(fill = "transparent", colour = NA),
+            plot.background = element_rect(fill = "transparent", colour = NA),
+            strip.background = element_rect(fill = "transparent", colour = NA),
+        )
+    return(plot)
+}
 
-pptacc_dist <- ggplot(acceleration_peak_posterior, 
-                      aes(x = .prediction, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = acceleration_peak_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = acceleration_peak_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = expression("Peak Acceleration "(mm/s^2)), 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  scale_x_continuous(
-    limits = c(
-      min(acceleration_peak_posterior[,.prediction])
-      - sd(acceleration_peak_posterior[,.prediction]), 
-      max(acceleration_peak_posterior[,.prediction])
-      + sd(acceleration_peak_posterior[,.prediction])
-      ),
-   expand = c(0, 0)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
+pptvel_dist <- create_pp_plot(velocity_peak_posterior, "Peak Velocity (mm/s)")
+pptacc_dist <- create_pp_plot(acceleration_peak_posterior, expression("Peak Acceleration "(mm / s^2)))
+pptdec_dist <- create_pp_plot(deceleration_peak_posterior, expression("Peak Deceleration "(mm / s^2)))
+pptvel_lat_dist <- create_pp_plot(velocity_latency_posterior, "Velocity Latency (s)")
+pptacc_lat_dist <- create_pp_plot(acceleration_latency_posterior, "Acceleration Latency (s)")
+pptdec_lat_dist <- create_pp_plot(deceleration_latency_posterior, "Deceleration Latency (s)")
 
-pptdec_dist <- ggplot(deceleration_peak_posterior, 
-                      aes(x = .prediction, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = deceleration_peak_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = deceleration_peak_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = expression("Peak Deceleration "(mm/s^2)), 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  scale_x_continuous(
-    limits = c(
-      min(deceleration_peak_posterior[,.prediction])
-      - sd(deceleration_peak_posterior[,.prediction]), 
-      max(deceleration_peak_posterior[,.prediction])
-      + sd(deceleration_peak_posterior[,.prediction])
-      ),
-   expand = c(0, 0)) +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
+kinematic_posterior_prediction_plots <- ( 
+  pptacc_dist + pptvel_dist + pptdec_dist + 
+  pptacc_lat_dist + pptvel_lat_dist + pptdec_lat_dist
+  ) + plot_layout(guides = "collect", nrow = 2, ncol = 3) & theme(plot.title = element_text(size = 16),
+        panel.background = element_blank(), 
+        legend.background = element_blank(),
+        strip.background = element_blank(),
+        legend.position = "bottom", 
+        plot.background = element_blank())
 
-pptvel_lat_dist <- ggplot(velocity_latency_posterior, 
-                      aes(x = .prediction, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = velocity_latency_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = velocity_latency_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = expression("Peak Velocity Latency "(ms)), 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  scale_x_continuous(
-    limits = c(
-      min(velocity_latency_posterior[,.prediction])
-      - sd(velocity_latency_posterior[,.prediction]), 
-      max(velocity_latency_posterior[,.prediction])
-      + sd(velocity_latency_posterior[,.prediction])
-      ),
-   expand = c(0, 0)) +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
-
-pptacc_lat_bf <- 1/model_params[Outcome == "Acceleration Latency", BF]
-pptacc_lat_dist <- ggplot(acceleration_latency_posterior, 
-                      aes(x = .prediction, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = acceleration_latency_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = acceleration_latency_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = expression("Peak Acceleration Latency "(ms)), 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  scale_x_continuous(
-    limits = c(
-      min(acceleration_latency_posterior[,.prediction])
-      - sd(acceleration_latency_posterior[,.prediction]), 
-      max(acceleration_latency_posterior[,.prediction])
-      + sd(acceleration_latency_posterior[,.prediction])
-      ),
-   expand = c(0, 0)) +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
-
-pptdec_lat_dist <- ggplot(deceleration_latency_posterior, 
-                      aes(x = .prediction, 
-                          fill = time, 
-                          color = time)) + 
-  stat_slab(alpha = .7, scale = 1, height = 1) +
-  stat_pointinterval(data = deceleration_latency_posterior[time == "Post"], 
-                     point_interval = mode_hdi, show_slab = FALSE, 
-                     position = position_nudge(y = -.043)) +
-  stat_pointinterval(data = deceleration_latency_posterior[time == "Pre"], 
-                     point_interval = mode_hdi, 
-                     show_slab = FALSE, 
-                     position = position_nudge(y = -.01)) +
-  labs(x = expression("Peak Deceleration Latency "(ms)), 
-       fill = "Time", 
-       color = "Time",
-       y = NULL) +
-  scale_fill_manual(values = c("#001015", "#09A1D7")) +
-  scale_color_manual(values = c("#001015", "#09A1D7")) +
-  theme_tidybayes() +
-  scale_x_continuous(
-    limits = c(
-      min(deceleration_latency_posterior[,.prediction])
-      - sd(deceleration_latency_posterior[,.prediction]), 
-      max(deceleration_latency_posterior[,.prediction])
-      + sd(deceleration_latency_posterior[,.prediction])
-      ),
-   expand = c(0, 0)) +
-  theme(text = element_text(size = 14)) +
-  scale_y_continuous(limits = c(-.05, 1)) +
-  theme(axis.line.y = element_blank(), 
-        axis.ticks.y = element_blank(), 
-        axis.text.y = element_blank(),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
-
-kinematic_posterior_prediction_plots <- ( pptacc_dist + pptvel_dist + pptdec_dist +  
-  pptacc_lat_dist + pptvel_lat_dist +
-  pptdec_lat_dist) + plot_layout(guides = "collect", nrow = 2, ncol = 3) + patchwork::plot_annotation(title = "Kinematic peak and latency posterior predictive distributions") & theme(plot.title = element_text(size = 16),
-        panel.background = element_rect(fill = "transparent", colour = NA), 
-        legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
 
 ggsave(
   kinematic_posterior_prediction_plots,
@@ -798,42 +434,46 @@ model_params <- readRDS(here::here("scripts", "for_osf", "tooluse_in_real", "tab
 
 # Move the posterior draws long-to-wide using dcast
 draws_change <- posterior_draws %>%
-  dcast(
-    .draw ~ Outcome + time,
-    value.var = ".epred"
-  )  %>%
-  mutate(
-    # Calculate pre-to-post change as post - pre
-    "Peak Velocity Change" = `Peak Velocity_Post` - `Peak Velocity_Pre`,
-    "Peak Acceleration Change" = `Peak Acceleration_Post` - `Peak Acceleration_Pre`,
-    "Peak Deceleration Change" = `Peak Deceleration_Post` - `Peak Deceleration_Pre`,
-    "Velocity Latency Change" = `Velocity Latency_Post` - `Velocity Latency_Pre`,
-    "Acceleration Latency Change" = `Acceleration Latency_Post` - `Acceleration Latency_Pre`,
-    "Deceleration Latency Change" = `Deceleration Latency_Post` - `Deceleration Latency_Pre`
-  ) %>%
-  # Select only the change columns
-  select(
-    .draw,
-    ends_with("Change")
-  ) %>%
-  # Melt the data back to long format
-  melt(
-    id.vars = c(".draw"),
-    variable.name = "Outcome",
-    value.name = ".epred"
-  ) %>%
-  # Remove the " Change" from the end of the outcome names
-  mutate("Outcome" = str_remove(Outcome, " Change$")) %>%
-  # Calculate the mode and HDI for each outcome
-  group_by(Outcome) %>% 
-  mode_hdi() %>%
-  # Select the mode and interval thresholds and rename the columns
-  select(Outcome:.upper) %>%
-  rename(
-    "Mode" = .epred,
-    "Lower" = .lower,
-    "Upper" = .upper
-  )
+    dcast(
+        .draw ~ Outcome + time,
+        value.var = ".epred"
+    ) %>%
+    mutate(
+        # Calculate pre-to-post change as post - pre
+        "Peak Velocity Change" = `Peak Velocity_Post` - `Peak Velocity_Pre`,
+        "Peak Acceleration Change" = `Peak Acceleration_Post` - `Peak Acceleration_Pre`,
+        "Peak Deceleration Change" = `Peak Deceleration_Post` - `Peak Deceleration_Pre`,
+        "Velocity Latency Change" = `Velocity Latency_Post` - `Velocity Latency_Pre`,
+        "Acceleration Latency Change" = `Acceleration Latency_Post` - `Acceleration Latency_Pre`,
+        "Deceleration Latency Change" = `Deceleration Latency_Post` - `Deceleration Latency_Pre`
+    ) %>%
+    # Select only the change columns
+    select(
+        .draw,
+        ends_with("Change")
+    ) %>%
+    # Melt the data back to long format
+    melt(
+        id.vars = c(".draw"),
+        variable.name = "Outcome",
+        value.name = ".epred"
+    ) %>%
+    # Remove the " Change" from the end of the outcome names
+    mutate("Outcome" = str_remove(Outcome, " Change$"))
+
+fwrite(draws_change, here::here("scripts", "for_osf", "tooluse_in_real", "plot_data", "kinematic_draws_change.csv"))
+
+draws_change <- draws_change %>%
+    # Calculate the mode and HDI for each outcome
+    group_by(Outcome) %>%
+    mode_hdi() %>%
+    # Select the mode and interval thresholds and rename the columns
+    select(Outcome:.upper) %>%
+    rename(
+        "Mode" = .epred,
+        "Lower" = .lower,
+        "Upper" = .upper
+    )
 
 # Merge the BF and mode/HDI data
 model_params_unstd <- model_params %>%
@@ -922,17 +562,6 @@ model_table <- model_params_unstd %>%
   add_w = .1,
   add_h = 0.1
   ) %>%
-  # Add a descriptive footnote
-  flextable::footnote(i = 3, j=c(1:2),
-           value = as_paragraph(
-             c(
-               "Parameter estimates (Mode, 95% HDI) based on 50,000 draws from the posterior distribution, unstandardized and calculated as (Post - Pre). For peaks, values correspond to mm/s and mm/s^2. For latencies, values correspond to ms.", 
-               "Reported Bayes Factors represent multiplicative evidence in favor of an effect (for tool-use) over a point-null hypothesis (Savage-Dickey Ratios). Fractional values indicate that evidence favors the null."
-               )
-             ), 
-           ref_symbols = c("a", "b"),
-           part = "header"
-          ) %>%
   # Turn the Bayes Factors into LaTeX equations so the fractional values will display correctly
   compose(
     j = "BF",

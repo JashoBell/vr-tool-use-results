@@ -1,0 +1,439 @@
+---
+title: "Cumulative Figures"
+author: "Joshua Bell"
+date: "2/23/2025"
+output: html_document
+---
+
+# Imports
+```{r setup, include=TRUE}
+pkgs <- c("dplyr", "tidyr", "readr", "flextable", "data.table", "magrittr", "ggridges", "here", "ggplot2", "patchwork", "tidybayes", "correlation", "knitr", "datawizard", "brms", "bayestestR", "RColorBrewer", "latex2exp", "showtext")
+for(i in pkgs){
+  if(!i %in% rownames(installed.packages())){ 
+    install.packages(i) 
+    library(i, character.only = TRUE)
+  }
+  else(library(i, character.only = TRUE))
+}
+# Sets stan backend to cmdstan. You will need to install the cmdstanr package and set up the toolchain.
+options("mc.cores" = parallel::detectCores(), "brms.backend" = "cmdstan", tinytex.verbose = T)
+showtext_auto()
+b = 4800/parallel::detectCores()
+i = 48000/parallel::detectCores()
+ch = parallel::detectCores()
+co = parallel::detectCores()
+control_list <- list(adapt_delta = .995, max_treedepth = 15)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE, fig.width = 12, fig.height = 8)
+
+ppt_m <- read_csv(here::here("data", "study_one", "ppt_manual.csv")) %>%
+        bind_rows(
+            read_csv(here::here("data", "study_two", "ppt_manual.csv")),
+            read_csv(here::here("data", "study_three", "ppt_manual.csv"))) %>%
+        as.data.table() %>%
+        mutate(
+        study = fcase(
+            ppid %like% "d1-0", "VR (No Avatar)",
+            ppid %like% "d2-0", "Real-world",
+            ppid %like% "d3-0", "VR (Avatar)",
+            default = NA),
+        time = factor(x = time,
+            levels = c("pre", "post"),
+            labels = c("Pre", "Post")),
+        order = fifelse(
+            ppid == "d2-018" & is.na(order), "first", order
+        ),
+        order = factor(x = order,
+            levels = c("pre", "first", "second"),
+            labels = c("Pre", "First", "Second")),
+
+        )
+
+
+
+landmark <- read_csv(here::here("data", "study_one", "landmark.csv")) %>%
+    bind_rows(
+        read_csv(here::here("data", "study_two", "landmark.csv")),
+        read_csv(here::here("data", "study_three", "landmark.csv"))) %>%
+    mutate(
+      study = fcase(
+            ppid %like% "d1-0", "VR (No Avatar)",
+            ppid %like% "d2-0", "Real-world",
+            ppid %like% "d3-0", "VR (Avatar)",
+        default = NA),
+      error_std = standardize(lapse_fix_error),
+         target = factor(lapse_fix_target,
+            levels = c("Elbow", "Forearm", "Wrist")),
+         error_cm = lapse_fix_error * 100,
+         forearmlength = forearmlength * 100,
+         forearmlength_std = (forearmlength - mean(forearmlength)) / sd(forearmlength),
+         time = factor(time,
+            levels = c("pre", "post"),
+            labels= c("Pre", "Post")),
+         order = factor(x = order, levels = c("pre", "first", "second"),
+            labels = c("Pre", "First", "Second"))
+            ) %>%
+            as.data.table()
+
+participant_info <- bind_rows(
+read_csv(
+    here::here("data", "1_tooluseinVR", "participant_info.csv"),
+),
+read_csv(
+    here::here("data", "2_toolusenotinVR", "participant_info.csv"),
+),
+read_csv(
+    here::here("data", "3_avatartooluse", "participant_info_coded.csv"),
+)[, fatigue := ifelse(fatigue_yn, 1, 0)]
+) %>%
+    mutate(
+          study = fcase(ppid %like% "d1-0", "VR (No Avatar)",
+                        ppid %like% "d2-0", "Real-world",
+                        ppid %like% "d3-0", "VR (Avatar)",
+                        default = NA)
+    ) %>%
+    as.data.table()
+    
+    
+
+
+
+ppt_forearmlength <- landmark[, .(forearmlength = mean(forearmlength)),
+                                by = c("ppid")] %>% merge(ppt_m, by = c("ppid")) %>%
+                                as.data.table()
+
+
+ppt_forearm_surveys <- merge(
+    ppt_forearmlength,
+participant_info[,
+        .(
+            ppid,
+            study,
+            age,
+            gender,
+            fatigue,
+            performance_hypothesis
+        )
+    ],
+    by = c("ppid", "study")
+)
+```
+
+## Change comparison across all studies
+
+```{r}
+kinematic_change <- bind_rows(
+    read_csv(here::here("scripts", "for_osf", "tooluse_in_VR", "plot_data", "kinematic_draws_change.csv")) %>% mutate(study = "VR (No Avatar)"),
+    read_csv(here::here("scripts", "for_osf", "tooluse_in_real", "plot_data", "kinematic_draws_change.csv")) %>% mutate(study = "Real-world"),
+    read_csv(here::here("scripts", "for_osf", "tooluse_avatar", "plot_data", "kinematic_draws_change.csv")) %>% mutate(study = "VR (Avatar)")
+)
+
+kinematic_change <- kinematic_change %>%
+    mutate(
+        outcome = factor(Outcome,
+            levels = c("Peak Acceleration","Peak Velocity", "Peak Deceleration", "Acceleration Latency", "Velocity Latency", "Deceleration Latency"),
+            labels = c("Peak Acceleration", "Peak Velocity", "Peak Deceleration", "Acceleration Latency", "Velocity Latency", "Deceleration Latency")),
+        change = .epred,
+        study = factor(study,
+            levels = c("VR (No Avatar)", "VR (Avatar)", "Real-world"),
+            labels = c("VR (No Avatar)", "VR (Avatar)", "Real-world"))
+    )
+
+## Cardinali et al. (2009) values (from figure 1)
+mupre <- 1243.2
+se <- 25.6
+mupost <- 1195.2
+
+
+velchange <- mupost - mupre
+velchange_ci <- se * 1.96
+
+velchangedf <- data.frame(
+    study = c(0.5, 3.5),
+    change = c(velchange, velchange)
+)
+
+decchange <- 448.74
+decchange_ci <- 50 * 1.96
+
+decchangedf <- data.frame(
+    study = c(0.5, 3.5),
+    change = c(decchange, decchange)
+)
+
+accchange <- -480
+accchange_ci <- 608 * 1.96
+
+accchangedf <- data.frame(
+    study = c(0.5, 3.5),
+    change = c(accchange, accchange)
+)
+
+acclatchange <- 11.67
+acclatchange_ci <- 8.75 * 1.96
+
+acclatchangedf <- data.frame(
+    study = c(0.5, 3.5),
+    change = c(acclatchange, acclatchange)
+)
+
+vellatchange <- 16
+vellatchange_ci <- 18.4 * 1.96
+
+vellatchangedf <- data.frame(
+    study = c(0.5, 3.5),
+    change = c(vellatchange, vellatchange)
+)
+
+declatchange <- 19.2
+declatchange_ci <- 14.4 * 1.96
+
+declatchangedf <- data.frame(
+    study = c(0.5, 3.5),
+    change = c(declatchange, declatchange)
+)
+
+# Plot change in kinematic error for each outcome, within each study, using stat_eye
+# Outcome: Peak Velocity, Peak Acceleration, Peak Deceleration, Velocity Latency, Acceleration Latency, Deceleration Latency
+# Study: VR (No Avatar), Real-world, VR (Avatar)
+# Create six individual plots, one for each outcome, since the scales are different for each outcome. 
+# Then use patchwork to put them together
+
+# Define a function to create each plot
+create_kinematic_peak_plot <- function(df, outcome_str, ymin, ymax, ylab) {
+    past_value <- fcase(
+        outcome_str == "Peak Velocity", "velchange",
+        outcome_str == "Peak Acceleration", "accchange",
+        outcome_str == "Peak Deceleration", "decchange",
+        default = NA
+    )
+
+    past_df <- get(paste0(past_value, "df"), envir = parent.frame()) %>%
+    as.data.frame()
+
+    df %>%
+        dplyr::filter(outcome == outcome_str) %>%
+        ggplot(aes(x = study, y = change, fill = study)) +
+        geom_blank() +
+        geom_ribbon(
+            data = past_df %>%
+                dplyr::mutate(
+                    ymin = change - get(paste0(past_value, "_ci")),
+                    ymax = change + get(paste0(past_value, "_ci"))
+                ),
+            aes(ymin = ymin, ymax = ymax, x = study, fill = "Cardinali et al. (2009)"),
+            alpha = 0.6
+        ) +
+        stat_eye() +
+        geom_hline(
+            yintercept = 0,
+            linetype = "dashed",
+            linewidth = 1.5
+            ) +
+        geom_hline(
+            yintercept = get(paste0(past_value)),
+            linetype = "solid",
+            color = "#003566",
+            linewidth = 2
+        ) +
+        theme_tidybayes() +
+        theme(
+            axis.text.x = element_blank(),
+            axis.title.x = element_blank(),
+            axis.text.y = element_text(angle = 0, hjust = 1, color = "black", size = 14),
+            axis.ticks.x = element_blank(),
+            axis.ticks.y = element_line(colour = "black", linewidth = .5),
+            axis.line = element_line(colour = "black", linewidth = 1),
+            axis.title.y = element_text(angle = 90, size = 20),
+            plot.title = element_text(size = 24, hjust = 0.5)
+        ) +
+        scale_x_discrete(limits = c("VR (No Avatar)", "VR (Avatar)", "Real-world"), expand = c(-.15, -.15)) +
+        scale_y_continuous(limits = c(ymin, ymax)) +
+        ylab(ylab) +
+        xlab("Study") +
+        ggtitle(stringr::str_remove(outcome_str, "Peak ")) +
+        scale_fill_manual(
+            guide = guide_legend(title = "Study"),
+            values = c("VR (No Avatar)" = "#E69F00", "Real-world" = "#56B4E9", "VR (Avatar)" = "#009E73", "Cardinali et al. (2009)" = "#003566")
+        )
+}
+
+
+
+create_kinematic_latency_plot <- function(df, outcome_str, xmin, xmax, xlab) {
+    past_value <- fcase(
+        outcome_str == "Velocity Latency", "vellatchange",
+        outcome_str == "Acceleration Latency", "acclatchange",
+        outcome_str == "Deceleration Latency", "declatchange",
+        default = NA
+    )
+
+    past_df <- get(paste0(past_value, "df"), envir = parent.frame()) %>%
+        as.data.frame()
+
+    df %>%
+        dplyr::filter(outcome == outcome_str) %>%
+        ggplot(aes(y = study, x = change, fill = study)) +
+        geom_blank() +
+        geom_ribbon(
+            data = past_df %>%
+                dplyr::mutate(
+                    xmin = change - get(paste0(past_value, "_ci")),
+                    xmax = change + get(paste0(past_value, "_ci"))
+                ),
+            aes(xmin = xmin, xmax = xmax, y = study, fill = "Cardinali et al. (2009)"),
+            alpha = 0.6
+        ) +
+        stat_eye() +
+        geom_vline(
+            xintercept = 0, 
+            linetype = "dashed",
+            linewidth = 1.5
+            ) +
+        geom_vline(
+            xintercept = get(paste0(past_value)), 
+            linetype = "solid",
+            color = "#003566",
+            linewidth = 2
+        ) +
+
+        theme_tidybayes() +
+        theme(
+            axis.text.x = element_text(angle = -90, color = "black", size = 14, vjust = .5, hjust = .5),
+            axis.title.x = element_text(angle = 0, size = 20),
+            axis.title.y = element_blank(),
+            axis.text.y = element_blank(),
+            axis.ticks.y = element_blank(),
+            axis.ticks.x = element_line(colour = "black", linewidth = .5),
+            plot.title = element_text(size = 24, hjust = 0.5)
+        ) +
+        scale_y_discrete(limits = c("Real-world", "VR (Avatar)", "VR (No Avatar)"), expand = c(-.25, -.25))+
+        scale_x_continuous(limits = c(xmin, xmax), expand = c(0.1, 0.1)) +
+        ylab("Study") +
+        xlab(xlab) +
+        ggtitle(stringr::str_remove(outcome_str, " Latency")) +
+        scale_fill_manual(guide = guide_legend(title = "Study"),
+            values = c("VR (No Avatar)" = "#E69F00", "Real-world" = "#56B4E9", "VR (Avatar)" = "#009E73", "Cardinali et al. (2009)" = "#003566"))
+}
+
+
+
+
+# All Studies
+velocity_change_plot <- create_kinematic_peak_plot(kinematic_change, "Peak Velocity", -250, 250, " ")
+acceleration_change_plot <- create_kinematic_peak_plot(kinematic_change, "Peak Acceleration", -2000, 2000, "Kinematic Peak Change (Post - Pre)")
+deceleration_change_plot <- create_kinematic_peak_plot(kinematic_change, "Peak Deceleration", -2000, 2000, " ")
+velocity_latency_change_plot <- create_kinematic_latency_plot(kinematic_change, "Velocity Latency", -100, 100, "Latency Change (Post - Pre)")
+acceleration_latency_change_plot <- create_kinematic_latency_plot(kinematic_change, "Acceleration Latency", -100, 100, " ")
+deceleration_latency_change_plot <- create_kinematic_latency_plot(kinematic_change, "Deceleration Latency", -100, 100, " ")
+
+
+
+pw_theme <- theme(
+    plot.background = element_rect(fill = "transparent", color = "transparent"),
+    panel.background = element_rect(fill = "transparent", color = "transparent"),
+    legend.background = element_rect(fill = "transparent", color = "transparent"),
+    legend.key = element_rect(fill = "transparent", color = "transparent"),
+    legend.text = element_text(color = "black", size = 16),
+    legend.title = element_text(color = "black", size = 20),
+    legend.position = "bottom",
+    text = element_text(color = "black"),
+    axis.line.x = element_line(colour = "black", linewidth = .5),
+    axis.line.y = element_line(colour = "black", linewidth = .5),
+)
+
+peak_changes_plot <- acceleration_change_plot + velocity_change_plot + deceleration_change_plot + patchwork::plot_layout(guides = "collect") & pw_theme
+latency_changes_plot <- acceleration_latency_change_plot + velocity_latency_change_plot + deceleration_latency_change_plot + 
+patchwork::plot_layout(guides = "collect") & pw_theme
+
+ggsave(
+    peak_changes_plot,
+    width = 12,
+    height = 6,
+    dpi = 200,
+    bg = "transparent",
+    filename = here::here("scripts", "for_osf", "cumulative_analyses", "figures", "kinematic_changes_all.svg")
+)
+
+ggsave(
+    latency_changes_plot,
+    width = 12,
+    height = 6,
+    dpi = 200,
+    bg = "transparent",
+    filename = here::here("scripts", "for_osf", "cumulative_analyses", "figures","kinematic_latency_changes_all.svg" )
+)
+```
+
+```{r}
+landmark_change <- bind_rows(
+    fread(here::here("scripts", "for_osf", "tooluse_in_vr", "plot_data", "landmark_draws_change.csv")) %>% mutate(study = "VR (No Avatar)"),
+    fread(here::here("scripts", "for_osf", "tooluse_in_real", "plot_data", "landmark_draws_change.csv")) %>% mutate(study = "Real-world"),
+    fread(here::here("scripts", "for_osf", "tooluse_avatar", "plot_data", "landmark_draws_change.csv")) %>% mutate(study = "VR (Avatar)")
+)
+
+landmark_change <- landmark_change %>%
+    mutate(
+        target = factor(Target,
+            levels = c("Elbow", "Forearm", "Wrist"),
+            labels = c("Elbow", "Forearm", "Wrist")
+        ),
+        change = .epred,
+        study = factor(study,
+            levels = c("VR (No Avatar)", "VR (Avatar)", "Real-world"),
+            labels = c("VR (No Avatar)", "VR (Avatar)", "Real-world")
+        )
+    )
+
+create_landmark_error_plot <- function(df, target_str) {
+    ylab = fifelse(
+        target_str == "Elbow",
+        "Change in Error (cm, Post - Pre)",
+        " "
+    )
+    df %>%
+        dplyr::filter(target == target_str) %>%
+        ggplot(aes(x = study, y = change, fill = study)) +
+        geom_blank() +
+        stat_eye() +
+        geom_hline(
+            yintercept = 0,
+            linetype = "dashed",
+            linewidth = 1.5
+        ) +
+        theme_tidybayes() +
+        theme(
+            axis.text.x = element_blank(),
+            axis.title.x = element_blank(),
+            axis.text.y = element_text(angle = 0, hjust = 1, color = "black", size = 14),
+            axis.ticks.x = element_blank(),
+            axis.ticks.y = element_line(colour = "black", linewidth = .5),
+            axis.line = element_line(colour = "black", linewidth = 1),
+            axis.title.y = element_text(angle = 90, size = 20),
+            plot.title = element_text(size = 24, hjust = 0.5)
+        ) +
+        scale_x_discrete(limits = c("VR (No Avatar)", "VR (Avatar)", "Real-world"), expand = c(-.15, -.15)) +
+        scale_y_continuous(limits = c(-10, 10)) +
+        ylab(ylab) +
+        xlab("Study") +
+        ggtitle(target_str) +
+        scale_fill_manual(
+            guide = guide_legend(title = "Study"),
+            values = c("VR (No Avatar)" = "#E69F00", "Real-world" = "#56B4E9", "VR (Avatar)" = "#009E73", "Cardinali et al. (2009)" = "#003566")
+        )
+}
+
+wrist_change_plot <- create_landmark_error_plot(landmark_change, "Wrist")
+forearm_change_plot <- create_landmark_error_plot(landmark_change, "Forearm")
+elbow_change_plot <- create_landmark_error_plot(landmark_change, "Elbow")
+
+landmark_change_plot <- elbow_change_plot + forearm_change_plot + wrist_change_plot + patchwork::plot_layout(guides = "collect") & pw_theme
+
+ggsave(
+    landmark_change_plot,
+    width = 12,
+    height = 6,
+    dpi = 200,
+    bg = "transparent",
+    filename = here::here("scripts", "for_osf", "cumulative_analyses", "figures", "landmark_changes_all.svg")
+)
+```

@@ -13,7 +13,7 @@ format:
 knitr::opts_chunk$set(echo = TRUE, 
                       warning = FALSE, 
                       message = FALSE, 
-                      cache = TRUE, 
+                      cache = FALSE, 
                       fig.width = 12, 
                       fig.height = 8)
 pkgs <- c("dplyr", "readr", "magrittr", "data.table", "here", "brms", "cmdstanr", "bayestestR", "tidybayes", "ggplot2", "flextable", "officer")
@@ -138,31 +138,37 @@ pp_check(
     x = "Error (standardized)"
   )
 
-landmark_describe <- bayestestR::describe_posterior(
-  landmark_time_target,
-  centrality = "map",
-  ci_method="hdi"
+draws <- as_draws_df(landmark_time_target) %>%
+  dplyr::select(starts_with("b_b_")) %>%
+  tidyr::pivot_longer(everything(), names_to = "parameter", values_to = "value")
+
+# 2. Compute MAP + 95% HDI per parameter
+landmark_describe <- draws %>%
+  group_by(parameter) %>%
+  summarise(
+    MAP = bayestestR::map_estimate(value)$MAP_Estimate,
+    HDI_low = bayestestR::hdi(value, ci = 0.95)$CI_low,
+    HDI_high = bayestestR::hdi(value, ci = 0.95)$CI_high
+  ) %>%
+  select(
+    Parameter = parameter,
+    MAP,
+    HDI_low,
+    HDI_high
   ) %>% as.data.table()
 
-landmark_describe
-
-landmark_bfs <- landmark_time_target %>%
-  bayesfactor_pointnull(
-    direction = ">",
-    prior = landmark_time_target_priors
-    ) %>%
+targets <- levels(landmark_summary$target)
+hypotheses <- paste0("b_target", targets, "> 0")
+landmark_bfs <- brms::hypothesis(landmark_time_target, hypotheses, nlpar="b")$hypothesis |>
   as.data.table()
 
 (landmark_error_table <- merge(
-  landmark_bfs[Parameter %in% c(
-    "b_b_targetElbow", 
-    "b_b_targetWrist", 
-    "b_b_targetForearm"),
+  landmark_bfs[,
     .(Parameter = fcase(
-        Parameter == "b_b_targetElbow", "Elbow",
-        Parameter == "b_b_targetWrist", "Wrist",
-        Parameter == "b_b_targetForearm", "Forearm"),
-    BF = exp(log_BF))],
+        Hypothesis == "(b_targetElbow) > 0", "Elbow",
+        Hypothesis == "(b_targetWrist) > 0", "Wrist",
+        Hypothesis == "(b_targetForearm) > 0", "Forearm"),
+    BF = Evid.Ratio)],
     landmark_describe[
       Parameter %in% c(
         "b_b_targetElbow", 
@@ -186,105 +192,105 @@ write_csv(landmark_error_table, file = here::here("scripts", "for_osf", "tooluse
 ## Lapse Fix
 ### Prior
 ```{r lapsefix_model}
-landmark_lapsefix_error_time_target_priors <- brm(
-  bf(error_std ~ 0 + a + b * time + d,
-     a ~ 0 + target,
-     b ~ 0 + target,
-     d ~ 0 + (0 + target + time + target : time | ppid),
-     nl = TRUE),
-     prior = c(prior("normal(0, 2)", nlpar = "a"),
-               prior("normal(0, 2)", nlpar = "b"),
-                prior("exponential(1)", class = "sd", nlpar = "d"),
-                prior("exponential(1)", class = "sigma")),
-     data = landmark_fix,
-     sample_prior = "only",
-     seed = 1337,
-     silent = TRUE, refresh = 0,
-     save_pars = save_pars(all = TRUE),
-     warmup = b,
-     iter = i,
-     chains = ch,
-     cores = co,
-     control = list(adapt_delta = .975, max_treedepth = 15))
+# landmark_lapsefix_error_time_target_priors <- brm(
+#   bf(error_std ~ 0 + a + b * time + d,
+#      a ~ 0 + target,
+#      b ~ 0 + target,
+#      d ~ 0 + (0 + target + time + target : time | ppid),
+#      nl = TRUE),
+#      prior = c(prior("normal(0, 2)", nlpar = "a"),
+#                prior("normal(0, 2)", nlpar = "b"),
+#                 prior("exponential(1)", class = "sd", nlpar = "d"),
+#                 prior("exponential(1)", class = "sigma")),
+#      data = landmark_fix,
+#      sample_prior = "only",
+#      seed = 1337,
+#      silent = TRUE, refresh = 0,
+#      save_pars = save_pars(all = TRUE),
+#      warmup = b,
+#      iter = i,
+#      chains = ch,
+#      cores = co,
+#      control = list(adapt_delta = .975, max_treedepth = 15))
 
-summary(landmark_lapsefix_error_time_target_priors)
-plot(landmark_lapsefix_error_time_target_priors)
+# summary(landmark_lapsefix_error_time_target_priors)
+# plot(landmark_lapsefix_error_time_target_priors)
 ```
 
 ### Posterior
 ```{r landmark_lapsefix_error_time_target_posterior}
-landmark_lapsefix_error_time_target <- update(
-  landmark_lapsefix_error_time_target_priors,
-  sample_prior = "no",
-  refresh = 0,
-  seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_avatar", "models", "landmark_lapsefix_error_time_target.rds"),
-  file_refit = "on_change",
-  silent = TRUE
-  )
+# landmark_lapsefix_error_time_target <- update(
+#   landmark_lapsefix_error_time_target_priors,
+#   sample_prior = "no",
+#   refresh = 0,
+#   seed = 1337,
+#   file = here::here("scripts", "for_osf", "tooluse_avatar", "models", "landmark_lapsefix_error_time_target.rds"),
+#   file_refit = "on_change",
+#   silent = TRUE
+#   )
 
-summary(landmark_lapsefix_error_time_target)
-plot(landmark_lapsefix_error_time_target)
+# summary(landmark_lapsefix_error_time_target)
+# plot(landmark_lapsefix_error_time_target)
 
-pp_check(
-  landmark_lapsefix_error_time_target,
-  type  = "dens_overlay_grouped",
-  ndraws = 50,
-  group = "target"
-  ) +
-  theme_tidybayes() +
-  theme(
-    axis.text.y = element_blank()
-  ) +
-  labs(
-    title = "Landmark Task Errors",
-    subtitle = "Posterior Draws vs. Empirical Distribution",
-    x = "Error (standardized)"
-  )
+# pp_check(
+#   landmark_lapsefix_error_time_target,
+#   type  = "dens_overlay_grouped",
+#   ndraws = 50,
+#   group = "target"
+#   ) +
+#   theme_tidybayes() +
+#   theme(
+#     axis.text.y = element_blank()
+#   ) +
+#   labs(
+#     title = "Landmark Task Errors",
+#     subtitle = "Posterior Draws vs. Empirical Distribution",
+#     x = "Error (standardized)"
+#   )
 
-landmark_describe <- bayestestR::describe_posterior(
-  landmark_lapsefix_error_time_target,
-  centrality = "map",
-  ci_method="hdi"
-  ) %>% as.data.table()
+# landmark_describe <- bayestestR::describe_posterior(
+#   landmark_lapsefix_error_time_target,
+#   centrality = "map",
+#   ci_method="hdi"
+#   ) %>% as.data.table()
 
-landmark_describe
+# landmark_describe
 
-landmark_bfs <- landmark_lapsefix_error_time_target %>%
-  bayesfactor_pointnull(
-    direction = ">",
-    prior = landmark_lapsefix_error_time_target_priors
-  ) %>%
-  as.data.table()
+# landmark_bfs <- landmark_lapsefix_error_time_target %>%
+#   bayesfactor_pointnull(
+#     direction = ">",
+#     prior = landmark_lapsefix_error_time_target_priors
+#   ) %>%
+#   as.data.table()
 
-(landmark_lapsefix_error_table <- merge(
-  landmark_bfs[Parameter %in% c(
-    "b_b_targetElbow", 
-    "b_b_targetWrist", 
-    "b_b_targetForearm"),
-    .(Parameter = fcase(
-        Parameter == "b_b_targetElbow", "Elbow",
-        Parameter == "b_b_targetWrist", "Wrist",
-        Parameter == "b_b_targetForearm", "Forearm"),
-    BF = exp(log_BF))],
-    landmark_describe[
-      Parameter %in% c(
-        "b_b_targetElbow", 
-        "b_b_targetWrist", 
-        "b_b_targetForearm"
-        )][,
-      Parameter := fcase(
-          Parameter == "b_b_targetElbow", "Elbow",
-          Parameter == "b_b_targetWrist", "Wrist",
-          Parameter == "b_b_targetForearm", "Forearm"
-          )
-          ],
-  by = "Parameter"
-  )
-)
+# (landmark_lapsefix_error_table <- merge(
+#   landmark_bfs[Parameter %in% c(
+#     "b_b_targetElbow", 
+#     "b_b_targetWrist", 
+#     "b_b_targetForearm"),
+#     .(Parameter = fcase(
+#         Parameter == "b_b_targetElbow", "Elbow",
+#         Parameter == "b_b_targetWrist", "Wrist",
+#         Parameter == "b_b_targetForearm", "Forearm"),
+#     BF = exp(log_BF))],
+#     landmark_describe[
+#       Parameter %in% c(
+#         "b_b_targetElbow", 
+#         "b_b_targetWrist", 
+#         "b_b_targetForearm"
+#         )][,
+#       Parameter := fcase(
+#           Parameter == "b_b_targetElbow", "Elbow",
+#           Parameter == "b_b_targetWrist", "Wrist",
+#           Parameter == "b_b_targetForearm", "Forearm"
+#           )
+#           ],
+#   by = "Parameter"
+#   )
+# )
               
-landmark_lapsefix_error_table %>%
-write_csv(file = here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_table_lapsefix.csv"))
+# landmark_lapsefix_error_table %>%
+# write_csv(file = here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_table_lapsefix.csv"))
 ```
 
 
@@ -294,27 +300,27 @@ model_params <- landmark_error_table %>% dplyr::select(
   Parameter,
   BF,
   MAP,
-  CI_low,
-  CI_high
-) %>% rename("Lower" = CI_low,
-             "Upper" = CI_high,
+  HDI_low,
+  HDI_high
+) %>% rename("Lower" = HDI_low,
+             "Upper" = HDI_high,
              "Mode" = MAP)
 
 fwrite(model_params, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_model_params.csv"))
 
 saveRDS(model_params, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_model_params.rds"))
 
-lapsefix_model_params <- landmark_lapsefix_error_table %>% dplyr::select(
-  Parameter,
-  BF,
-  MAP,
-  CI_low,
-  CI_high
-) %>% rename("Lower" = CI_low,
-             "Upper" = CI_high,
-             "Mode" = MAP)
+# lapsefix_model_params <- landmark_lapsefix_error_table %>% dplyr::select(
+#   Parameter,
+#   BF,
+#   MAP,
+#   CI_low,
+#   CI_high
+# ) %>% rename("Lower" = CI_low,
+#              "Upper" = CI_high,
+#              "Mode" = MAP)
 
-fwrite(lapsefix_model_params, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_lapsefix_model_params.csv"))
+# fwrite(lapsefix_model_params, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_lapsefix_model_params.csv"))
 
-saveRDS(lapsefix_model_params, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_lapsefix_model_params.rds"))
+# saveRDS(lapsefix_model_params, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_lapsefix_model_params.rds"))
 ```

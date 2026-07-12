@@ -7,6 +7,7 @@ format:
     toc-depth: 3
     toc-float: true
     toc-placement: left
+    auto-play-media: true
 ---
 
 ```{r setup, include=FALSE}
@@ -43,13 +44,13 @@ showtext::showtext_auto()
 #Plot participant on the x axis
 #Colors?
 
-landmark_long <- melt(landmark,
+landmark_long <- reshape2::melt(landmark,
   id.vars = c("ppid", "block", "time", "trial", "target"),
   measure.vars = colnames(select(landmark, ends_with(c("pos_z")))),
   variable.name = "armlocation",
   value.name = "position") %>% as.data.table()
 
-landmark_long_fix <- melt(landmark_fix,
+landmark_long_fix <- reshape2::melt(landmark_fix,
   id.vars = c("ppid", "block", "time", "trial", "target"),
   measure.vars = colnames(select(landmark, ends_with(c("pos_z")))),
   variable.name = "armlocation",
@@ -229,7 +230,7 @@ for(p in unique(landmark$ppid))
         # Line ratios ----------------------------------------
         geom_text(aes(
           y = 1.85,
-          x = mean(e[[p]][target == "Wrist"]$position),
+          x = mean(e[[p]][target == "Wrist"]$position) + .2,
           label = paste("P/A: ", pre_ratio[[p]], "%", sep = "")
         ),
         color = "black",
@@ -237,7 +238,7 @@ for(p in unique(landmark$ppid))
         ) +
         geom_text(aes(
           y = 1.15,
-          x = mean(e[[p]][target == "Wrist"]$position),
+          x = mean(e[[p]][target == "Wrist"]$position) + .2,
           label = paste("P/A: ", post_ratio[[p]], "%", sep = "")
         ),
         color = "black",
@@ -246,7 +247,7 @@ for(p in unique(landmark$ppid))
 
         # Line labels ----------------------------------------
         geom_text(aes(
-          x = mean(e[[p]][target == "Forearm"]$position),
+          x = mean(e[[p]][target == "Forearm"]$position) - .2,
           y = 1.15,
           label = paste("Perceived: ",
             round(post_perceived[[p]], 2) * 100,
@@ -258,7 +259,7 @@ for(p in unique(landmark$ppid))
         check_overlap = T
         ) +
         geom_text(aes(
-          x = mean(e[[p]][target == "Forearm"]$position),
+          x = mean(e[[p]][target == "Forearm"]$position) - .2,
           y = 1.85,
           label = paste("Perceived: ",
             round(pre_perceived[[p]], 2) * 100,
@@ -296,6 +297,19 @@ for(p in unique(landmark$ppid))
         scale_x_continuous(
           limits = x_limits,
           breaks = seq(x_limits[[1]], x_limits[[2]], by = .1)
+        ) +
+        theme(
+          axis.text.y = element_text(hjust = 0),
+          title = element_text(size = 14),
+          text = element_text(size = 16, color = "black"),
+          strip.background = element_blank(),
+          strip.placement = "inside",
+          strip.switch.pad.wrap = unit(0, "in"),
+          panel.background = element_rect(fill = "transparent", colour = "transparent"), 
+          legend.background = element_rect(fill = "transparent", colour = "transparent"),  
+          plot.background = element_rect(fill = "transparent", colour = "transparent"),
+          legend.key = element_rect(fill = "transparent", colour = "transparent")
+
         )
       
       # Append two rows to new dataframe for later analysis
@@ -330,6 +344,12 @@ for(p in unique(landmark$ppid))
       )
 
       nonfix_plots[[p]] <- plot
+      if(p == "d1-015")
+      {
+        ggsave(here::here("scripts", "for_osf", "tooluse_in_vr", "landmark_trials_plot.svg"), dpi = 420, 
+        plot = plot, bg = "transparent")
+        saveRDS(plot, file = here::here("scripts", "for_osf", "tooluse_in_vr", "landmark_trials_plot.rds"))
+      }
   }
 
 ```
@@ -504,6 +524,17 @@ nonfix_overallplot <- l %>%
       check_overlap = T
       ) +
       theme_tidybayes() +
+      theme(
+        axis.text.y = element_text(hjust = 0),
+        title = element_text(size = 14),
+        text = element_text(size = 16, color = "black"),
+        strip.background = element_blank(),
+        strip.placement = "inside",
+        strip.switch.pad.wrap = unit(0, "in"),
+        panel.background = element_rect(fill = "transparent", colour = NA), 
+        legend.background = element_rect(fill = "transparent", colour = NA),  
+        plot.background = element_rect(fill = "transparent", colour = NA)
+      ) +
       labs(
         y = "Time",
         x = "Z-coordinate (meters)",
@@ -526,8 +557,8 @@ nonfix_overallplot <- l %>%
 ```
 
 ```{r armlength_ratio, echo=FALSE}
-pre_ratio_ <- unlist(pre_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "pre")
-post_ratio_ <- unlist(post_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "post")
+pre_ratio_ <- unlist(pre_ratio) %>% reshape2::melt(value.name = "perceived_length") %>% mutate(time = "pre")
+post_ratio_ <- unlist(post_ratio) %>% reshape2::melt(value.name = "perceived_length") %>% mutate(time = "post")
 d <- full_join(pre_ratio_, post_ratio_)
 d %>% group_by(time) %>% summarise(m_length = mean(perceived_length))
 sum(landmark$lapse)
@@ -913,8 +944,8 @@ lapsefix_overallplot <- l %>%
 ```
 
 ```{r ratio_lapsefix, echo = FALSE}
-pre_ratio_ <- unlist(pre_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "pre")
-post_ratio_ <- unlist(post_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "post")
+pre_ratio_ <- unlist(pre_ratio) %>% reshape2::melt(value.name = "perceived_length") %>% mutate(time = "pre")
+post_ratio_ <- unlist(post_ratio) %>% reshape2::melt(value.name = "perceived_length") %>% mutate(time = "post")
 d <- full_join(pre_ratio_, post_ratio_)
 d %>% group_by(time) %>% summarise(m_length = mean(perceived_length))
 ```

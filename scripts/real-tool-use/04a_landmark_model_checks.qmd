@@ -12,7 +12,7 @@ format:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-pkgs <- c("dplyr", "tidyr", "magrittr", "readr", "stringr", "data.table", "here", "plotly", "ggplot2", "gghalves", "ggthemes", "flextable", "officer", "equatags", "tidybayes")
+pkgs <- c("dplyr", "tidyr", "magrittr", "readr", "stringr", "data.table", "here",  "ggplot2", "ggthemes", "flextable", "officer", "equatags", "tidybayes")
 for(i in pkgs){
   if(!i %in% rownames(installed.packages())){ 
     install.packages(i) 
@@ -111,18 +111,18 @@ ggplot(aes(y = .epred,
                    point_interval = mean_qi, 
                    show_slab = FALSE, 
                    position = position_nudge(x = .45)) +
-  geom_half_point(data = posterior_expected_value[time == "Post"], 
-                  side = "r", 
-                  range_scale = .5,
-                  alpha = .6) +
-  geom_half_point(data = posterior_expected_value[time == "Post"], 
-                side = "r", 
-                range_scale = .5,
-                alpha = .6) +
-  geom_half_point(data = posterior_expected_value[time == "Pre"],
-                  side = "l", 
-                  range_scale = .5,
-                  alpha = .6) +
+  # geom_half_point(data = posterior_expected_value[time == "Post"], 
+  #                 side = "r", 
+  #                 range_scale = .5,
+  #                 alpha = .6) +
+  # geom_half_point(data = posterior_expected_value[time == "Post"], 
+  #               side = "r", 
+  #               range_scale = .5,
+  #               alpha = .6) +
+  # geom_half_point(data = posterior_expected_value[time == "Pre"],
+  #                 side = "l", 
+  #                 range_scale = .5,
+  #                 alpha = .6) +
   stat_slab(data = posterior_expected_value[time == "Post"],
             alpha = .8, 
             scale = .4,
@@ -169,18 +169,18 @@ ggplot(aes(y = .epred,
                    point_interval = mean_qi, 
                    show_slab = FALSE, 
                    position = position_nudge(x = .45)) +
-  geom_half_point(data = posterior_expected_value_lapsefix[time == "Post"], 
-                  side = "r", 
-                  range_scale = .5,
-                  alpha = .6) +
-  geom_half_point(data = posterior_expected_value_lapsefix[time == "Post"], 
-                side = "r", 
-                range_scale = .5,
-                alpha = .6) +
-  geom_half_point(data = posterior_expected_value_lapsefix[time == "Pre"],
-                  side = "l", 
-                  range_scale = .5,
-                  alpha = .6) +
+  # geom_half_point(data = posterior_expected_value_lapsefix[time == "Post"], 
+  #                 side = "r", 
+  #                 range_scale = .5,
+  #                 alpha = .6) +
+  # geom_half_point(data = posterior_expected_value_lapsefix[time == "Post"], 
+  #               side = "r", 
+  #               range_scale = .5,
+  #               alpha = .6) +
+  # geom_half_point(data = posterior_expected_value_lapsefix[time == "Pre"],
+  #                 side = "l", 
+  #                 range_scale = .5,
+  #                 alpha = .6) +
   stat_slab(data = posterior_expected_value_lapsefix[time == "Post"],
             alpha = .8, 
             scale = .4,
@@ -203,7 +203,7 @@ ggplot(aes(y = .epred,
   scale_color_manual(breaks = c("Pre", "Post"),
     values = c("#001015", "#09A1D7"),
     labels = c("Pre", "Post")) +
-  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time", title = "Body Landmark Task Posterior Distributions") +
+  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time") +
   theme(axis.text.y = element_text(hjust = 0),
         title = element_text(size = 14),
         text = element_text(size = 14, color = "black"),
@@ -275,18 +275,18 @@ ggplot(aes(y = .prediction,
                    point_interval = mean_qi, 
                    show_slab = FALSE, 
                    position = position_nudge(x = .45)) +
-  geom_half_point(data = posterior_predictions[time == "Post"], 
-                  side = "r", 
-                  range_scale = .5,
-                  alpha = .6) +
-  geom_half_point(data = posterior_predictions[time == "Post"], 
-                side = "r", 
-                range_scale = .5,
-                alpha = .6) +
-  geom_half_point(data = posterior_predictions[time == "Pre"],
-                  side = "l", 
-                  range_scale = .5,
-                  alpha = .6) +
+  # geom_half_point(data = posterior_predictions[time == "Post"], 
+  #                 side = "r", 
+  #                 range_scale = .5,
+  #                 alpha = .6) +
+  # geom_half_point(data = posterior_predictions[time == "Post"], 
+  #               side = "r", 
+  #               range_scale = .5,
+  #               alpha = .6) +
+  # geom_half_point(data = posterior_predictions[time == "Pre"],
+  #                 side = "l", 
+  #                 range_scale = .5,
+  #                 alpha = .6) +
   stat_slab(data = posterior_predictions[time == "Post"],
             alpha = .8, 
             scale = .4,
@@ -309,7 +309,7 @@ ggplot(aes(y = .prediction,
   scale_color_manual(breaks = c("Pre", "Post"),
     values = c("#001015", "#09A1D7"),
     labels = c("Pre", "Post")) +
-  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time", title = "Body Landmark Task Posterior Predictive Distributions") +
+  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time") +
   theme(axis.text.y = element_text(hjust = 0),
         title = element_text(size = 14),
         text = element_text(size = 14, color = "black"),
@@ -333,18 +333,18 @@ ggplot(aes(y = .prediction,
                    point_interval = mean_qi, 
                    show_slab = FALSE, 
                    position = position_nudge(x = .45)) +
-  geom_half_point(data = posterior_predictions_lapsefix[time == "Post"], 
-                  side = "r", 
-                  range_scale = .5,
-                  alpha = .6) +
-  geom_half_point(data = posterior_predictions_lapsefix[time == "Post"], 
-                side = "r", 
-                range_scale = .5,
-                alpha = .6) +
-  geom_half_point(data = posterior_predictions_lapsefix[time == "Pre"],
-                  side = "l", 
-                  range_scale = .5,
-                  alpha = .6) +
+  # geom_half_point(data = posterior_predictions_lapsefix[time == "Post"], 
+  #                 side = "r", 
+  #                 range_scale = .5,
+  #                 alpha = .6) +
+  # geom_half_point(data = posterior_predictions_lapsefix[time == "Post"], 
+  #               side = "r", 
+  #               range_scale = .5,
+  #               alpha = .6) +
+  # geom_half_point(data = posterior_predictions_lapsefix[time == "Pre"],
+  #                 side = "l", 
+  #                 range_scale = .5,
+  #                 alpha = .6) +
   stat_slab(data = posterior_predictions_lapsefix[time == "Post"],
             alpha = .8, 
             scale = .4,
@@ -367,7 +367,7 @@ ggplot(aes(y = .prediction,
   scale_color_manual(breaks = c("Pre", "Post"),
     values = c("#001015", "#09A1D7"),
     labels = c("Pre", "Post")) +
-  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time", title = "Body Landmark Task Posterior Predictive Distributions") +
+  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time") +
   theme(axis.text.y = element_text(hjust = 0),
         title = element_text(size = 14),
         text = element_text(size = 14, color = "black"),
@@ -412,17 +412,21 @@ draws_change <- posterior_expected_value %>%
     value.name = ".epred"
   ) %>%
   # Remove the " Change" from the end of the outcome names
-  mutate("Target" = str_remove(Target, " Change$")) %>%
-  # Calculate the mode and HDI for each outcome
-  group_by(Target) %>% 
-  mode_hdi() %>%
-  # Select the mode and interval thresholds and rename the columns
-  select(Target:.upper) %>%
-  rename(
-    "Mode" = .epred,
-    "Lower" = .lower,
-    "Upper" = .upper
-  )
+  mutate("Target" = str_remove(Target, " Change$"))
+
+fwrite(draws_change, here::here("scripts", "for_osf", "tooluse_in_real", "plot_data", "landmark_draws_change.csv"))
+
+draws_change <- draws_change %>%
+    # Calculate the mode and HDI for each outcome
+    group_by(Target) %>%
+    mode_hdi() %>%
+    # Select the mode and interval thresholds and rename the columns
+    select(Target:.upper) %>%
+    rename(
+        "Mode" = .epred,
+        "Lower" = .lower,
+        "Upper" = .upper
+    )
 
 # Merge the BF and mode/HDI data
 model_params_unstd <- model_params %>%
@@ -514,17 +518,6 @@ model_table <- model_params_unstd %>%
   add_w = .1,
   add_h = 0.1
   ) %>%
-  # Add a descriptive footnote
-  flextable::footnote(i = 3, j=c(1:2),
-           value = as_paragraph(
-             c(
-               "Parameter estimates (Mode, 95% HDI) based on 50,000 draws from the posterior distribution, unstandardized and calculated as (Post - Pre). Values correspond to cm.", 
-               "Reported Bayes Factors represent multiplicative evidence in favor of an effect in the direction of precedent (for tool-use) over a complementary (one-sided) null hypothesis. Fractional values indicate that evidence favors the null."
-               )
-             ), 
-           ref_symbols = c("a", "b"),
-           part = "header"
-          ) %>%
   # Turn the Bayes Factors into LaTeX equations so the fractional values will display correctly
   compose(
     j = "BF",
@@ -634,7 +627,7 @@ lapsefix_model_table <- lapsefix_model_params_unstd %>%
   # Adds a row and line to the top of the table to indicate the
   # HDI interval estimates
   add_header_row(T, 
-                 c(" ", "95% Highest Density Interval"), 
+                 c(" ", "95\\% Highest Density Interval"), 
                  colwidths = c(3, 2)) %>% 
   add_header_lines("") %>%
   border_outer(border = officer::fp_border(style = "none", 
@@ -671,17 +664,6 @@ lapsefix_model_table <- lapsefix_model_params_unstd %>%
   add_w = .1,
   add_h = 0.1
   ) %>%
-  # Add a descriptive footnote
-  flextable::footnote(i = 3, j=c(1:2),
-           value = as_paragraph(
-             c(
-               "Parameter estimates (Mode, 95% HDI) based on 50,000 draws from the posterior distribution, unstandardized and calculated as (Post - Pre). Values correspond to error in cm, with negative values indicating an underestimate of the landmark on the z (forward) axis.", 
-               "Reported Bayes Factors represent multiplicative evidence in favor of an effect in the direction of precedent (for tool-use) over a complementary (one-sided) null hypothesis. Fractional values indicate that evidence favors the null."
-               )
-             ), 
-           ref_symbols = c("a", "b"),
-           part = "header"
-          ) %>%
   # Turn the Bayes Factors into LaTeX equations so the fractional values will display correctly
   compose(
     j = "BF",

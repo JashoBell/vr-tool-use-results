@@ -4,6 +4,7 @@ author: "Joshua Bell"
 date: "2/14/2022"
 format:
   html:
+    embed-resources: true
     toc: true
     toc-depth: 3
     toc-float: true
@@ -524,8 +525,8 @@ nonfix_overallplot <- l %>%
 ```
 
 ```{r armlength_ratio, echo=FALSE}
-pre_ratio_ <- unlist(pre_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "pre")
-post_ratio_ <- unlist(post_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "post")
+pre_ratio_ <- unlist(pre_ratio) %>% reshape2::melt(value.name = "perceived_length") %>% mutate(time = "pre")
+post_ratio_ <- unlist(post_ratio) %>% reshape2::melt(value.name = "perceived_length") %>% mutate(time = "post")
 d <- full_join(pre_ratio_, post_ratio_)
 d %>% group_by(time) %>% summarise(m_length = mean(perceived_length))
 sum(landmark$lapse)
@@ -908,8 +909,8 @@ lapsefix_overallplot <- l %>%
 ```
 
 ```{r ratio_lapsefix, echo = FALSE}
-pre_ratio_ <- unlist(pre_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "pre")
-post_ratio_ <- unlist(post_ratio) %>% melt(value.name = "perceived_length") %>% mutate(time = "post")
+pre_ratio_ <- unlist(pre_ratio) %>% reshape2::melt(value.name = "perceived_length") %>% mutate(time = "pre")
+post_ratio_ <- unlist(post_ratio) %>% reshape2::melt(value.name = "perceived_length") %>% mutate(time = "post")
 d <- full_join(pre_ratio_, post_ratio_)
 d %>% group_by(time) %>% summarise(m_length = mean(perceived_length))
 ```
