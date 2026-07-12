@@ -3,6 +3,7 @@ title: "Avatar VR - Processing - Landmark"
 author: "Joshua Bell"
 format:
   html:
+    embed-resources: true
     toc: true
     toc-depth: 3
     toc-float: true

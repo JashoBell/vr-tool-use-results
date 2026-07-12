@@ -3,6 +3,7 @@ title: "Avatar VR - Trial-level Data - Reaching"
 author: "Joshua Bell"
 format:
   html:
+    embed-resources: true
     toc: true
     toc-depth: 3
     toc-float: true
@@ -12,7 +13,7 @@ format:
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(include = TRUE, cache = TRUE, echo = FALSE, fig.height = 6, fig.width = 12)
 
-pkgs <- c("raster", "plyr", "data.table", "dplyr", "Rmisc", "magrittr", "tidyr", "readr", "ggplot2", "here", "tidybayes", "datawizard", "patchwork")
+pkgs <- c("plyr", "data.table", "dplyr", "Rmisc", "magrittr", "tidyr", "readr", "ggplot2", "here", "tidybayes", "datawizard", "patchwork")
 for(i in pkgs){
   if(!i %in% rownames(installed.packages())){ 
     install.packages(i) 
@@ -20,8 +21,7 @@ for(i in pkgs){
   }
   else(library(i, character.only = TRUE))
 }
-# Set max memory to 1gb
-rasterOptions(maxmemory = 10e+09)
+
 setDTthreads(percent = 90)
 
 ppt_m_fulltrials <- fread(here::here("data", "study_three", "ppt_m_fulltrials.csv")) %>%
@@ -188,6 +188,10 @@ for(p in unique(ppt_m$ppid))
     ]
   }
 
+  if(p %in% steamvr_participants)
+  {
+    average_velocity <- average_velocity[tracking == "ppt"]
+  }
   
   plot <- bytrial_velocity %>%
   ggplot(aes(x = time_ms_norm, 
@@ -211,7 +215,23 @@ for(p in unique(ppt_m$ppid))
                   y = velocity_10hz,
                   group = interaction(time, tracking),
                   color = "#09A1D7"),
+                  linewidth = 1) 
+if(p %in% steamvr_participants)
+{        
+  plot <- plot + geom_line(data = average_ovr_velocity[time == "pre"],
+                  aes(x = time_ms_norm,
+                  y = velocity_combined,
+                  group = interaction(time, tracking)),
+                  color = "#001015",
                   linewidth = 1) +
+        geom_line(data = average_ovr_velocity[time == "post"],
+                  aes(x = time_ms_norm,
+                  y = velocity_combined,
+                  group = interaction(time, tracking)),
+                  color = "#09A1D7",
+                  linewidth = 1) 
+  }
+  plot <- plot +
         scale_color_manual(
           labels = c("Pre", "Post"),
           values = c("#001015", "#09A1D7")
@@ -229,21 +249,7 @@ for(p in unique(ppt_m$ppid))
           title = p,
           color = "Time",
           linetype = "Tracking System") 
-if(p %in% steamvr_participants)
-{        
-  plot <- plot + geom_line(data = average_ovr_velocity[time == "pre"],
-                  aes(x = time_ms_norm,
-                  y = velocity_combined,
-                  group = interaction(time, tracking)),
-                  color = "firebrick",
-                  linewidth = 1) +
-        geom_line(data = average_ovr_velocity[time == "post"],
-                  aes(x = time_ms_norm,
-                  y = velocity_combined,
-                  group = interaction(time, tracking)),
-                  color = "forestgreen",
-                  linewidth = 1) 
-  }
+
     plots_participant[[p]] <- plot
 }
 

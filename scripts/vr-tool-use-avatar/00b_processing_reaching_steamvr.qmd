@@ -242,7 +242,10 @@ steamvr_position_filtered <- steamvr_prefilter_buffered[!(ppid %like% "pilot"), 
   `:=`(
     pos_x_10hz = filtfilt(b_10hz, pos_x),
     pos_y_10hz = filtfilt(b_10hz, pos_y),
-    pos_z_10hz = filtfilt(b_10hz, pos_z)
+    pos_z_10hz = filtfilt(b_10hz, pos_z),
+    velocity_x_10hz = filtfilt(b_10hz, velocity_x),
+    velocity_y_10hz = filtfilt(b_10hz, velocity_y),
+    velocity_z_10hz = filtfilt(b_10hz, velocity_z)
   ),
   by = .(ppid, block_num, trial_num_in_block, time, tracker)
 ]

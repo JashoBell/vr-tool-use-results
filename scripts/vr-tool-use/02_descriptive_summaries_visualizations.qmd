@@ -119,13 +119,6 @@ ggplot(aes(y = error_cm,
                    point_interval = mean_qi, 
                    show_slab = FALSE, 
                    position = position_nudge(x = .45)) +
-  geom_half_point(data = landmark[time == "Post"], 
-                  side = "r", 
-                  range_scale = .5,
-                  alpha = .6) +
-  geom_half_point(data = landmark[time == "Pre"],
-                  side = "l", 
-                  range_scale = .5,
                   alpha = .6) +
   stat_slab(data = landmark[time == "Post"],
             alpha = .8, 
@@ -141,23 +134,28 @@ ggplot(aes(y = error_cm,
   scale_x_discrete(limits = c("Pre", "Post"),
                    expand = c(0, 0),
                    labels = c("Pre", "Post"))+
-  scale_y_continuous(limits = c(-35, 35), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(-25, 25), expand = c(0, 0)) +
   scale_fill_manual(breaks = c("Pre", "Post"),
     values = c("#001015", "#09A1D7"),
     labels = c("Pre", "Post")) +
   scale_color_manual(breaks = c("Pre", "Post"),
     values = c("#001015", "#09A1D7"),
     labels = c("Pre", "Post")) +
-  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time", title = "Body Landmark Task Response Distributions") +
+  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time") +
   theme(axis.text.y = element_text(hjust = 0),
         title = element_text(size = 14),
         text = element_text(size = 16, color = "black"),
+        axis.title.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
         strip.background = element_blank(),
         strip.placement = "inside",
         strip.switch.pad.wrap = unit(0, "in"),
         panel.background = element_rect(fill = "transparent", colour = NA), 
         legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA))
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        legend.key = element_rect(fill = "transparent", colour = NA),
+        legend.position = "none")
 
 ggsave(lm_empirical, filename = here::here("scripts", "for_osf", "tooluse_in_VR",  "figures", "landmark-empirical-plot.svg"), width = 15, height = 8)
 saveRDS(lm_empirical, here::here("scripts", "for_osf", "tooluse_in_VR",  "figures", "landmark-empirical-plot.rds"))
@@ -467,13 +465,12 @@ kinematic_empirical_plots <-
     guides = "collect", 
     nrow = 2, 
     ncol = 3
-    ) + patchwork::plot_annotation(
-      title = "Kinematic peak and latency empirical distributions"
-      ) & theme(
+    )  & theme(
         plot.title = element_text(size = 14),
         panel.background = element_rect(fill = "transparent", colour = NA), 
         legend.background = element_rect(fill = "transparent", colour = NA),  
-        plot.background = element_rect(fill = "transparent", colour = NA)
+        plot.background = element_rect(fill = "transparent", colour = NA),
+        legend.key = element_rect(fill = "transparent", colour = NA),
       )
 
 ggsave(kinematic_empirical_plots, filename = here::here("scripts", "for_osf", "tooluse_in_VR", "figures", "kinematics-empirical-plot.svg"), width = 18, height = 12, bg = "transparent")

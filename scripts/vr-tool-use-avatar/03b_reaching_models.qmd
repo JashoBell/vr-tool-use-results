@@ -7,15 +7,17 @@ format:
     toc-depth: 3
     toc-float: true
     toc-placement: left
+knitr:
+  opts_chunk:
+    echo: true
+    warning: false
+    message: false
+    cache: true
+    fig.width: 12
+    fig.height: 8
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, 
-                      warning = FALSE, 
-                      message = FALSE, 
-                      cache = TRUE, 
-                      fig.width = 12, 
-                      fig.height = 8)
 pkgs <- c("dplyr", "readr", "magrittr", "data.table", "here", "brms", "cmdstanr", "datawizard", "bayestestR", "flextable", "officer", "ggplot2", "tidybayes")
 for(i in pkgs){
   if(!i %in% rownames(installed.packages())){ 
@@ -257,6 +259,7 @@ deceleration_peaks <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
+  silent = FALSE,
   file = here::here("scripts", "for_osf", "tooluse_avatar", "models", "peakdeceleration_ppt")
   )
 
@@ -421,6 +424,7 @@ acceleration_latency_priors <- brm(
   family = lognormal(link = "identity"),
   prior = c(
      prior_string(
+      # b prior mean is empirical SD / 5, with spread of empirical SD * 2.5
        prior = paste0("normal(",
          round(log(
           ppt_acceleration_and_latencies[,sd(acc_lat_filtfilt)] / 5
@@ -632,61 +636,6 @@ model_params <- bind_rows(
 
 saveRDS(model_params, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "model_params.rds"))
 fwrite(model_params, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "model_params.csv"))
-
-model_table <- flextable::qflextable(model_params) %>%
-  add_header_row(T, 
-                 c(" ", "95% Highest Density Interval"), 
-                 colwidths = c(3, 2)) %>% 
-  add_header_lines("Table 1. Tool-use Effect in Kinematic Models") %>%
-  border_outer(border = officer::fp_border(style = "none", 
-                                           width = 0), 
-               part = "header") %>%
-  hline(i = 1, 
-        border = officer::fp_border(style = "solid", 
-                                    width = 1.5), 
-        part = "header") %>%
-  hline(i = 2, j= c(1:3), 
-        border = officer::fp_border(style = "none", 
-                                    width = 0), 
-        part = "header") %>%
-  hline(i = 2, j= c(4, 5), 
-        border = officer::fp_border(style = "solid", 
-                                    width = 1), 
-        part = "header") %>%
-  hline(i = 3, 
-        border = officer::fp_border(style = "solid", 
-                                    width = 1), 
-        part = "header") %>%
-  hline(i = 6, 
-        border = officer::fp_border(style = "solid", 
-                                    width = 1.5), 
-        part = "body") %>%
-  style(i = 1:6,j = 2, part = "body", pr_t = fp_text(font.size = 16)) %>%
-  align(j = 3:5, align = "center", part = "all") %>%
-  autofit(
-  add_w = .1,
-  add_h = 0.1
-  ) %>%
-  flextable::footnote(i = 3, j=c(1:2),
-           value = as_paragraph(
-             c(
-               "Parameters given as standardized values, and represent the effect of time (tool-use).", 
-               "Bayes Factors represent multiplicative evidence in favor of effect (Savage-Dickey Ratios).")
-             ), 
-           ref_symbols = c("a", "b"),
-           part = "header"
-          ) %>%
-  font(fontname = "Times New Roman",
-       part = "all") %>%
-  fontsize(size = 9, part = "footer") %>%
-  flextable::colformat_double(i=c(1:6), j = 3:5, digits = 3) %>%
-  flextable::colformat_double(i=c(1:6), j = 2, digits = 2)
-  
-
-model_table
-
-saveRDS(model_table, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "kinematic_table.rds"))
-
 ```
 
 # Session Info

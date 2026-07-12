@@ -273,7 +273,7 @@ fwrite(
     )
 )
 
-rm(ppt_position_filtered_long)
+rm(ppt_position_filtered)
 gc()
 ```
 
@@ -370,7 +370,7 @@ ppt_velocity <- ppt_position_filtered_long[,
     )
 ]
 
-rm(ppt_position_filtered)
+rm(ppt_position_filtered_long)
 gc()
 ```
 
@@ -564,8 +564,6 @@ ppt_m <- time_correction[
     )
 ]
 
-rm(time_correction)
-gc()
 ```
 
 # Individualized Adjustments

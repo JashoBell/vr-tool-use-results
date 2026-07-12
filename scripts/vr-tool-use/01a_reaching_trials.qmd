@@ -1,0 +1,484 @@
+---
+title: "VR - Trial-level Data - Reaching"
+author: "Joshua Bell"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    toc-float: true
+    toc-placement: left
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(include = TRUE, echo = FALSE, fig.height = 6, fig.width = 12)
+
+pkgs <- c("plyr", "data.table", "dplyr", "Rmisc", "magrittr", "tidyr", "readr", "ggplot2", "here", "tidybayes", "datawizard", "patchwork", "raster")
+for(i in pkgs){
+  if(!i %in% rownames(installed.packages())){ 
+    install.packages(i) 
+    library(i, character.only = TRUE)
+  }
+  else(library(i, character.only = TRUE))
+}
+# Set max memory to 1gb
+rasterOptions(maxmemory = 10e+09)
+setDTthreads(percent = 90)
+
+ppt_m_fulltrials <- fread(here::here("data", "study_one", "ppt_m_fulltrials.csv"))
+
+ppt_m_fulltrials <- ppt_m_fulltrials[order(ppid, block_num, trial_num_in_block, time_ms)
+  ][,
+         `:=`(phase = factor(phase, levels = c("start", "begin", "out", "lift", "replace", "return", "returned")),
+         time = factor(time, levels = c("pre", "post")),
+         ppid = factor(ppid))
+  ]
+
+color_scale = c("steelblue", "forestgreen", "gold")
+names(color_scale) = c("begin", "out", "lift")
+
+ppt_m <- fread(here::here("data", "study_one", "ppt_manual.csv"))
+ppt_m[,
+  time := factor(time, levels = c("pre", "post"))
+  ]
+
+```
+
+# Overlaid Trials per Participant
+
+## PPT
+```{r plotsbyparticipant, cache = FALSE}
+plots_participant <- list()
+ppt_m_combined <- merge(ppt_m_fulltrials, ppt_m, by = c("ppid", "time", "block_num", "trial_num_in_block"), all.x = TRUE)
+
+for(p in unique(ppt_m_fulltrials$ppid))
+{
+  bytrial_velocity <- ppt_m_combined[
+      !phase %in% c(
+          "start", "lift",
+          "replace", "return",
+          "returned"
+      ) & time_ms_fix > 0
+      & (is.na(dec_lat_filtfilt) | (!is.na(dec_lat_filtfilt)
+      & time_ms_fix < dec_lat_filtfilt + 50))
+      & ppid == p
+  ][
+      order(block_num, trial_num_in_block, time_ms_fix)
+  ][,
+      time_ms_fix := (0:(.N - 1)) * 5,
+      by = c("time", "block_num", "trial_num_in_block")
+  ][,
+      time_ms_norm := datawizard::normalize(time_ms_fix),
+      by = c("time", "block_num", "trial_num_in_block")
+  ]
+
+  if(p == "d1-006")
+  {
+    bytrial_velocity <- bytrial_velocity[(trial_num_in_block != 5 | time != "post"),]
+  } else if(p == "d1-011")
+  {
+    bytrial_velocity <- bytrial_velocity[(trial_num_in_block != 8 | time != "pre"),]
+  } else if(p == "d1-018")
+  {
+    bytrial_velocity <- bytrial_velocity[(trial_num_in_block !=17 | time != "pre"),]
+  }
+
+  time_normed <- seq(0, 1, by = 0.001)
+  # Interpolate velocity to the common time scale using spline
+  average_velocity <- bytrial_velocity[,
+    .(
+        velocity_interpolated = spline(time_ms_norm, velocity, xout = time_normed)$y,
+        velocity_10hz_interpolated = spline(time_ms_norm, velocity_10hz, xout = time_normed)$y
+    ),
+    by = c("time", "block_num", "trial_num_in_block")
+  ][,
+    time_ms_norm := time_normed,
+    by = c("time", "block_num", "trial_num_in_block")
+  ][,
+    .(
+        velocity = mean(velocity_interpolated, na.rm = TRUE),
+        velocity_10hz = mean(velocity_10hz_interpolated, na.rm = TRUE)
+    ),
+    by = c("time_ms_norm", "time", "block_num")
+  ][order(block_num, time_ms_norm)]
+
+  plots_participant[[p]] <- bytrial_velocity %>%
+  ggplot(aes(x = time_ms_norm, 
+              y = velocity_10hz, 
+              color = time,
+              group = interaction(trial_num_in_block, block_num))) +
+        geom_line(alpha = .4) +
+        geom_line(data = average_velocity,
+                  aes(x = time_ms_norm,
+                  y = velocity_10hz,
+                  group = block_num),
+                  size = 1) +
+        scale_color_manual(values = c("firebrick", "steelblue")) +
+        theme_tidybayes() +
+        theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+              text = element_text(size = 22)) +
+        labs(x = "Time (normalized)", y = "Velocity (mm/s)", title = p) 
+}
+
+plots_participant
+```
+
+
+## Velocity by Participant x Trial
+
+```{r plotcreationloop, include=FALSE, cache = FALSE}
+plots <- list()
+lats <- data.table()
+for(p in unique(ppt_m_fulltrials$ppid))
+{
+  for(b in unique(ppt_m_fulltrials$time))
+  {
+    for(t in unique(ppt_m_fulltrials$trial_num_in_block))
+    {
+
+
+      m <- copy(
+          ppt_m[!is.na(vel_m_filt) &
+          ppid == p &
+          time == b & 
+          trial_num_in_block == t])
+
+      d <- copy(
+                ppt_m_fulltrials[
+                  ppid == p & 
+                  time == b & 
+                  trial_num_in_block == t & 
+                  !phase %in% c("start", "replace", "return", "returned") &
+                  between(
+                    time_ms_fix,
+                    0, 
+                    m$dec_lat_filtfilt + 500
+                    ) &
+                    !is.na(time_ms_fix) &
+                    !is.na(velocity_10hz)
+                  ]
+                )
+      
+      plot <- d %>%
+      ggplot(aes(x = time_ms_fix, 
+                 y = velocity_10hz, 
+                 color = phase,
+                 fill = phase)) +
+      geom_vline(xintercept = 0, size=.75, color = "blue")+
+      geom_vline(xintercept = m[, vel_lat_filt], size=.75, color = "forestgreen")+
+      geom_vline(xintercept = m[, acc_lat_filtfilt], size=.75, color = "steelblue")+
+      geom_vline(xintercept = m[, dec_lat_filtfilt], size=.75, color = "gold") +
+      geom_line(alpha = .5) +
+      geom_area(alpha = .5) +
+      scale_color_manual( values = color_scale) +
+      scale_fill_manual(values = color_scale) +
+      scale_x_continuous(limits = c(min(d[, time_ms_fix]), 
+                                    max(d[, time_ms_fix])), 
+                         breaks = scales::extended_breaks(as.integer(
+                           (max(d[, time_ms_fix])-min(d[, time_ms_fix]))/100))) +
+      scale_y_continuous(limits = c(0, max(d[, velocity_10hz]) + sd(d[, velocity_10hz]))) +
+      theme_tidybayes() +
+      theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+      labs(title = paste("Participant: ", unique(d$ppid), ", Time:", b, ", Trial: ", as.character(t)))
+      
+      if(length(copy(d[!is.na(start_time), start_time])) > 0)
+      {
+      plot <- plot +
+      annotate(geom = "text",
+                x = 50,
+                y = m[, vel_m_filt],
+                label = copy(d[!is.na(start_time), start_time][[1]]),
+                color = "black",
+                size = 8)
+      }
+      plots[[p]][[b]][[t]] <- plot
+    }
+  }
+}
+
+```
+
+# Manual Reaching Trials - PPT
+## General Information
+
+- Movement onset calculated as the thick blue vertical line that appears in the timeline
+- Acceleration, velocity and deceleration are pale blue, green and gold respectively
+- The black text is the time of the movement onset from the start of recording.
+- time_ms_fix is the original time_ms with the start time of the trial subtracted from it, making 0 the start of the movement
+
+### Participant 1
+#### Pre
+```{r participant-1}
+print(plots[["d1-001"]]["pre"])
+```
+#### Post
+```{r participant-1-post}
+print(plots[["d1-001"]]["post"])
+```
+
+### Participant 2
+#### Pre
+```{r participant-2}
+print(plots[["d1-002"]]["pre"])
+```
+#### Post
+```{r participant-2-post}
+print(plots[["d1-002"]]["post"])
+```
+
+
+### Participant 3
+#### Pre
+```{r participant-3}
+print(plots[["d1-003"]]["pre"])
+```
+
+#### Post
+Trials 8 and 9 of the post-test failed to save the PPT data.
+```{r participant-3-post}
+print(plots[["d1-003"]]["post"])
+```
+
+### Participant 4
+#### Pre
+```{r participant-4}
+print(plots[["d1-004"]]["pre"])
+```
+#### Post
+```{r participant-4-post}
+print(plots[["d1-004"]]["post"])
+```
+
+### Participant 5
+#### Pre
+```{r participant-5}
+print(plots[["d1-005"]]["pre"])
+```
+#### Post
+```{r participant-5-post}
+print(plots[["d1-005"]]["post"])
+```
+
+### Participant 6
+#### Pre
+```{r participant-6}
+plots[["d1-006"]]["pre"]
+```
+#### Post
+```{r participant-6-post}
+plots[["d1-006"]]["post"]
+```
+
+
+
+### Participant 7
+#### Pre
+```{r participant-7}
+plots[["d1-007"]]["pre"]
+```
+#### Post
+```{r }
+plots[["d1-007"]]["post"]
+```
+
+
+### Participant 8
+#### Pre
+```{r participant-8}
+plots[["d1-008"]]["pre"]
+```
+#### Post
+```{r participant-8-post}
+plots[["d1-008"]]["post"]
+```
+
+
+
+### Participant 9
+#### Pre
+```{r participant-9}
+plots[["d1-009"]]["pre"]
+```
+#### Post
+```{r participant-9-post}
+plots[["d1-009"]]["post"]
+```
+
+
+
+### Participant 10
+#### Pre
+```{r participant-10}
+plots[["d1-010"]]["pre"]
+```
+#### Post
+```{r participant-10-post}
+plots[["d1-010"]]["post"]
+```
+
+
+
+### Participant 11
+#### Pre
+```{r participant-11}
+plots[["d1-011"]]["pre"]
+```
+#### Post
+```{r participant-11-post}
+plots[["d1-011"]]["post"]
+```
+
+
+
+### Participant 12
+#### Pre
+```{r participant-12}
+plots[["d1-012"]]["pre"]
+```
+#### Post
+```{r participant-12-post}
+plots[["d1-012"]]["post"]
+```
+
+
+
+### Participant 13
+#### Pre
+```{r participant-13}
+plots[["d1-013"]]["pre"]
+```
+#### Post
+```{r participant-13-post}
+plots[["d1-013"]]["post"]
+```
+
+
+
+### Participant 14
+#### Pre
+```{r participant-14}
+plots[["d1-014"]]["pre"]
+```
+#### Post
+```{r participant-14-post}
+plots[["d1-014"]]["post"]
+```
+
+
+
+### Participant 15
+#### Pre
+```{r participant-15}
+plots[["d1-015"]]["pre"]
+```
+#### Post
+```{r participant-15-post}
+plots[["d1-015"]]["post"]
+```
+
+
+
+### Participant 16
+#### Pre
+```{r participant-16}
+plots[["d1-016"]]["pre"]
+```
+#### Post
+```{r participant-16-post}
+plots[["d1-016"]]["post"]
+```
+
+
+
+### Participant 17
+#### Pre
+```{r participant-17}
+plots[["d1-017"]]["pre"]
+```
+#### Post
+```{r participant-17-post}
+plots[["d1-017"]]["post"]
+```
+
+
+
+### Participant 18
+#### Pre
+```{r participant-18}
+plots[["d1-018"]]["pre"]
+```
+#### Post
+```{r participant-18-post}
+plots[["d1-018"]]["post"]
+```
+
+
+
+### Participant 19
+#### Pre
+```{r participant-19}
+plots[["d1-019"]]["pre"]
+```
+#### Post
+```{r participant-19-post}
+plots[["d1-019"]]["post"]
+```
+
+
+
+### Participant 20
+#### Pre
+```{r participant-20}
+plots[["d1-020"]]["pre"]
+```
+#### Post
+```{r participant-20-post}
+plots[["d1-020"]]["post"]
+```
+
+
+
+### Participant 21
+#### Pre
+```{r participant-21}
+plots[["d1-021"]]["pre"]
+```
+#### Post
+```{r participant-21-post}
+plots[["d1-021"]]["post"]
+```
+
+
+
+### Participant 22
+#### Pre
+```{r participant-22}
+plots[["d1-022"]]["pre"]
+```
+#### Post
+```{r participant-22-post}
+plots[["d1-022"]]["post"]
+```
+
+
+
+### Participant 23
+#### Pre
+```{r participant-23}
+plots[["d1-023"]]["pre"]
+```
+#### Post
+```{r participant-23-post}
+plots[["d1-023"]]["post"]
+```
+
+
+
+### Participant 24
+#### Pre
+```{r participant-24}
+plots[["d1-024"]]["pre"]
+```
+#### Post
+```{r participant-24-post}
+plots[["d1-024"]]["post"]
+```

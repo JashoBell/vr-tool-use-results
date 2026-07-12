@@ -12,7 +12,7 @@ format:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-pkgs <- c("dplyr", "tidyr", "magrittr", "readr", "stringr", "data.table", "here", "plotly", "ggplot2", "gghalves", "ggthemes", "flextable", "officer", "equatags", "tidybayes")
+pkgs <- c("dplyr", "tidyr", "magrittr", "readr", "stringr", "data.table", "here", "ggplot2", "ggthemes", "flextable", "officer", "equatags", "tidybayes", "brms", "rstantools", "datawizard", "priorsense")
 for(i in pkgs){
   if(!i %in% rownames(installed.packages())){ 
     install.packages(i) 
@@ -111,18 +111,6 @@ ggplot(aes(y = .epred,
                    point_interval = mean_qi, 
                    show_slab = FALSE, 
                    position = position_nudge(x = .45)) +
-  geom_half_point(data = posterior_expected_value[time == "Post"], 
-                  side = "r", 
-                  range_scale = .5,
-                  alpha = .6) +
-  geom_half_point(data = posterior_expected_value[time == "Post"], 
-                side = "r", 
-                range_scale = .5,
-                alpha = .6) +
-  geom_half_point(data = posterior_expected_value[time == "Pre"],
-                  side = "l", 
-                  range_scale = .5,
-                  alpha = .6) +
   stat_slab(data = posterior_expected_value[time == "Post"],
             alpha = .8, 
             scale = .4,
@@ -145,7 +133,7 @@ ggplot(aes(y = .epred,
   scale_color_manual(breaks = c("Pre", "Post"),
     values = c("#001015", "#09A1D7"),
     labels = c("Pre", "Post")) +
-  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time", title = "Body Landmark Task Posterior Distributions") +
+  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time") +
   theme(axis.text.y = element_text(hjust = 0),
         title = element_text(size = 14),
         text = element_text(size = 14, color = "black"),
@@ -169,18 +157,6 @@ ggplot(aes(y = .epred,
                    point_interval = mean_qi, 
                    show_slab = FALSE, 
                    position = position_nudge(x = .45)) +
-  geom_half_point(data = posterior_expected_value_lapsefix[time == "Post"], 
-                  side = "r", 
-                  range_scale = .5,
-                  alpha = .6) +
-  geom_half_point(data = posterior_expected_value_lapsefix[time == "Post"], 
-                side = "r", 
-                range_scale = .5,
-                alpha = .6) +
-  geom_half_point(data = posterior_expected_value_lapsefix[time == "Pre"],
-                  side = "l", 
-                  range_scale = .5,
-                  alpha = .6) +
   stat_slab(data = posterior_expected_value_lapsefix[time == "Post"],
             alpha = .8, 
             scale = .4,
@@ -203,7 +179,7 @@ ggplot(aes(y = .epred,
   scale_color_manual(breaks = c("Pre", "Post"),
     values = c("#001015", "#09A1D7"),
     labels = c("Pre", "Post")) +
-  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time", title = "Body Landmark Task Posterior Distributions") +
+  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time") +
   theme(axis.text.y = element_text(hjust = 0),
         title = element_text(size = 14),
         text = element_text(size = 14, color = "black"),
@@ -271,18 +247,6 @@ ggplot(aes(y = .prediction,
                    point_interval = mean_qi, 
                    show_slab = FALSE, 
                    position = position_nudge(x = .45)) +
-  geom_half_point(data = posterior_predictions[time == "Post"], 
-                  side = "r", 
-                  range_scale = .5,
-                  alpha = .6) +
-  geom_half_point(data = posterior_predictions[time == "Post"], 
-                side = "r", 
-                range_scale = .5,
-                alpha = .6) +
-  geom_half_point(data = posterior_predictions[time == "Pre"],
-                  side = "l", 
-                  range_scale = .5,
-                  alpha = .6) +
   stat_slab(data = posterior_predictions[time == "Post"],
             alpha = .8, 
             scale = .4,
@@ -305,7 +269,7 @@ ggplot(aes(y = .prediction,
   scale_color_manual(breaks = c("Pre", "Post"),
     values = c("#001015", "#09A1D7"),
     labels = c("Pre", "Post")) +
-  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time", title = "Body Landmark Task Posterior Predictive Distributions") +
+  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time") +
   theme(axis.text.y = element_text(hjust = 0),
         title = element_text(size = 14),
         text = element_text(size = 14, color = "black"),
@@ -329,18 +293,6 @@ ggplot(aes(y = .prediction,
                    point_interval = mean_qi, 
                    show_slab = FALSE, 
                    position = position_nudge(x = .45)) +
-  geom_half_point(data = posterior_predictions_lapsefix[time == "Post"], 
-                  side = "r", 
-                  range_scale = .5,
-                  alpha = .6) +
-  geom_half_point(data = posterior_predictions_lapsefix[time == "Post"], 
-                side = "r", 
-                range_scale = .5,
-                alpha = .6) +
-  geom_half_point(data = posterior_predictions_lapsefix[time == "Pre"],
-                  side = "l", 
-                  range_scale = .5,
-                  alpha = .6) +
   stat_slab(data = posterior_predictions_lapsefix[time == "Post"],
             alpha = .8, 
             scale = .4,
@@ -363,7 +315,7 @@ ggplot(aes(y = .prediction,
   scale_color_manual(breaks = c("Pre", "Post"),
     values = c("#001015", "#09A1D7"),
     labels = c("Pre", "Post")) +
-  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time", title = "Body Landmark Task Posterior Predictive Distributions") +
+  labs(y = "Error (cm)", x = "Time", fill = "Time", color = "Time") +
   theme(axis.text.y = element_text(hjust = 0),
         title = element_text(size = 14),
         text = element_text(size = 14, color = "black"),
@@ -408,17 +360,21 @@ draws_change <- posterior_expected_value %>%
     value.name = ".epred"
   ) %>%
   # Remove the " Change" from the end of the outcome names
-  mutate("Target" = str_remove(Target, " Change$")) %>%
-  # Calculate the mode and HDI for each outcome
-  group_by(Target) %>% 
-  mode_hdi() %>%
-  # Select the mode and interval thresholds and rename the columns
-  select(Target:.upper) %>%
-  rename(
-    "Mode" = .epred,
-    "Lower" = .lower,
-    "Upper" = .upper
-  )
+  mutate("Target" = str_remove(Target, " Change$"))
+
+fwrite(draws_change, here::here("scripts", "for_osf", "tooluse_avatar", "plot_data", "landmark_draws_change.csv"))
+
+draws_change <- draws_change %>%
+    # Calculate the mode and HDI for each outcome
+    group_by(Target) %>%
+    mode_hdi() %>%
+    # Select the mode and interval thresholds and rename the columns
+    select(Target:.upper) %>%
+    rename(
+        "Mode" = .epred,
+        "Lower" = .lower,
+        "Upper" = .upper
+    )
 
 # Merge the BF and mode/HDI data
 model_params_unstd <- model_params %>%
@@ -503,24 +459,14 @@ model_table <- model_params_unstd %>%
         border = officer::fp_border(style = "solid", 
                                     width = 1.5), 
         part = "body") %>%
-  style(i = 1:3,j = 2, part = "body", pr_t = fp_text(font.size = 9)) %>%
+  style(i = 2:3,j = 2, part = "body", pr_t = fp_text(font.size = 9)) %>%
+  style(i = 1,j = 2, part = "body", pr_t = fp_text(font.size = 12)) %>%
   align(j = 2:5, align = "center", part = "all") %>%
   # Make sure the table is the right size
   autofit(
   add_w = .1,
   add_h = 0.1
   ) %>%
-  # Add a descriptive footnote
-  flextable::footnote(i = 3, j=c(1:2),
-           value = as_paragraph(
-             c(
-               "Parameter estimates (Mode, 95% HDI) based on 50,000 draws from the posterior distribution, unstandardized and calculated as (Post - Pre). Values correspond to error in cm, with negative values indicating an underestimate of the landmark on the z (forward) axis.", 
-               "Reported Bayes Factors represent multiplicative evidence in favor of a distalizing effect (for tool-use) over a complementary hypothesis (i.e., a one-sided test). Fractional values indicate that evidence favors the null."
-               )
-             ), 
-           ref_symbols = c("a", "b"),
-           part = "header"
-          ) %>%
   # Turn the Bayes Factors into LaTeX equations so the fractional values will display correctly
   compose(
     j = "BF",
@@ -539,160 +485,160 @@ saveRDS(model_table, here::here("scripts", "for_osf", "tooluse_avatar", "tables"
 ```
 
 ```{r}
-lapsefix_model_params <- readRDS(here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_lapsefix_model_params.rds"))
+# lapsefix_model_params <- readRDS(here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_lapsefix_model_params.rds"))
 
-# Move the posterior draws long-to-wide using dcast
-draws_change <- posterior_expected_value_lapsefix %>%
-  dcast(
-    .draw ~ target + time,
-    value.var = ".epred"
-  )  %>%
-  mutate(
-    # Calculate pre-to-post change as post - pre
-    "Wrist Change" = `Wrist_Post` - `Wrist_Pre`,
-    "Forearm Change" = `Forearm_Post` - `Forearm_Pre`,
-    "Elbow Change" = `Elbow_Post` - `Elbow_Pre`
-  ) %>%
-  # Select only the change columns
-  select(
-    .draw,
-    ends_with("Change")
-  ) %>%
-  # Melt the data back to long format
-  melt(
-    id.vars = c(".draw"),
-    variable.name = "Target",
-    value.name = ".epred"
-  ) %>%
-  # Remove the " Change" from the end of the outcome names
-  mutate("Target" = str_remove(Target, " Change$")) %>%
-  # Calculate the mode and HDI for each outcome
-  group_by(Target) %>% 
-  mode_hdi() %>%
-  # Select the mode and interval thresholds and rename the columns
-  select(Target:.upper) %>%
-  rename(
-    "Mode" = .epred,
-    "Lower" = .lower,
-    "Upper" = .upper
-  )
+# # Move the posterior draws long-to-wide using dcast
+# draws_change <- posterior_expected_value_lapsefix %>%
+#   dcast(
+#     .draw ~ target + time,
+#     value.var = ".epred"
+#   )  %>%
+#   mutate(
+#     # Calculate pre-to-post change as post - pre
+#     "Wrist Change" = `Wrist_Post` - `Wrist_Pre`,
+#     "Forearm Change" = `Forearm_Post` - `Forearm_Pre`,
+#     "Elbow Change" = `Elbow_Post` - `Elbow_Pre`
+#   ) %>%
+#   # Select only the change columns
+#   dplyr::select(
+#     .draw,
+#     ends_with("Change")
+#   ) %>%
+#   # Melt the data back to long format
+#   melt(
+#     id.vars = c(".draw"),
+#     variable.name = "Target",
+#     value.name = ".epred"
+#   ) %>%
+#   # Remove the " Change" from the end of the outcome names
+#   mutate("Target" = str_remove(Target, " Change$")) %>%
+#   # Calculate the mode and HDI for each outcome
+#   group_by(Target) %>% 
+#   mode_hdi() %>%
+#   # Select the mode and interval thresholds and rename the columns
+#   dplyr::select(Target:.upper) %>%
+#   rename(
+#     "Mode" = .epred,
+#     "Lower" = .lower,
+#     "Upper" = .upper
+#   )
 
-# Merge the BF and mode/HDI data
-lapsefix_model_params_unstd <- lapsefix_model_params %>%
-  mutate(Target = Parameter) %>% 
-  select(
-    Target,
-    BF
-  ) %>%
-  as.data.table() %>%
-  merge.data.table(
-    draws_change,
-    by = "Target"
-  ) %>%
-  mutate(
-    # If BF > 1, round to 2 decimal places
-    # If BF < 1, turn into a LaTeX fraction and, 
-    # depending on how small, round to 1 or 0 decimal places.
-    BF = fcase(
-      BF > 1, paste0(
-        round(BF, 2)
-      ),
+# # Merge the BF and mode/HDI data
+# lapsefix_model_params_unstd <- lapsefix_model_params %>%
+#   mutate(Target = Parameter) %>% 
+#   dplyr::select(
+#     Target,
+#     BF
+#   ) %>%
+#   as.data.table() %>%
+#   merge.data.table(
+#     draws_change,
+#     by = "Target"
+#   ) %>%
+#   mutate(
+#     # If BF > 1, round to 2 decimal places
+#     # If BF < 1, turn into a LaTeX fraction and, 
+#     # depending on how small, round to 1 or 0 decimal places.
+#     BF = fcase(
+#       BF > 1, paste0(
+#         round(BF, 2)
+#       ),
       
-      BF < .5, paste0(
-      "\\frac{1}{",
-      fifelse(
-        1/BF > 100,
-        round(1/BF, 0),
-        round(1/BF, 1)
-        ),
-      "}"
-      ),
+#       BF < .5, paste0(
+#       "\\frac{1}{",
+#       fifelse(
+#         1/BF > 100,
+#         round(1/BF, 0),
+#         round(1/BF, 1)
+#         ),
+#       "}"
+#       ),
 
-      BF < 1 & BF >= .5, paste0(
-        round(BF, 2)
-      )
-    ),
-    # Turn Target into a factor and reorder the levels
-    Target = factor(Target,
-    levels = c(
-      "Wrist",
-      "Forearm",
-      "Elbow"
-      )
-    )
-  ) %>%
-  # Arrange the data table to match the new order of the levels
-  arrange(Target)
+#       BF < 1 & BF >= .5, paste0(
+#         round(BF, 2)
+#       )
+#     ),
+#     # Turn Target into a factor and reorder the levels
+#     Target = factor(Target,
+#     levels = c(
+#       "Wrist",
+#       "Forearm",
+#       "Elbow"
+#       )
+#     )
+#   ) %>%
+#   # Arrange the data table to match the new order of the levels
+#   arrange(Target)
   
-# Create an APA-style table using flextable
-lapsefix_model_table <- lapsefix_model_params_unstd %>%
-  flextable::qflextable() %>%
-  # Adds a row and line to the top of the table to indicate the
-  # HDI interval estimates
-  add_header_row(T, 
-                 c(" ", "95% Highest Density Interval"), 
-                 colwidths = c(3, 2)) %>% 
-  add_header_lines("") %>%
-  border_outer(border = officer::fp_border(style = "none", 
-                                           width = 0), 
-               part = "header") %>%
-  # Add lines that cohere to APA style
-  hline(i = 1, 
-        border = officer::fp_border(
-          style = "solid", 
-          width = 1.5), 
-        part = "header") %>%
-  hline(i = 2, j= c(1:3), 
-        border = officer::fp_border(
-          style = "none", 
-          width = 0), 
-        part = "header") %>%
-  hline(i = 2, j= c(4, 5), 
-        border = officer::fp_border(
-          style = "solid", 
-          width = 1), 
-        part = "header") %>%
-  hline(i = 3, 
-        border = officer::fp_border(style = "solid", 
-                                    width = 1), 
-        part = "header") %>%
-  hline(i = 3, 
-        border = officer::fp_border(style = "solid", 
-                                    width = 1.5), 
-        part = "body") %>%
-  style(i = 1:3,j = 2, part = "body", pr_t = fp_text(font.size = 9)) %>%
-  align(j = 2:5, align = "center", part = "all") %>%
-  # Make sure the table is the right size
-  autofit(
-  add_w = .1,
-  add_h = 0.1
-  ) %>%
-  # Add a descriptive footnote
-  flextable::footnote(i = 3, j=c(1:2),
-           value = as_paragraph(
-             c(
-               "Parameter estimates (Mode, 95% HDI) based on 50,000 draws from the posterior distribution, unstandardized and calculated as (Post - Pre). Values correspond to error in cm, with negative values indicating an underestimate of the landmark on the z (forward) axis.", 
-               "Reported Bayes Factors represent multiplicative evidence in favor of an effect (for tool-use) over a point-null hypothesis (Savage-Dickey Ratios). Fractional values indicate that evidence favors the null."
-               )
-             ), 
-           ref_symbols = c("a", "b"),
-           part = "header"
-          ) %>%
-  # Turn the Bayes Factors into LaTeX equations so the fractional values will display correctly
-  compose(
-    j = "BF",
-    value = as_paragraph(as_equation(BF)),
-  ) %>%
-  font(fontname = "Times New Roman",
-       part = "all") %>%
-  flextable::fontsize(size = 9, part = "footer") %>%
-  flextable::colformat_double(i=c(1:3), j = 3:5, digits = 2)
+# # Create an APA-style table using flextable
+# lapsefix_model_table <- lapsefix_model_params_unstd %>%
+#   flextable::qflextable() %>%
+#   # Adds a row and line to the top of the table to indicate the
+#   # HDI interval estimates
+#   add_header_row(T, 
+#                  c(" ", "95\\% Highest Density Interval"), 
+#                  colwidths = c(3, 2)) %>% 
+#   add_header_lines("") %>%
+#   border_outer(border = officer::fp_border(style = "none", 
+#                                            width = 0), 
+#                part = "header") %>%
+#   # Add lines that cohere to APA style
+#   hline(i = 1, 
+#         border = officer::fp_border(
+#           style = "solid", 
+#           width = 1.5), 
+#         part = "header") %>%
+#   hline(i = 2, j= c(1:3), 
+#         border = officer::fp_border(
+#           style = "none", 
+#           width = 0), 
+#         part = "header") %>%
+#   hline(i = 2, j= c(4, 5), 
+#         border = officer::fp_border(
+#           style = "solid", 
+#           width = 1), 
+#         part = "header") %>%
+#   hline(i = 3, 
+#         border = officer::fp_border(style = "solid", 
+#                                     width = 1), 
+#         part = "header") %>%
+#   hline(i = 3, 
+#         border = officer::fp_border(style = "solid", 
+#                                     width = 1.5), 
+#         part = "body") %>%
+#   style(i = 2:3,j = 2, part = "body", pr_t = fp_text(font.size = 9)) %>%
+#   style(i = 1,j = 2, part = "body", pr_t = fp_text(font.size = 12)) %>%
+#   align(j = 2:5, align = "center", part = "all") %>%
+#   # Make sure the table is the right size
+#   autofit(
+#   add_w = .1,
+#   add_h = 0.1
+#   ) %>%
+#   # Add a descriptive footnote
+#   flextable::footnote(i = 3, j=c(1:2),
+#            value = as_paragraph(
+#              as_qmd(
+#                "Parameter estimates (Mode, 95% HDI) based on 50,000 draws from the posterior distribution, unstandardized and calculated as (Post - Pre). Values correspond to error in cm, with negative values indicating an underestimate of the landmark on the z (forward) axis. Reported Bayes Factors represent multiplicative evidence in favor of one hypothesis over another. BF > 1 indicate support for the expected effect of tool-use, while fractional values indicate that evidence favors the complimentary null."
+#                )
+#              ), 
+#            ref_symbols = c("a", "b"),
+#            part = "header"
+#           ) %>%
+#   # Turn the Bayes Factors into LaTeX equations so the fractional values will display correctly
+#   compose(
+#     j = "BF",
+#     value = as_paragraph(as_equation(BF)),
+#   ) %>%
+#   font(fontname = "Times New Roman",
+#        part = "all") %>%
+#   flextable::fontsize(size = 9, part = "footer") %>%
+#   flextable::colformat_double(i=c(1:3), j = 3:5, digits = 2)
 
-# Display the table
-lapsefix_model_table
+# # Display the table
+# lapsefix_model_table
 
-# Save the table to an RDS to be used in the manuscript
-saveRDS(lapsefix_model_table, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "lapsefix_landmark_table.rds"))
+# # Save the table to an RDS to be used in the manuscript
+# saveRDS(lapsefix_model_table, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "lapsefix_landmark_table.rds"))
 ```
 
 ## Prior Sensitivity
