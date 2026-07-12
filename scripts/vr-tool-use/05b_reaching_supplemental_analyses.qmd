@@ -354,7 +354,7 @@ velocity_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "peakvelocity_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "peakvelocity_ppt_bongers")
   )
 
 plot(velocity_peaks)
@@ -430,7 +430,7 @@ acceleration_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "peakacceleration_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "peakacceleration_ppt_bongers")
   )
 
 plot(acceleration_peaks)
@@ -508,7 +508,7 @@ deceleration_peaks <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "peakdeceleration_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "peakdeceleration_ppt_bongers")
   )
 
 plot(deceleration_peaks)
@@ -618,7 +618,7 @@ velocity_latencies <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "velocity_latency_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "velocity_latency_ppt_bongers")
   )
 
 plot(velocity_latencies)
@@ -717,7 +717,7 @@ acceleration_latencies <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "acceleration_latency_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "acceleration_latency_ppt_bongers")
   )
 
 plot(acceleration_latencies)
@@ -817,7 +817,7 @@ deceleration_latencies <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "deceleration_latency_ppt_bongers")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "deceleration_latency_ppt_bongers")
   )
 
 plot(deceleration_latencies)
@@ -882,7 +882,7 @@ model_params <- bind_rows(
              "Upper" = CI_high,
              "Mode" = MAP)
 
-fwrite(model_params, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "supplementary", "model_params_bongers.csv"))
+fwrite(model_params, here::here("scripts", "vr-tool-use", "tables", "supplementary", "model_params_bongers.csv"))
 
 model_table <- flextable::qflextable(model_params) %>%
   add_header_row(T, 
@@ -930,7 +930,7 @@ model_table <- flextable::qflextable(model_params) %>%
 
 model_table
 
-saveRDS(model_table, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "supplementary", "kinematic_table_bongers.rds"))
+saveRDS(model_table, here::here("scripts", "vr-tool-use", "tables", "supplementary", "kinematic_table_bongers.rds"))
 
 ```
 
@@ -997,7 +997,7 @@ velocity_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "peakvelocity_ppt_cardinali")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "peakvelocity_ppt_cardinali")
   )
 
 plot(velocity_peaks)
@@ -1073,7 +1073,7 @@ acceleration_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "peakacceleration_ppt_cardinali")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "peakacceleration_ppt_cardinali")
   )
 
 plot(acceleration_peaks)
@@ -1151,7 +1151,7 @@ deceleration_peaks <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "peakdeceleration_ppt_cardinali")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "peakdeceleration_ppt_cardinali")
   )
 
 plot(deceleration_peaks)
@@ -1261,7 +1261,7 @@ velocity_latencies <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "velocity_latency_ppt_cardinali")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "velocity_latency_ppt_cardinali")
   )
 
 plot(velocity_latencies)
@@ -1360,7 +1360,7 @@ acceleration_latencies <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "acceleration_latency_ppt_cardinali")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "acceleration_latency_ppt_cardinali")
   )
 
 plot(acceleration_latencies)
@@ -1460,7 +1460,7 @@ deceleration_latencies <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "deceleration_latency_ppt_cardinali")
+  file = here::here("scripts", "vr-tool-use", "models", "supplementary", "deceleration_latency_ppt_cardinali")
   )
 
 plot(deceleration_latencies)
@@ -1525,7 +1525,7 @@ model_params <- bind_rows(
              "Upper" = CI_high,
              "Mode" = MAP)
 
-fwrite(model_params, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "supplementary", "model_params_cardinali.csv"))
+fwrite(model_params, here::here("scripts", "vr-tool-use", "tables", "supplementary", "model_params_cardinali.csv"))
 
 model_table <- flextable::qflextable(model_params) %>%
   add_header_row(T, 
@@ -1573,7 +1573,7 @@ model_table <- flextable::qflextable(model_params) %>%
 
 model_table
 
-saveRDS(model_table, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "supplementary", "kinematic_table_cardinali.rds"))
+saveRDS(model_table, here::here("scripts", "vr-tool-use", "tables", "supplementary", "kinematic_table_cardinali.rds"))
 
 ```
 
@@ -1864,7 +1864,7 @@ fatigue_plot <- fatigue_points %>%
 
 fatigue_plot
 ggsave(
-    filename = here::here("scripts", "for_osf", "tooluse_in_vr", "figures", "fatigue_plot.png"),
+    filename = here::here("scripts", "vr-tool-use", "figures", "fatigue_plot.png"),
     plot = fatigue_plot,
     width = 20,
     height = 10,
@@ -1872,7 +1872,7 @@ ggsave(
     dpi = 300,
     background = "transparent"
     )
-saveRDS(fatigue_plot, here::here("scripts", "for_osf", "tooluse_in_vr", "figures", "fatigue_plot.rds"))
+saveRDS(fatigue_plot, here::here("scripts", "vr-tool-use", "figures", "fatigue_plot.rds"))
 ```
 
 

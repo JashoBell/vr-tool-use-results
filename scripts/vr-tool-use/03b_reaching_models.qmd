@@ -95,7 +95,7 @@ velocity_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_vr", "models", "peakvelocity_ppt")
+  file = here::here("scripts", "vr-tool-use", "models", "peakvelocity_ppt")
   )
 
 plot(velocity_peaks)
@@ -171,7 +171,7 @@ acceleration_peaks <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_vr", "models", "peakacceleration_ppt")
+  file = here::here("scripts", "vr-tool-use", "models", "peakacceleration_ppt")
   )
 
 plot(acceleration_peaks)
@@ -249,7 +249,7 @@ deceleration_peaks <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_vr", "models", "peakdeceleration_ppt")
+  file = here::here("scripts", "vr-tool-use", "models", "peakdeceleration_ppt")
   )
 
 plot(deceleration_peaks)
@@ -359,7 +359,7 @@ velocity_latencies <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_vr", "models", "velocity_latency_ppt")
+  file = here::here("scripts", "vr-tool-use", "models", "velocity_latency_ppt")
   )
 
 plot(velocity_latencies)
@@ -457,7 +457,7 @@ acceleration_latencies <- update(
   acceleration_latency_priors,
   sample_prior = "no",
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_vr", "models", "acceleration_latency_ppt")
+  file = here::here("scripts", "vr-tool-use", "models", "acceleration_latency_ppt")
   )
 
 plot(acceleration_latencies)
@@ -557,7 +557,7 @@ deceleration_latencies <- update(
   sample_prior = "no",
   seed = 1337,
   refresh = 0,
-  file = here::here("scripts", "for_osf", "tooluse_in_vr", "models", "deceleration_latency_ppt")
+  file = here::here("scripts", "vr-tool-use", "models", "deceleration_latency_ppt")
   )
 
 plot(deceleration_latencies)
@@ -622,8 +622,8 @@ model_params <- bind_rows(
              "Upper" = CI_high,
              "Mode" = MAP)
 
-saveRDS(model_params, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "model_params.rds"))
-fwrite(model_params, here::here("scripts", "for_osf", "tooluse_in_vr", "tables", "model_params.csv"))
+saveRDS(model_params, here::here("scripts", "vr-tool-use", "tables", "model_params.rds"))
+fwrite(model_params, here::here("scripts", "vr-tool-use", "tables", "model_params.csv"))
 
 ```
 

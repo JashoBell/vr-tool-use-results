@@ -196,7 +196,7 @@ lm_perceived <- update(
   sample_prior = "no",
   refresh = 0,
   seed = 1337,
-  file = here::here("scripts", "for_osf", "tooluse_in_VR", "models", "supplementary", "landmark_perceived.rds")
+  file = here::here("scripts", "vr-tool-use-avatar", "models", "supplementary", "landmark_perceived.rds")
   )
 
 plot(lm_perceived)

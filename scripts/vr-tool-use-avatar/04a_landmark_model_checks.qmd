@@ -42,8 +42,8 @@ landmark_summary <- landmark %>% select(ppid, trial, time,
 
 
 #Model data
-landmark_model <- readRDS(here::here("scripts", "for_osf", "tooluse_avatar", "models", "landmark_error_time_target.rds"))
-landmark_lapsefix_model <- readRDS(here::here("scripts", "for_osf", "tooluse_avatar", "models","landmark_lapsefix_error_time_target.rds"))
+landmark_model <- readRDS(here::here("scripts", "vr-tool-use-avatar", "models", "landmark_error_time_target.rds"))
+landmark_lapsefix_model <- readRDS(here::here("scripts", "vr-tool-use-avatar", "models","landmark_lapsefix_error_time_target.rds"))
 ```
 
 # Posterior Visualizations
@@ -193,7 +193,7 @@ ggplot(aes(y = .epred,
 landmark_posterior_expected_value_plot
 landmark_lapsefix_posterior_expected_value_plot
 
-saveRDS(landmark_posterior_expected_value_plot, here::here("scripts", "for_osf", "tooluse_avatar", "figures", "landmark_posterior_parameter_plot.rds"))
+saveRDS(landmark_posterior_expected_value_plot, here::here("scripts", "vr-tool-use-avatar", "figures", "landmark_posterior_parameter_plot.rds"))
 ```
 
 ## Predictive Distributions
@@ -329,12 +329,12 @@ ggplot(aes(y = .prediction,
 landmark_posterior_predictive_plot
 landmark_lapsefix_posterior_predictive_plot
 
-saveRDS(landmark_posterior_predictive_plot, here::here("scripts", "for_osf", "tooluse_avatar", "figures", "landmark-posterior-prediction-plot.rds"))
+saveRDS(landmark_posterior_predictive_plot, here::here("scripts", "vr-tool-use-avatar", "figures", "landmark-posterior-prediction-plot.rds"))
 ```
 ## Model Summary
 
 ```{r}
-model_params <- readRDS(here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_model_params.rds"))
+model_params <- readRDS(here::here("scripts", "vr-tool-use-avatar", "tables", "landmark_model_params.rds"))
 
 # Move the posterior draws long-to-wide using dcast
 draws_change <- posterior_expected_value %>%
@@ -362,7 +362,7 @@ draws_change <- posterior_expected_value %>%
   # Remove the " Change" from the end of the outcome names
   mutate("Target" = str_remove(Target, " Change$"))
 
-fwrite(draws_change, here::here("scripts", "for_osf", "tooluse_avatar", "plot_data", "landmark_draws_change.csv"))
+fwrite(draws_change, here::here("scripts", "vr-tool-use-avatar", "plot_data", "landmark_draws_change.csv"))
 
 draws_change <- draws_change %>%
     # Calculate the mode and HDI for each outcome
@@ -481,11 +481,11 @@ model_table <- model_params_unstd %>%
 model_table
 
 # Save the table to an RDS to be used in the manuscript
-saveRDS(model_table, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_table.rds"))
+saveRDS(model_table, here::here("scripts", "vr-tool-use-avatar", "tables", "landmark_table.rds"))
 ```
 
 ```{r}
-# lapsefix_model_params <- readRDS(here::here("scripts", "for_osf", "tooluse_avatar", "tables", "landmark_lapsefix_model_params.rds"))
+# lapsefix_model_params <- readRDS(here::here("scripts", "vr-tool-use-avatar", "tables", "landmark_lapsefix_model_params.rds"))
 
 # # Move the posterior draws long-to-wide using dcast
 # draws_change <- posterior_expected_value_lapsefix %>%
@@ -638,15 +638,15 @@ saveRDS(model_table, here::here("scripts", "for_osf", "tooluse_avatar", "tables"
 # lapsefix_model_table
 
 # # Save the table to an RDS to be used in the manuscript
-# saveRDS(lapsefix_model_table, here::here("scripts", "for_osf", "tooluse_avatar", "tables", "lapsefix_landmark_table.rds"))
+# saveRDS(lapsefix_model_table, here::here("scripts", "vr-tool-use-avatar", "tables", "lapsefix_landmark_table.rds"))
 ```
 
 ## Prior Sensitivity
 
 
 ```{r}
-model <- readRDS(here::here("scripts", "for_osf", "tooluse_avatar", "models", "landmark_error_time_target.rds"))
-model_lapsefix <- readRDS(here::here("scripts", "for_osf", "tooluse_avatar", "models", "landmark_lapsefix_error_time_target.rds"))
+model <- readRDS(here::here("scripts", "vr-tool-use-avatar", "models", "landmark_error_time_target.rds"))
+model_lapsefix <- readRDS(here::here("scripts", "vr-tool-use-avatar", "models", "landmark_lapsefix_error_time_target.rds"))
 priorsense::powerscale_sensitivity(
   model, 
   variable = c(

@@ -49,15 +49,15 @@ ppt_m <- read_csv(
 
 
 ```{r model_information}
-vel_peak_model <- readRDS(here::here("scripts", "for_osf", "tooluse_in_real", "models", "peakvelocity_ppt.rds"))
-acc_peak_model <- readRDS(here::here("scripts", "for_osf", "tooluse_in_real", "models", "peakacceleration_ppt.rds"))
-dec_peak_model <- readRDS(here::here("scripts", "for_osf", "tooluse_in_real", "models", "peakdeceleration_ppt.rds"))
+vel_peak_model <- readRDS(here::here("scripts", "real-tool-use", "models", "peakvelocity_ppt.rds"))
+acc_peak_model <- readRDS(here::here("scripts", "real-tool-use", "models", "peakacceleration_ppt.rds"))
+dec_peak_model <- readRDS(here::here("scripts", "real-tool-use", "models", "peakdeceleration_ppt.rds"))
 
-vel_latency_model <- readRDS(here::here("scripts", "for_osf", "tooluse_in_real", "models", "velocity_latency_ppt.rds"))
-acc_latency_model <- readRDS(here::here("scripts", "for_osf", "tooluse_in_real", "models", "acceleration_latency_ppt.rds"))
-dec_latency_model <- readRDS(here::here("scripts", "for_osf", "tooluse_in_real", "models", "deceleration_latency_ppt.rds"))
+vel_latency_model <- readRDS(here::here("scripts", "real-tool-use", "models", "velocity_latency_ppt.rds"))
+acc_latency_model <- readRDS(here::here("scripts", "real-tool-use", "models", "acceleration_latency_ppt.rds"))
+dec_latency_model <- readRDS(here::here("scripts", "real-tool-use", "models", "deceleration_latency_ppt.rds"))
 
-model_params <- fread(here("scripts", "for_osf", "tooluse_in_real", "tables", "model_params.csv"))
+model_params <- fread(here("scripts", "real-tool-use", "tables", "model_params.csv"))
 ```
 
 # Posterior Visualizations
@@ -430,7 +430,7 @@ kinematic_posterior_prediction_plots
 ## Summary Table
 
 ```{r}
-model_params <- readRDS(here::here("scripts", "for_osf", "tooluse_in_real", "tables", "model_params.rds"))
+model_params <- readRDS(here::here("scripts", "real-tool-use", "tables", "model_params.rds"))
 
 # Move the posterior draws long-to-wide using dcast
 draws_change <- posterior_draws %>%
@@ -461,7 +461,7 @@ draws_change <- posterior_draws %>%
     # Remove the " Change" from the end of the outcome names
     mutate("Outcome" = str_remove(Outcome, " Change$"))
 
-fwrite(draws_change, here::here("scripts", "for_osf", "tooluse_in_real", "plot_data", "kinematic_draws_change.csv"))
+fwrite(draws_change, here::here("scripts", "real-tool-use", "plot_data", "kinematic_draws_change.csv"))
 
 draws_change <- draws_change %>%
     # Calculate the mode and HDI for each outcome
@@ -576,7 +576,7 @@ model_table <- model_params_unstd %>%
 model_table
 
 # Save the table to an RDS to be used in the manuscript
-saveRDS(model_table, here::here("scripts", "for_osf", "tooluse_in_real", "tables", "kinematic_table.rds"))
+saveRDS(model_table, here::here("scripts", "real-tool-use", "tables", "kinematic_table.rds"))
 ```
 
 # Prior Sensitivity Analysis
